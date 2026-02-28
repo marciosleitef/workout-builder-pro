@@ -148,6 +148,60 @@ export type Database = {
           },
         ]
       }
+      workouts: {
+        Row: {
+          created_at: string
+          day_label: string
+          id: string
+          journey_id: string
+          name: string
+          orientations: string | null
+          professor_id: string
+          sort_order: number | null
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_label?: string
+          id?: string
+          journey_id: string
+          name: string
+          orientations?: string | null
+          professor_id: string
+          sort_order?: number | null
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_label?: string
+          id?: string
+          journey_id?: string
+          name?: string
+          orientations?: string | null
+          professor_id?: string
+          sort_order?: number | null
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workouts_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "workout_journeys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workouts_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

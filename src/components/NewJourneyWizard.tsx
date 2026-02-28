@@ -14,7 +14,7 @@ interface NewJourneyWizardProps {
   studentId: string;
   studentName: string;
   onCreated: () => void;
-  onGoToWorkout?: (journeyId: string) => void;
+  onGoToWorkout?: (journeyId: string, format: string) => void;
 }
 
 const STEPS = ["Informações", "Objetivo", "Nível", "Formato", "Confirmação"];
@@ -121,7 +121,7 @@ const NewJourneyWizard = ({ open, onOpenChange, studentId, studentName, onCreate
               <button
                 onClick={() => {
                   if (createdJourneyId && onGoToWorkout) {
-                    onGoToWorkout(createdJourneyId);
+                    onGoToWorkout(createdJourneyId, form.format);
                   }
                   handleClose();
                 }}

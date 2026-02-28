@@ -69,7 +69,7 @@ const WorkoutInfoDialog = ({
     }
 
     onOpenChange(false);
-    navigate(`/workout/${studentId}?workoutId=${data.id}`);
+    navigate(`/workout/${studentId}?workoutId=${data.id}&journeyId=${journeyId}&journeyFormat=${encodeURIComponent(journeyFormat)}`);
   };
 
   const handleClose = () => {

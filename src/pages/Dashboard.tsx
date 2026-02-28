@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Search, Plus, Play, User, TrendingUp, Dumbbell, LogOut, Calendar, UserCircle, List, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import NewJourneyWizard from "@/components/NewJourneyWizard";
+import WorkoutInfoDialog from "@/components/WorkoutInfoDialog";
 
 interface Student {
   id: string;
@@ -46,6 +47,9 @@ const Dashboard = () => {
   const [showWorkoutMenu, setShowWorkoutMenu] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [showJourneyWizard, setShowJourneyWizard] = useState(false);
+  const [showWorkoutInfo, setShowWorkoutInfo] = useState(false);
+  const [activeJourneyId, setActiveJourneyId] = useState("");
+  const [activeJourneyFormat, setActiveJourneyFormat] = useState("");
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [form, setForm] = useState({ full_name: "", email: "", phone: "", plan: "PS Prime" });
   const [profileName, setProfileName] = useState("");
@@ -387,13 +391,27 @@ const Dashboard = () => {
 
       {/* Journey wizard */}
       {selectedStudent && (
-        <NewJourneyWizard
-          open={showJourneyWizard}
-          onOpenChange={setShowJourneyWizard}
-          studentId={selectedStudent.id}
-          studentName={selectedStudent.full_name}
-          onCreated={() => {}}
-        />
+        <>
+          <NewJourneyWizard
+            open={showJourneyWizard}
+            onOpenChange={setShowJourneyWizard}
+            studentId={selectedStudent.id}
+            studentName={selectedStudent.full_name}
+            onCreated={() => {}}
+            onGoToWorkout={(journeyId, format) => {
+              setActiveJourneyId(journeyId);
+              setActiveJourneyFormat(format);
+              setShowWorkoutInfo(true);
+            }}
+          />
+          <WorkoutInfoDialog
+            open={showWorkoutInfo}
+            onOpenChange={setShowWorkoutInfo}
+            journeyId={activeJourneyId}
+            journeyFormat={activeJourneyFormat}
+            studentId={selectedStudent.id}
+          />
+        </>
       )}
     </div>
   );

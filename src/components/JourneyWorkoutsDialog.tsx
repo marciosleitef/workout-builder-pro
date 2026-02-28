@@ -119,12 +119,6 @@ const JourneyWorkoutsDialog = ({
             <h2 className="font-display font-bold text-base truncate">{journeyName}</h2>
             <p className="text-white/60 text-xs">{studentName}</p>
           </div>
-          <button
-            onClick={() => onOpenChange(false)}
-            className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
         </div>
 
         <div className="px-4 py-4 max-h-[70vh] overflow-y-auto scrollbar-thin space-y-4">

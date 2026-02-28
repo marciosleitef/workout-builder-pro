@@ -8,6 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import NewJourneyWizard from "@/components/NewJourneyWizard";
 import WorkoutInfoDialog from "@/components/WorkoutInfoDialog";
 import JourneyListDialog from "@/components/JourneyListDialog";
+import JourneyWorkoutsDialog from "@/components/JourneyWorkoutsDialog";
+import JourneyEditDialog from "@/components/JourneyEditDialog";
 
 interface Student {
   id: string;
@@ -52,6 +54,9 @@ const Dashboard = () => {
   const [activeJourneyId, setActiveJourneyId] = useState("");
   const [activeJourneyFormat, setActiveJourneyFormat] = useState("");
   const [showJourneyList, setShowJourneyList] = useState(false);
+  const [showJourneyWorkouts, setShowJourneyWorkouts] = useState(false);
+  const [showJourneyEdit, setShowJourneyEdit] = useState(false);
+  const [activeJourney, setActiveJourney] = useState<{ id: string; name: string; objective: string; level: string; format: string; start_date: string; end_date: string; status: string | null } | null>(null);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [form, setForm] = useState({ full_name: "", email: "", phone: "", plan: "PS Prime" });
   const [profileName, setProfileName] = useState("");
@@ -423,6 +428,37 @@ const Dashboard = () => {
             studentId={selectedStudent.id}
             studentName={selectedStudent.full_name}
             professorName={profileName}
+            onOpenJourney={(j) => {
+              setActiveJourney(j);
+              setShowJourneyList(false);
+              setShowJourneyWorkouts(true);
+            }}
+            onEditJourney={(j) => {
+              setActiveJourney(j);
+              setShowJourneyList(false);
+              setShowJourneyEdit(true);
+            }}
+          />
+          <JourneyWorkoutsDialog
+            open={showJourneyWorkouts}
+            onOpenChange={setShowJourneyWorkouts}
+            journeyId={activeJourney?.id || ""}
+            journeyName={activeJourney?.name || ""}
+            journeyFormat={activeJourney?.format || ""}
+            studentName={selectedStudent.full_name}
+          />
+          <JourneyEditDialog
+            open={showJourneyEdit}
+            onOpenChange={setShowJourneyEdit}
+            journey={activeJourney}
+            studentId={selectedStudent.id}
+            studentName={selectedStudent.full_name}
+            onUpdated={() => {}}
+            onAddWorkout={(journeyId, format) => {
+              setActiveJourneyId(journeyId);
+              setActiveJourneyFormat(format);
+              setShowWorkoutInfo(true);
+            }}
           />
         </>
       )}

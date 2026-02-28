@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Search, Plus, Play, User, TrendingUp, Dumbbell, LogOut, Calendar, UserCircle } from "lucide-react";
+import { Search, Plus, Play, User, TrendingUp, Dumbbell, LogOut, Calendar, UserCircle, List, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface Student {
@@ -42,6 +42,8 @@ const Dashboard = () => {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [showWorkoutMenu, setShowWorkoutMenu] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [form, setForm] = useState({ full_name: "", email: "", phone: "", plan: "PS Prime" });
   const [profileName, setProfileName] = useState("");
@@ -225,7 +227,7 @@ const Dashboard = () => {
                     { icon: Play, label: "Iniciar", color: "hsl(220 60% 50%)", onClick: () => {} },
                     { icon: User, label: "Bio", color: "hsl(150 55% 45%)", onClick: () => openEdit(s) },
                     { icon: TrendingUp, label: "Detalhes", color: "hsl(35 85% 50%)", onClick: () => {} },
-                    { icon: Dumbbell, label: "Treinos", color: "hsl(82 85% 55%)", onClick: () => navigate(`/workout/${s.id}`) },
+                    { icon: Dumbbell, label: "Treinos", color: "hsl(82 85% 55%)", onClick: () => { setSelectedStudent(s); setShowWorkoutMenu(true); } },
                   ].map((a) => (
                     <button
                       key={a.label}
@@ -322,6 +324,62 @@ const Dashboard = () => {
               </button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Workout menu dialog */}
+      <Dialog open={showWorkoutMenu} onOpenChange={setShowWorkoutMenu}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display">Treinos</DialogTitle>
+          </DialogHeader>
+          {selectedStudent && (
+            <div className="space-y-3 mt-1">
+              {/* Student banner */}
+              <div className="rounded-xl p-4 text-white bg-gradient-to-r from-[hsl(220,60%,50%)] to-[hsl(170,50%,45%)]">
+                <div className="flex items-center gap-2">
+                  <User className="w-5 h-5" />
+                  <div>
+                    <p className="font-display font-bold text-sm">
+                      Treino para: {selectedStudent.full_name.toUpperCase()}
+                    </p>
+                    <p className="text-white/70 text-xs">
+                      Categoria: {selectedStudent.plan}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Options */}
+              <button
+                onClick={() => {
+                  setShowWorkoutMenu(false);
+                  navigate(`/workout/${selectedStudent.id}`);
+                }}
+                className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Plus className="w-5 h-5 text-primary" />
+                </div>
+                <div className="text-left">
+                  <p className="font-display font-bold text-sm text-foreground">Novo Treino</p>
+                  <p className="text-xs text-muted-foreground">Criar nova jornada ou treino</p>
+                </div>
+              </button>
+
+              <button
+                className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <List className="w-5 h-5 text-primary" />
+                </div>
+                <div className="text-left">
+                  <p className="font-display font-bold text-sm text-foreground">Visualizar Treinos</p>
+                  <p className="text-xs text-muted-foreground">Consultar jornadas e treinos</p>
+                </div>
+              </button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

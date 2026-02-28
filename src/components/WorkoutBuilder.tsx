@@ -3,6 +3,7 @@ import { DragDropContext, Droppable, Draggable, type DropResult } from "@hello-p
 import { ExerciseGroup, WorkoutExercise, BiSet, isBiSet } from "@/types/workout";
 import { GripVertical, X, Link2, Unlink, Trash2, PlusCircle, Play, ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import ExerciseParamFields from "./ExerciseParamFields";
 
 interface WorkoutBuilderProps {
   groups: ExerciseGroup[];
@@ -28,6 +29,38 @@ const GROUP_BORDER_COLORS = [
 const WorkoutBuilder = ({ groups, setGroups }: WorkoutBuilderProps) => {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [expandedVideos, setExpandedVideos] = useState<Set<string>>(new Set());
+  const [expandedParams, setExpandedParams] = useState<Set<string>>(new Set());
+
+  const toggleParams = (itemId: string) => {
+    setExpandedParams((prev) => {
+      const next = new Set(prev);
+      if (next.has(itemId)) next.delete(itemId);
+      else next.add(itemId);
+      return next;
+    });
+  };
+
+  const updateExerciseParam = (groupId: string, itemId: string, field: string, value: string) => {
+    setGroups((prev) =>
+      prev.map((g) => {
+        if (g.id !== groupId) return g;
+        return {
+          ...g,
+          items: g.items.map((item) => {
+            if (isBiSet(item)) {
+              return {
+                ...item,
+                exercises: item.exercises.map((ex) =>
+                  ex.id === itemId ? { ...ex, [field]: value } : ex
+                ),
+              };
+            }
+            return item.id === itemId ? { ...item, [field]: value } : item;
+          }),
+        };
+      })
+    );
+  };
 
   const toggleVideo = (itemId: string) => {
     setExpandedVideos((prev) => {
@@ -268,7 +301,27 @@ const WorkoutBuilder = ({ groups, setGroups }: WorkoutBuilderProps) => {
                                       className="border-b border-border/50 last:border-0"
                                     >
                                       <div className="flex items-center gap-2 px-3 py-2">
-                                        <span className="text-sm text-foreground flex-1">{ex.exercise.name}</span>
+                                        <button
+                                          onClick={() => toggleParams(ex.id)}
+                                          className="text-sm text-foreground flex-1 text-left truncate"
+                                        >
+                                          {ex.exercise.name}
+                                          {ex.sets && (
+                                            <span className="text-[10px] text-muted-foreground ml-2">
+                                              {ex.sets}x{ex.reps || "?"}
+                                            </span>
+                                          )}
+                                        </button>
+                                        <button
+                                          onClick={() => toggleParams(ex.id)}
+                                          className="p-1 hover:bg-secondary rounded shrink-0"
+                                        >
+                                          {expandedParams.has(ex.id) ? (
+                                            <ChevronUp className="w-3 h-3 text-muted-foreground" />
+                                          ) : (
+                                            <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                                          )}
+                                        </button>
                                         {ex.exercise.videoUrl && (
                                           <button
                                             onClick={() => toggleVideo(ex.id)}
@@ -303,6 +356,13 @@ const WorkoutBuilder = ({ groups, setGroups }: WorkoutBuilderProps) => {
                                           <X className="w-3 h-3 text-muted-foreground" />
                                         </button>
                                       </div>
+                                      {expandedParams.has(ex.id) && (
+                                        <ExerciseParamFields
+                                          item={ex}
+                                          groupId={group.id}
+                                          onUpdate={updateExerciseParam}
+                                        />
+                                      )}
                                       {ex.exercise.videoUrl && expandedVideos.has(ex.id) && (
                                         <div className="px-3 pb-2">
                                           <video
@@ -340,9 +400,32 @@ const WorkoutBuilder = ({ groups, setGroups }: WorkoutBuilderProps) => {
                                         <span className="text-primary-foreground text-[10px] font-bold">✓</span>
                                       )}
                                     </button>
-                                    <div className="flex-1 min-w-0">
+                                    <button
+                                      onClick={() => toggleParams(item.id)}
+                                      className="flex-1 min-w-0 text-left"
+                                    >
                                       <p className="text-sm text-foreground truncate">{item.exercise.name}</p>
-                                    </div>
+                                      {item.sets && (
+                                        <p className="text-[10px] text-muted-foreground truncate">
+                                          {item.sets}x{item.reps || "?"} {item.load ? `• ${item.load}` : ""}
+                                        </p>
+                                      )}
+                                    </button>
+                                    {expandedParams.has(item.id) ? (
+                                      <button
+                                        onClick={() => toggleParams(item.id)}
+                                        className="p-1 hover:bg-secondary rounded shrink-0 transition-colors"
+                                      >
+                                        <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" />
+                                      </button>
+                                    ) : (
+                                      <button
+                                        onClick={() => toggleParams(item.id)}
+                                        className="p-1 hover:bg-secondary rounded shrink-0 transition-colors"
+                                      >
+                                        <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                                      </button>
+                                    )}
                                     {item.exercise.videoUrl && (
                                       <button
                                         onClick={() => toggleVideo(item.id)}
@@ -363,6 +446,13 @@ const WorkoutBuilder = ({ groups, setGroups }: WorkoutBuilderProps) => {
                                       <X className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive" />
                                     </button>
                                   </div>
+                                  {expandedParams.has(item.id) && (
+                                    <ExerciseParamFields
+                                      item={item}
+                                      groupId={group.id}
+                                      onUpdate={updateExerciseParam}
+                                    />
+                                  )}
                                   {item.exercise.videoUrl && expandedVideos.has(item.id) && (
                                     <div className="px-3 pb-3">
                                       <video

@@ -3,6 +3,7 @@ export interface Exercise {
   name: string;
   pilar: string;
   classe: string;
+  videoUrl?: string;
 }
 
 export const PILARES = [

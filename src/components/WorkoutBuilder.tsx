@@ -8,6 +8,8 @@ import ExerciseParamFields from "./ExerciseParamFields";
 interface WorkoutBuilderProps {
   groups: ExerciseGroup[];
   setGroups: React.Dispatch<React.SetStateAction<ExerciseGroup[]>>;
+  activeGroupId?: string | null;
+  onActiveGroupChange?: (groupId: string) => void;
 }
 
 const GROUP_COLORS = [
@@ -26,7 +28,7 @@ const GROUP_BORDER_COLORS = [
   "hsl(270 70% 55% / 0.4)",
 ];
 
-const WorkoutBuilder = ({ groups, setGroups }: WorkoutBuilderProps) => {
+const WorkoutBuilder = ({ groups, setGroups, activeGroupId, onActiveGroupChange }: WorkoutBuilderProps) => {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [expandedVideos, setExpandedVideos] = useState<Set<string>>(new Set());
   const [expandedParams, setExpandedParams] = useState<Set<string>>(new Set());
@@ -74,15 +76,17 @@ const WorkoutBuilder = ({ groups, setGroups }: WorkoutBuilderProps) => {
   const addGroup = () => {
     const idx = groups.length % GROUP_COLORS.length;
     const defaultNames = ["Aquecimento", "Parte 1", "Parte 2", "Parte 3", "Finalização"];
+    const newId = `group-${Date.now()}`;
     setGroups((prev) => [
       ...prev,
       {
-        id: `group-${Date.now()}`,
+        id: newId,
         name: defaultNames[prev.length] || `Parte ${prev.length}`,
         color: GROUP_COLORS[idx],
         items: [],
       },
     ]);
+    onActiveGroupChange?.(newId);
   };
 
   const removeGroup = (groupId: string) => {
@@ -227,10 +231,14 @@ const WorkoutBuilder = ({ groups, setGroups }: WorkoutBuilderProps) => {
                 }}
               >
                 {/* Group header */}
-                <div className="flex items-center gap-2 px-4 py-3">
+                <div
+                  className={`flex items-center gap-2 px-4 py-3 cursor-pointer transition-colors ${activeGroupId === group.id ? "ring-2 ring-primary/50 rounded-t-xl" : ""}`}
+                  onClick={() => onActiveGroupChange?.(group.id)}
+                >
                   <input
                     value={group.name}
                     onChange={(e) => renameGroup(group.id, e.target.value)}
+                    onFocus={() => onActiveGroupChange?.(group.id)}
                     className="bg-transparent font-display font-bold text-foreground text-sm border-none outline-none flex-1"
                   />
                   <div className="flex items-center gap-1">

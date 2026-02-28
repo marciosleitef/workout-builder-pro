@@ -169,7 +169,7 @@ const Index = () => {
 
         {/* Right: Workout Builder */}
         <main className="flex-1 overflow-hidden">
-          <WorkoutBuilder groups={groups} setGroups={setGroups} />
+          <WorkoutBuilder groups={groups} setGroups={setGroups} activeGroupId={activeGroupId} onActiveGroupChange={setActiveGroupId} />
         </main>
       </div>
 

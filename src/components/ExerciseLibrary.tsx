@@ -1,7 +1,8 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import { exercises, PILARES, type Exercise } from "@/data/exercises";
-import { Search, Plus, Dumbbell, Star, User, X } from "lucide-react";
+import { Search, Plus, Dumbbell, Star, User, X, Upload, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ExerciseLibraryProps {
   onAddExercise: (exercise: Exercise) => void;
@@ -55,6 +56,9 @@ const ExerciseLibrary = ({ onAddExercise }: ExerciseLibraryProps) => {
   const [newExerciseName, setNewExerciseName] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
   const [newExercisePilar, setNewExercisePilar] = useState<string>(PILARES[0]);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const toggleFavorite = useCallback((e: React.MouseEvent, exerciseId: string) => {
     e.stopPropagation();
@@ -79,20 +83,36 @@ const ExerciseLibrary = ({ onAddExercise }: ExerciseLibraryProps) => {
     });
   }, [search, activePilar, specialFilter, favorites, allExercises, customExercises]);
 
-  const handleAddCustom = () => {
+  const handleAddCustom = async () => {
     const name = newExerciseName.trim();
     if (!name) return;
+
+    let videoUrl: string | undefined;
+
+    if (videoFile) {
+      setUploading(true);
+      const fileName = `${Date.now()}-${videoFile.name}`;
+      const { error } = await supabase.storage.from("exercise-videos").upload(fileName, videoFile);
+      if (!error) {
+        const { data: urlData } = supabase.storage.from("exercise-videos").getPublicUrl(fileName);
+        videoUrl = urlData.publicUrl;
+      }
+      setUploading(false);
+    }
+
     const newEx: Exercise = {
       id: `custom-${Date.now()}`,
       name,
       pilar: newExercisePilar,
       classe: "PERSONALIZADO",
+      videoUrl,
     };
     const updated = [...customExercises, newEx];
     setCustomExercises(updated);
     saveCustomExercises(updated);
     setNewExerciseName("");
     setNewExercisePilar(PILARES[0]);
+    setVideoFile(null);
     setShowAddForm(false);
   };
 
@@ -206,15 +226,37 @@ const ExerciseLibrary = ({ onAddExercise }: ExerciseLibraryProps) => {
                   <option key={p} value={p}>{PILAR_SHORT[p] || p}</option>
                 ))}
               </select>
+              {/* Video upload */}
+              <div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="video/*"
+                  className="hidden"
+                  onChange={(e) => setVideoFile(e.target.files?.[0] || null)}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full flex items-center gap-2 px-3 py-2 bg-secondary text-sm rounded-lg border border-border hover:border-primary transition-colors"
+                >
+                  <Upload className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-muted-foreground truncate">
+                    {videoFile ? videoFile.name : "Upload do vídeo (opcional)"}
+                  </span>
+                </button>
+              </div>
               <div className="flex gap-2">
                 <button
                   onClick={handleAddCustom}
-                  className="flex-1 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+                  disabled={uploading}
+                  className="flex-1 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  Adicionar
+                  {uploading && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {uploading ? "Enviando..." : "Adicionar"}
                 </button>
                 <button
-                  onClick={() => { setShowAddForm(false); setNewExerciseName(""); setNewExercisePilar(PILARES[0]); }}
+                  onClick={() => { setShowAddForm(false); setNewExerciseName(""); setNewExercisePilar(PILARES[0]); setVideoFile(null); }}
                   className="p-2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <X className="w-4 h-4" />

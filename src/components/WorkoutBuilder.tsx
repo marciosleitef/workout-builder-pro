@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { DragDropContext, Droppable, Draggable, type DropResult } from "@hello-pangea/dnd";
 import { ExerciseGroup, WorkoutExercise, BiSet, isBiSet } from "@/types/workout";
-import { GripVertical, X, Link2, Unlink, Trash2, PlusCircle } from "lucide-react";
+import { GripVertical, X, Link2, Unlink, Trash2, PlusCircle, Play, ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface WorkoutBuilderProps {
@@ -27,6 +27,16 @@ const GROUP_BORDER_COLORS = [
 
 const WorkoutBuilder = ({ groups, setGroups }: WorkoutBuilderProps) => {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [expandedVideos, setExpandedVideos] = useState<Set<string>>(new Set());
+
+  const toggleVideo = (itemId: string) => {
+    setExpandedVideos((prev) => {
+      const next = new Set(prev);
+      if (next.has(itemId)) next.delete(itemId);
+      else next.add(itemId);
+      return next;
+    });
+  };
 
   const addGroup = () => {
     const idx = groups.length % GROUP_COLORS.length;
@@ -255,67 +265,114 @@ const WorkoutBuilder = ({ groups, setGroups }: WorkoutBuilderProps) => {
                                   {item.exercises.map((ex) => (
                                     <div
                                       key={ex.id}
-                                      className="flex items-center gap-2 px-3 py-2 border-b border-border/50 last:border-0"
+                                      className="border-b border-border/50 last:border-0"
                                     >
-                                      <span className="text-sm text-foreground flex-1">{ex.exercise.name}</span>
-                                      <button
-                                        onClick={() => {
-                                          // Remove from biset
-                                          setGroups((prev) =>
-                                            prev.map((g) => {
-                                              if (g.id !== group.id) return g;
-                                              return {
-                                                ...g,
-                                                items: g.items.map((i) => {
-                                                  if (!isBiSet(i) || i.id !== item.id) return i;
-                                                  const remaining = i.exercises.filter((e) => e.id !== ex.id);
-                                                  if (remaining.length <= 1) return remaining[0] || i;
-                                                  return { ...i, exercises: remaining };
-                                                }).filter(Boolean) as (WorkoutExercise | BiSet)[],
-                                              };
-                                            })
-                                          );
-                                        }}
-                                        className="p-1 hover:bg-destructive/20 rounded"
-                                      >
-                                        <X className="w-3 h-3 text-muted-foreground" />
-                                      </button>
+                                      <div className="flex items-center gap-2 px-3 py-2">
+                                        <span className="text-sm text-foreground flex-1">{ex.exercise.name}</span>
+                                        {ex.exercise.videoUrl && (
+                                          <button
+                                            onClick={() => toggleVideo(ex.id)}
+                                            className="p-1 hover:bg-secondary rounded shrink-0"
+                                          >
+                                            {expandedVideos.has(ex.id) ? (
+                                              <ChevronUp className="w-3 h-3 text-primary" />
+                                            ) : (
+                                              <Play className="w-3 h-3 text-primary" />
+                                            )}
+                                          </button>
+                                        )}
+                                        <button
+                                          onClick={() => {
+                                            setGroups((prev) =>
+                                              prev.map((g) => {
+                                                if (g.id !== group.id) return g;
+                                                return {
+                                                  ...g,
+                                                  items: g.items.map((i) => {
+                                                    if (!isBiSet(i) || i.id !== item.id) return i;
+                                                    const remaining = i.exercises.filter((e) => e.id !== ex.id);
+                                                    if (remaining.length <= 1) return remaining[0] || i;
+                                                    return { ...i, exercises: remaining };
+                                                  }).filter(Boolean) as (WorkoutExercise | BiSet)[],
+                                                };
+                                              })
+                                            );
+                                          }}
+                                          className="p-1 hover:bg-destructive/20 rounded"
+                                        >
+                                          <X className="w-3 h-3 text-muted-foreground" />
+                                        </button>
+                                      </div>
+                                      {ex.exercise.videoUrl && expandedVideos.has(ex.id) && (
+                                        <div className="px-3 pb-2">
+                                          <video
+                                            src={ex.exercise.videoUrl}
+                                            controls
+                                            className="w-full rounded-lg bg-black/10"
+                                            style={{ maxHeight: "160px" }}
+                                          />
+                                        </div>
+                                      )}
                                     </div>
                                   ))}
                                 </div>
                               ) : (
-                                <div
-                                  className={`flex items-center gap-2 px-3 py-2.5 rounded-lg bg-background/60 border transition-colors ${
-                                    selectedItems.has(item.id)
-                                      ? "border-primary/50 bg-primary/5"
-                                      : "border-transparent hover:border-border"
-                                  }`}
+                                <div className="rounded-lg bg-background/60 border transition-colors overflow-hidden"
+                                  style={{
+                                    borderColor: selectedItems.has(item.id)
+                                      ? "hsl(var(--primary) / 0.5)"
+                                      : "transparent",
+                                  }}
                                 >
-                                  <div {...dragProvided.dragHandleProps}>
-                                    <GripVertical className="w-3.5 h-3.5 text-muted-foreground" />
-                                  </div>
-                                  <button
-                                    onClick={() => toggleSelect(item.id)}
-                                    className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
-                                      selectedItems.has(item.id)
-                                        ? "bg-primary border-primary"
-                                        : "border-muted-foreground/40"
-                                    }`}
-                                  >
-                                    {selectedItems.has(item.id) && (
-                                      <span className="text-primary-foreground text-[10px] font-bold">✓</span>
+                                  <div className="flex items-center gap-2 px-3 py-2.5">
+                                    <div {...dragProvided.dragHandleProps}>
+                                      <GripVertical className="w-3.5 h-3.5 text-muted-foreground" />
+                                    </div>
+                                    <button
+                                      onClick={() => toggleSelect(item.id)}
+                                      className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
+                                        selectedItems.has(item.id)
+                                          ? "bg-primary border-primary"
+                                          : "border-muted-foreground/40"
+                                      }`}
+                                    >
+                                      {selectedItems.has(item.id) && (
+                                        <span className="text-primary-foreground text-[10px] font-bold">✓</span>
+                                      )}
+                                    </button>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm text-foreground truncate">{item.exercise.name}</p>
+                                    </div>
+                                    {item.exercise.videoUrl && (
+                                      <button
+                                        onClick={() => toggleVideo(item.id)}
+                                        className="p-1 hover:bg-secondary rounded shrink-0 transition-colors"
+                                        title="Ver vídeo"
+                                      >
+                                        {expandedVideos.has(item.id) ? (
+                                          <ChevronUp className="w-4 h-4 text-primary" />
+                                        ) : (
+                                          <Play className="w-4 h-4 text-primary" />
+                                        )}
+                                      </button>
                                     )}
-                                  </button>
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm text-foreground truncate">{item.exercise.name}</p>
-                                    
+                                    <button
+                                      onClick={() => removeItem(group.id, item.id)}
+                                      className="p-1 hover:bg-destructive/20 rounded shrink-0"
+                                    >
+                                      <X className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive" />
+                                    </button>
                                   </div>
-                                  <button
-                                    onClick={() => removeItem(group.id, item.id)}
-                                    className="p-1 hover:bg-destructive/20 rounded shrink-0"
-                                  >
-                                    <X className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive" />
-                                  </button>
+                                  {item.exercise.videoUrl && expandedVideos.has(item.id) && (
+                                    <div className="px-3 pb-3">
+                                      <video
+                                        src={item.exercise.videoUrl}
+                                        controls
+                                        className="w-full rounded-lg bg-black/10"
+                                        style={{ maxHeight: "200px" }}
+                                      />
+                                    </div>
+                                  )}
                                 </div>
                               )}
                             </div>

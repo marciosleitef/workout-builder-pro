@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Search, Plus, Play, User, TrendingUp, Dumbbell, LogOut, Calendar, UserCircle, List, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import NewJourneyWizard from "@/components/NewJourneyWizard";
 
 interface Student {
   id: string;
@@ -44,6 +45,7 @@ const Dashboard = () => {
   const [showForm, setShowForm] = useState(false);
   const [showWorkoutMenu, setShowWorkoutMenu] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [showJourneyWizard, setShowJourneyWizard] = useState(false);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [form, setForm] = useState({ full_name: "", email: "", phone: "", plan: "PS Prime" });
   const [profileName, setProfileName] = useState("");
@@ -354,7 +356,7 @@ const Dashboard = () => {
               <button
                 onClick={() => {
                   setShowWorkoutMenu(false);
-                  navigate(`/workout/${selectedStudent.id}`);
+                  setShowJourneyWizard(true);
                 }}
                 className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors"
               >
@@ -382,6 +384,17 @@ const Dashboard = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Journey wizard */}
+      {selectedStudent && (
+        <NewJourneyWizard
+          open={showJourneyWizard}
+          onOpenChange={setShowJourneyWizard}
+          studentId={selectedStudent.id}
+          studentName={selectedStudent.full_name}
+          onCreated={() => {}}
+        />
+      )}
     </div>
   );
 };

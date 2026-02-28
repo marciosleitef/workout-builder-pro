@@ -83,6 +83,71 @@ export type Database = {
         }
         Relationships: []
       }
+      workout_journeys: {
+        Row: {
+          created_at: string
+          end_date: string
+          format: string
+          hide_on_expire: boolean | null
+          hide_until_start: boolean | null
+          id: string
+          level: string
+          name: string
+          objective: string
+          orientations: string | null
+          professor_id: string
+          start_date: string
+          status: string | null
+          student_can_view: boolean | null
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string
+          format?: string
+          hide_on_expire?: boolean | null
+          hide_until_start?: boolean | null
+          id?: string
+          level?: string
+          name: string
+          objective?: string
+          orientations?: string | null
+          professor_id: string
+          start_date?: string
+          status?: string | null
+          student_can_view?: boolean | null
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string
+          format?: string
+          hide_on_expire?: boolean | null
+          hide_until_start?: boolean | null
+          id?: string
+          level?: string
+          name?: string
+          objective?: string
+          orientations?: string | null
+          professor_id?: string
+          start_date?: string
+          status?: string | null
+          student_can_view?: boolean | null
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_journeys_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

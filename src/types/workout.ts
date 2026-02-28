@@ -3,8 +3,12 @@ import { Exercise } from "@/data/exercises";
 export interface WorkoutExercise {
   id: string;
   exercise: Exercise;
-  sets?: number;
+  sets?: string;
   reps?: string;
+  load?: string;
+  rest?: string;
+  method?: string;
+  notes?: string;
 }
 
 export interface ExerciseGroup {

@@ -3,7 +3,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Search, Plus, Play, User, TrendingUp, Dumbbell, LogOut, Calendar, UserCircle, List, X } from "lucide-react";
+import { Search, Plus, Play, User, TrendingUp, Dumbbell, LogOut, Calendar, UserCircle, List, X, Sun, Moon } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import NewJourneyWizard from "@/components/NewJourneyWizard";
 import WorkoutInfoDialog from "@/components/WorkoutInfoDialog";
@@ -42,6 +43,7 @@ function getInitials(name: string) {
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [students, setStudents] = useState<Student[]>([]);
@@ -166,13 +168,22 @@ const Dashboard = () => {
               <p className="text-white/60 text-xs">{user?.email}</p>
             </div>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 text-white/70 hover:text-white text-sm transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            Sair
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggleTheme}
+              className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30 transition-colors"
+              title={isDark ? "Tema Claro" : "Tema Escuro"}
+            >
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 text-white/70 hover:text-white text-sm transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Sair
+            </button>
+          </div>
         </div>
       </header>
 

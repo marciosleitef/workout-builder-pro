@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -43,6 +43,7 @@ function getInitials(name: string) {
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [students, setStudents] = useState<Student[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -65,6 +66,26 @@ const Dashboard = () => {
     fetchStudents();
     fetchProfile();
   }, []);
+
+  // Handle "add another workout" deep link from Index page
+  useEffect(() => {
+    if (searchParams.get("addWorkout") === "true" && students.length > 0) {
+      const sId = searchParams.get("studentId");
+      const jId = searchParams.get("journeyId");
+      const jFormat = searchParams.get("journeyFormat");
+      if (sId && jId && jFormat) {
+        const student = students.find((s) => s.id === sId);
+        if (student) {
+          setSelectedStudent(student);
+          setActiveJourneyId(jId);
+          setActiveJourneyFormat(jFormat);
+          setShowWorkoutInfo(true);
+        }
+      }
+      // Clear the query params
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, students]);
 
   const fetchProfile = async () => {
     const { data } = await supabase

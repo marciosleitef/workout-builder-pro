@@ -54,6 +54,7 @@ const ExerciseLibrary = ({ onAddExercise }: ExerciseLibraryProps) => {
   const [customExercises, setCustomExercises] = useState<Exercise[]>(loadCustomExercises);
   const [newExerciseName, setNewExerciseName] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [newExercisePilar, setNewExercisePilar] = useState<string>(PILARES[0]);
 
   const toggleFavorite = useCallback((e: React.MouseEvent, exerciseId: string) => {
     e.stopPropagation();
@@ -84,13 +85,14 @@ const ExerciseLibrary = ({ onAddExercise }: ExerciseLibraryProps) => {
     const newEx: Exercise = {
       id: `custom-${Date.now()}`,
       name,
-      pilar: "PERSONALIZADO",
+      pilar: newExercisePilar,
       classe: "PERSONALIZADO",
     };
     const updated = [...customExercises, newEx];
     setCustomExercises(updated);
     saveCustomExercises(updated);
     setNewExerciseName("");
+    setNewExercisePilar(PILARES[0]);
     setShowAddForm(false);
   };
 
@@ -185,28 +187,39 @@ const ExerciseLibrary = ({ onAddExercise }: ExerciseLibraryProps) => {
       {specialFilter === "custom" && (
         <div className="px-4 py-3 border-b border-border">
           {showAddForm ? (
-            <div className="flex gap-2">
+            <div className="space-y-2">
               <input
                 type="text"
                 placeholder="Nome do exercício..."
                 value={newExerciseName}
                 onChange={(e) => setNewExerciseName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleAddCustom()}
-                className="flex-1 bg-secondary text-foreground placeholder:text-muted-foreground rounded-lg px-3 py-2 text-sm border border-border focus:border-primary focus:outline-none transition-colors"
+                className="w-full bg-secondary text-foreground placeholder:text-muted-foreground rounded-lg px-3 py-2 text-sm border border-border focus:border-primary focus:outline-none transition-colors"
                 autoFocus
               />
-              <button
-                onClick={handleAddCustom}
-                className="px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+              <select
+                value={newExercisePilar}
+                onChange={(e) => setNewExercisePilar(e.target.value)}
+                className="w-full bg-secondary text-foreground rounded-lg px-3 py-2 text-sm border border-border focus:border-primary focus:outline-none transition-colors"
               >
-                Adicionar
-              </button>
-              <button
-                onClick={() => { setShowAddForm(false); setNewExerciseName(""); }}
-                className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
+                {PILARES.map((p) => (
+                  <option key={p} value={p}>{PILAR_SHORT[p] || p}</option>
+                ))}
+              </select>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleAddCustom}
+                  className="flex-1 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+                >
+                  Adicionar
+                </button>
+                <button
+                  onClick={() => { setShowAddForm(false); setNewExerciseName(""); setNewExercisePilar(PILARES[0]); }}
+                  className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           ) : (
             <button

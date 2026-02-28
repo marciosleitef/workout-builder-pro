@@ -1,13 +1,31 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import ExerciseLibrary from "@/components/ExerciseLibrary";
 import WorkoutBuilder from "@/components/WorkoutBuilder";
 import { ExerciseGroup, WorkoutExercise } from "@/types/workout";
 import { type Exercise } from "@/data/exercises";
-import { Dumbbell } from "lucide-react";
+import { Dumbbell, ArrowLeft } from "lucide-react";
 
 const Index = () => {
+  const { studentId } = useParams();
+  const navigate = useNavigate();
+  const [studentName, setStudentName] = useState("");
   const [groups, setGroups] = useState<ExerciseGroup[]>([]);
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (studentId) {
+      supabase
+        .from("students")
+        .select("full_name")
+        .eq("id", studentId)
+        .single()
+        .then(({ data }) => {
+          if (data) setStudentName(data.full_name);
+        });
+    }
+  }, [studentId]);
 
   const handleAddExercise = useCallback(
     (exercise: Exercise) => {
@@ -46,11 +64,18 @@ const Index = () => {
     <div className="flex flex-col h-screen bg-background">
       {/* Header */}
       <header className="flex items-center gap-3 px-6 py-4 border-b border-border bg-card">
+        {studentId && (
+          <button onClick={() => navigate("/dashboard")} className="p-1.5 hover:bg-secondary rounded-lg transition-colors">
+            <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+          </button>
+        )}
         <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
           <Dumbbell className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <h1 className="font-display text-xl font-bold gradient-text">Workout Builder</h1>
+          <h1 className="font-display text-xl font-bold gradient-text">
+            {studentName ? `Treino — ${studentName}` : "Workout Builder"}
+          </h1>
           <p className="text-xs text-muted-foreground">Monte seu treino ideal</p>
         </div>
       </header>

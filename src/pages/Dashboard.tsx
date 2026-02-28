@@ -7,6 +7,7 @@ import { Search, Plus, Play, User, TrendingUp, Dumbbell, LogOut, Calendar, UserC
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import NewJourneyWizard from "@/components/NewJourneyWizard";
 import WorkoutInfoDialog from "@/components/WorkoutInfoDialog";
+import JourneyListDialog from "@/components/JourneyListDialog";
 
 interface Student {
   id: string;
@@ -50,6 +51,7 @@ const Dashboard = () => {
   const [showWorkoutInfo, setShowWorkoutInfo] = useState(false);
   const [activeJourneyId, setActiveJourneyId] = useState("");
   const [activeJourneyFormat, setActiveJourneyFormat] = useState("");
+  const [showJourneyList, setShowJourneyList] = useState(false);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [form, setForm] = useState({ full_name: "", email: "", phone: "", plan: "PS Prime" });
   const [profileName, setProfileName] = useState("");
@@ -374,6 +376,10 @@ const Dashboard = () => {
               </button>
 
               <button
+                onClick={() => {
+                  setShowWorkoutMenu(false);
+                  setShowJourneyList(true);
+                }}
                 className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors"
               >
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -410,6 +416,13 @@ const Dashboard = () => {
             journeyId={activeJourneyId}
             journeyFormat={activeJourneyFormat}
             studentId={selectedStudent.id}
+          />
+          <JourneyListDialog
+            open={showJourneyList}
+            onOpenChange={setShowJourneyList}
+            studentId={selectedStudent.id}
+            studentName={selectedStudent.full_name}
+            professorName={profileName}
           />
         </>
       )}

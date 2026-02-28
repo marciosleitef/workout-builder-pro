@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -27,7 +28,7 @@ interface Workout {
   sort_order: number | null;
 }
 
-type EditMode = "choice" | "journey" | "workouts" | "edit-workout";
+type EditMode = "choice" | "journey" | "workouts" | "edit-workout" | "workout-choice";
 
 interface JourneyEditDialogProps {
   open: boolean;
@@ -62,6 +63,7 @@ const JourneyEditDialog = ({
   onAddWorkout,
 }: JourneyEditDialogProps) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [mode, setMode] = useState<EditMode>("choice");
   const [saving, setSaving] = useState(false);
 
@@ -187,7 +189,17 @@ const JourneyEditDialog = ({
       day_label: w.day_label,
       orientations: w.orientations || "",
     });
+    setMode("workout-choice");
+  };
+
+  const handleEditWorkoutInfo = () => {
     setMode("edit-workout");
+  };
+
+  const handleEditWorkoutExercises = () => {
+    if (!editingWorkout || !studentId || !journey) return;
+    onOpenChange(false);
+    navigate(`/workout/${studentId}?workoutId=${editingWorkout.id}&journeyId=${journey.id}&journeyFormat=${encodeURIComponent(journey.format)}`);
   };
 
   const handleSaveWorkout = async () => {
@@ -228,12 +240,14 @@ const JourneyEditDialog = ({
     if (mode === "choice") return "O que deseja editar?";
     if (mode === "journey") return "Editar Jornada";
     if (mode === "workouts") return "Treinos da Jornada";
-    if (mode === "edit-workout") return "Editar Treino";
+    if (mode === "workout-choice") return "Editar Treino";
+    if (mode === "edit-workout") return "Editar Informações";
     return "";
   };
 
   const handleBack = () => {
-    if (mode === "edit-workout") setMode("workouts");
+    if (mode === "edit-workout") setMode("workout-choice");
+    else if (mode === "workout-choice") setMode("workouts");
     else if (mode === "journey" || mode === "workouts") setMode("choice");
     else onOpenChange(false);
   };
@@ -468,6 +482,45 @@ const JourneyEditDialog = ({
                   </button>
                 </>
               )}
+            </div>
+          )}
+
+          {/* WORKOUT CHOICE MODE - Info or Exercises */}
+          {mode === "workout-choice" && editingWorkout && (
+            <div className="space-y-3">
+              <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[hsl(250,55%,50%)/0.1] flex items-center justify-center">
+                  <Dumbbell className="w-5 h-5 text-[hsl(250,55%,50%)]" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-display font-bold text-sm text-foreground truncate">{editingWorkout.name}</p>
+                  <p className="text-xs text-muted-foreground">{editingWorkout.day_label}</p>
+                </div>
+              </div>
+              <button
+                onClick={handleEditWorkoutInfo}
+                className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Settings className="w-5 h-5 text-primary" />
+                </div>
+                <div className="text-left">
+                  <p className="font-display font-bold text-sm text-foreground">Editar Informações</p>
+                  <p className="text-xs text-muted-foreground">Nome, forma e orientações do treino</p>
+                </div>
+              </button>
+              <button
+                onClick={handleEditWorkoutExercises}
+                className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-lg bg-[hsl(150,60%,45%)/0.1] flex items-center justify-center">
+                  <Dumbbell className="w-5 h-5 text-[hsl(150,60%,45%)]" />
+                </div>
+                <div className="text-left">
+                  <p className="font-display font-bold text-sm text-foreground">Editar Exercícios</p>
+                  <p className="text-xs text-muted-foreground">Abrir montagem de treino</p>
+                </div>
+              </button>
             </div>
           )}
 

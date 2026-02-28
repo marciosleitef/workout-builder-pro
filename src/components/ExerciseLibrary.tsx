@@ -21,25 +21,13 @@ const PILAR_SHORT: Record<string, string> = {
 const ExerciseLibrary = ({ onAddExercise }: ExerciseLibraryProps) => {
   const [search, setSearch] = useState("");
   const [activePilar, setActivePilar] = useState<string | null>(null);
-  const [activeClasse, setActiveClasse] = useState<string | null>(null);
-
-  const classes = useMemo(() => {
-    if (!activePilar) return [];
-    const set = new Set<string>();
-    exercises.forEach((ex) => {
-      if (ex.pilar === activePilar) set.add(ex.classe);
-    });
-    return Array.from(set);
-  }, [activePilar]);
-
   const filtered = useMemo(() => {
     return exercises.filter((ex) => {
       if (activePilar && ex.pilar !== activePilar) return false;
-      if (activeClasse && ex.classe !== activeClasse) return false;
       if (search && !ex.name.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
-  }, [search, activePilar, activeClasse]);
+  }, [search, activePilar]);
 
   return (
     <div className="flex flex-col h-full">
@@ -64,7 +52,7 @@ const ExerciseLibrary = ({ onAddExercise }: ExerciseLibraryProps) => {
         {/* Pilar filter chips */}
         <div className="flex flex-wrap gap-1.5">
           <button
-            onClick={() => { setActivePilar(null); setActiveClasse(null); }}
+            onClick={() => { setActivePilar(null); }}
             className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
               !activePilar
                 ? "bg-primary text-primary-foreground"
@@ -76,7 +64,7 @@ const ExerciseLibrary = ({ onAddExercise }: ExerciseLibraryProps) => {
           {PILARES.map((p) => (
             <button
               key={p}
-              onClick={() => { setActivePilar(p === activePilar ? null : p); setActiveClasse(null); }}
+              onClick={() => { setActivePilar(p === activePilar ? null : p); }}
               className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                 activePilar === p
                   ? "bg-primary text-primary-foreground"
@@ -88,34 +76,6 @@ const ExerciseLibrary = ({ onAddExercise }: ExerciseLibraryProps) => {
           ))}
         </div>
 
-        {/* Classe filter */}
-        {activePilar && classes.length > 1 && (
-          <div className="flex flex-wrap gap-1.5">
-            <button
-              onClick={() => setActiveClasse(null)}
-              className={`px-2 py-0.5 rounded text-[11px] font-medium transition-colors ${
-                !activeClasse
-                  ? "bg-accent text-accent-foreground"
-                  : "bg-secondary/60 text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Todas classes
-            </button>
-            {classes.map((c) => (
-              <button
-                key={c}
-                onClick={() => setActiveClasse(c === activeClasse ? null : c)}
-                className={`px-2 py-0.5 rounded text-[11px] font-medium transition-colors ${
-                  activeClasse === c
-                    ? "bg-accent text-accent-foreground"
-                    : "bg-secondary/60 text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Exercise list */}

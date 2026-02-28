@@ -7,7 +7,11 @@ export interface WorkoutExercise {
   reps?: string;
   load?: string;
   rest?: string;
-  method?: string;
+  speed?: string;
+  distance?: string;
+  duration?: string;
+  breathing?: string;
+  calories?: string;
   notes?: string;
 }
 

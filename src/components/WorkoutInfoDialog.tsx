@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -39,9 +39,31 @@ const WorkoutInfoDialog = ({
   const [name, setName] = useState("");
   const [orientations, setOrientations] = useState("");
   const [saving, setSaving] = useState(false);
+  const [usedDayLabels, setUsedDayLabels] = useState<string[]>([]);
 
   const isWeekly = journeyFormat.toLowerCase() === "semanal";
-  const options = isWeekly ? WEEK_DAYS : NUMERIC_OPTIONS;
+  const allOptions = isWeekly ? WEEK_DAYS : NUMERIC_OPTIONS;
+
+  // Fetch existing day_labels for this journey to exclude them
+  useEffect(() => {
+    if (open && journeyId) {
+      supabase
+        .from("workouts")
+        .select("day_label")
+        .eq("journey_id", journeyId)
+        .then(({ data }) => {
+          setUsedDayLabels((data || []).map((w) => w.day_label));
+        });
+    }
+    if (!open) {
+      setDayLabel("");
+      setName("");
+      setOrientations("");
+      setUsedDayLabels([]);
+    }
+  }, [open, journeyId]);
+
+  const availableOptions = allOptions.filter((opt) => !usedDayLabels.includes(opt));
 
   const handleAdvance = async () => {
     if (!dayLabel || !name.trim()) {
@@ -99,20 +121,26 @@ const WorkoutInfoDialog = ({
             <label className="text-sm font-medium text-foreground">
               Forma do Treino <span className="text-destructive">*</span>
             </label>
-            <select
-              value={dayLabel}
-              onChange={(e) => setDayLabel(e.target.value)}
-              className="w-full mt-1 px-4 py-3 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none"
-            >
-              <option value="" disabled>
-                Selecione a forma
-              </option>
-              {options.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
+            {availableOptions.length === 0 ? (
+              <p className="mt-2 text-sm text-muted-foreground bg-secondary rounded-lg px-4 py-3">
+                Todas as opções já foram utilizadas nesta jornada.
+              </p>
+            ) : (
+              <select
+                value={dayLabel}
+                onChange={(e) => setDayLabel(e.target.value)}
+                className="w-full mt-1 px-4 py-3 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none"
+              >
+                <option value="" disabled>
+                  Selecione a forma
                 </option>
-              ))}
-            </select>
+                {availableOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           {/* Nome do Treino */}
@@ -145,7 +173,7 @@ const WorkoutInfoDialog = ({
         <div className="px-6 pb-5">
           <button
             onClick={handleAdvance}
-            disabled={saving || !dayLabel || !name.trim()}
+            disabled={saving || !dayLabel || !name.trim() || availableOptions.length === 0}
             className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-[hsl(250,55%,50%)] text-white font-display font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-40"
           >
             <ArrowRight className="w-4 h-4" />

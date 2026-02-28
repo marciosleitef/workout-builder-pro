@@ -2,7 +2,30 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ArrowLeft, X, CalendarDays, Dumbbell, Info, ChevronDown, ChevronUp, Printer, Play } from "lucide-react";
+import { ArrowLeft, X, CalendarDays, Dumbbell, Info, ChevronDown, ChevronUp, Printer, Play, Link2 } from "lucide-react";
+
+interface WorkoutExerciseData {
+  id: string;
+  exercise: { name: string; pilar?: string; classe?: string; videoUrl?: string };
+  sets?: string;
+  reps?: string;
+  load?: string;
+  rest?: string;
+  notes?: string;
+}
+
+interface BiSetData {
+  id: string;
+  type: "biset";
+  exercises: WorkoutExerciseData[];
+}
+
+interface ExerciseGroupData {
+  id: string;
+  name: string;
+  color: string;
+  items: (WorkoutExerciseData | BiSetData)[];
+}
 
 interface Workout {
   id: string;
@@ -10,6 +33,7 @@ interface Workout {
   day_label: string;
   orientations: string | null;
   sort_order: number | null;
+  exercises_data: ExerciseGroupData[] | null;
 }
 
 interface JourneyWorkoutsDialogProps {
@@ -46,18 +70,39 @@ const JourneyWorkoutsDialog = ({
     setLoading(true);
     const { data, error } = await supabase
       .from("workouts")
-      .select("id, name, day_label, orientations, sort_order")
+      .select("id, name, day_label, orientations, sort_order, exercises_data")
       .eq("journey_id", journeyId)
       .order("sort_order", { ascending: true });
     if (error) toast.error("Erro ao carregar treinos");
     else {
-      setWorkouts(data || []);
-      if (data && data.length > 0) setSelectedWorkout(data[0]);
+      const mapped = (data || []).map((w) => ({ ...w, exercises_data: (w.exercises_data as unknown as ExerciseGroupData[]) || [] }));
+      setWorkouts(mapped);
+      if (mapped.length > 0) setSelectedWorkout(mapped[0]);
     }
     setLoading(false);
   };
 
   const isWeekly = journeyFormat.toLowerCase() === "semanal";
+
+  const isBiSetData = (item: WorkoutExerciseData | BiSetData): item is BiSetData =>
+    "type" in item && item.type === "biset";
+
+  const groups = selectedWorkout?.exercises_data || [];
+  const hasExercises = groups.some((g) => g.items.length > 0);
+
+  const renderExerciseItem = (ex: WorkoutExerciseData) => (
+    <div key={ex.id} className="flex items-center gap-2 px-3 py-2">
+      <Dumbbell className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+      <div className="flex-1 min-w-0">
+        <p className="text-sm text-foreground truncate">{ex.exercise.name}</p>
+        {(ex.sets || ex.reps || ex.load) && (
+          <p className="text-[10px] text-muted-foreground">
+            {ex.sets && `${ex.sets}x`}{ex.reps || ""} {ex.load ? `• ${ex.load}` : ""} {ex.rest ? `• Desc: ${ex.rest}s` : ""}
+          </p>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -161,13 +206,42 @@ const JourneyWorkoutsDialog = ({
                 </div>
               )}
 
-              {/* Placeholder for exercises (not yet stored in DB) */}
-              <div className="rounded-xl border border-border bg-secondary/30 p-4 text-center">
-                <Dumbbell className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
-                <p className="text-xs text-muted-foreground">
-                  Exercícios serão exibidos aqui quando salvos
-                </p>
-              </div>
+              {/* Exercises */}
+              {selectedWorkout && hasExercises ? (
+                <div className="space-y-3">
+                  {groups.map((group) => (
+                    <div
+                      key={group.id}
+                      className="rounded-xl border overflow-hidden"
+                      style={{ backgroundColor: group.color, borderColor: group.color.replace("0.15", "0.4") }}
+                    >
+                      <div className="px-3 py-2">
+                        <p className="text-xs font-display font-bold text-foreground uppercase tracking-wide">{group.name}</p>
+                      </div>
+                      <div className="bg-background/60 divide-y divide-border/50">
+                        {group.items.map((item) =>
+                          isBiSetData(item) ? (
+                            <div key={item.id} className="border-l-2 border-primary/50">
+                              <div className="flex items-center gap-1.5 px-3 py-1 bg-primary/5">
+                                <Link2 className="w-3 h-3 text-primary" />
+                                <span className="text-[10px] font-display font-semibold text-primary">Bi-Set</span>
+                              </div>
+                              {item.exercises.map((ex) => renderExerciseItem(ex))}
+                            </div>
+                          ) : (
+                            renderExerciseItem(item)
+                          )
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : selectedWorkout ? (
+                <div className="rounded-xl border border-border bg-secondary/30 p-4 text-center">
+                  <Dumbbell className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                  <p className="text-xs text-muted-foreground">Nenhum exercício adicionado a este treino</p>
+                </div>
+              ) : null}
 
               {/* Action buttons */}
               <div className="space-y-2">

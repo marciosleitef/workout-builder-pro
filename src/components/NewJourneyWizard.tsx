@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
-  ArrowRight, ArrowLeft, Check, Star, Award, Trophy,
+  ArrowRight, ArrowLeft, Check, Star, Award, Trophy, Dumbbell,
   CalendarDays, ListOrdered, Target, Info, Settings, Eye, EyeOff, Clock
 } from "lucide-react";
 
@@ -14,6 +14,7 @@ interface NewJourneyWizardProps {
   studentId: string;
   studentName: string;
   onCreated: () => void;
+  onGoToWorkout?: (journeyId: string) => void;
 }
 
 const STEPS = ["Informações", "Objetivo", "Nível", "Formato", "Confirmação"];
@@ -36,10 +37,11 @@ const FORMATS = [
   { label: "Numerico", icon: ListOrdered },
 ];
 
-const NewJourneyWizard = ({ open, onOpenChange, studentId, studentName, onCreated }: NewJourneyWizardProps) => {
+const NewJourneyWizard = ({ open, onOpenChange, studentId, studentName, onCreated, onGoToWorkout }: NewJourneyWizardProps) => {
   const { user } = useAuth();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [createdJourneyId, setCreatedJourneyId] = useState<string | null>(null);
 
   const today = new Date().toISOString().split("T")[0];
   const nextMonth = new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0];
@@ -67,7 +69,7 @@ const NewJourneyWizard = ({ open, onOpenChange, studentId, studentName, onCreate
 
   const handleCreate = async () => {
     setSaving(true);
-    const { error } = await supabase.from("workout_journeys").insert({
+    const { data, error } = await supabase.from("workout_journeys").insert({
       professor_id: user?.id,
       student_id: studentId,
       name: form.name,
@@ -80,32 +82,67 @@ const NewJourneyWizard = ({ open, onOpenChange, studentId, studentName, onCreate
       student_can_view: form.student_can_view,
       hide_on_expire: form.hide_on_expire,
       hide_until_start: form.hide_until_start,
-    });
+    }).select("id").single();
     setSaving(false);
     if (error) {
       toast.error("Erro ao criar jornada");
     } else {
-      toast.success("Jornada criada com sucesso!");
+      setCreatedJourneyId(data.id);
+      setStep(5); // success screen
       onCreated();
-      onOpenChange(false);
-      // Reset
-      setStep(0);
-      setForm({
-        name: "", start_date: today, end_date: nextMonth, orientations: "",
-        student_can_view: true, hide_on_expire: true, hide_until_start: true,
-        objective: "", level: "", format: "",
-      });
     }
   };
 
+  const handleClose = () => {
+    onOpenChange(false);
+    setStep(0);
+    setCreatedJourneyId(null);
+    setForm({
+      name: "", start_date: today, end_date: nextMonth, orientations: "",
+      student_can_view: true, hide_on_expire: true, hide_until_start: true,
+      objective: "", level: "", format: "",
+    });
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-md p-0 overflow-hidden">
+        {step === 5 ? (
+          /* Success screen */
+          <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
+            <div className="w-16 h-16 rounded-full bg-[hsl(150,60%,45%)] flex items-center justify-center mb-5">
+              <Check className="w-8 h-8 text-white" />
+            </div>
+            <h3 className="font-display font-bold text-xl text-foreground mb-2">Jornada Criada!</h3>
+            <p className="text-sm text-muted-foreground mb-6">
+              Sua jornada foi criada com sucesso. Deseja criar os treinos agora?
+            </p>
+            <div className="w-full space-y-3">
+              <button
+                onClick={() => {
+                  if (createdJourneyId && onGoToWorkout) {
+                    onGoToWorkout(createdJourneyId);
+                  }
+                  handleClose();
+                }}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-[hsl(250,55%,50%)] text-white font-display font-bold text-sm hover:opacity-90 transition-opacity"
+              >
+                <Dumbbell className="w-4 h-4" />
+                Sim, criar treinos
+              </button>
+              <button
+                onClick={handleClose}
+                className="w-full py-3 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-secondary transition-colors"
+              >
+                Agora não
+              </button>
+            </div>
+          </div>
+        ) : (
+        <>
         {/* Header */}
         <div className="bg-gradient-to-r from-[hsl(220,60%,45%)] to-[hsl(250,55%,50%)] px-6 py-5 text-white">
           <h2 className="font-display font-bold text-lg">Nova Jornada de Treino</h2>
-
-          {/* Stepper */}
           <div className="flex items-center justify-between mt-4">
             {STEPS.map((label, i) => (
               <div key={label} className="flex flex-col items-center relative">
@@ -400,6 +437,8 @@ const NewJourneyWizard = ({ open, onOpenChange, studentId, studentName, onCreate
             </button>
           )}
         </div>
+        </>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -308,7 +308,7 @@ const WorkoutBuilder = ({ groups, setGroups }: WorkoutBuilderProps) => {
                                   </button>
                                   <div className="flex-1 min-w-0">
                                     <p className="text-sm text-foreground truncate">{item.exercise.name}</p>
-                                    <p className="text-xs text-muted-foreground">{item.exercise.category}</p>
+                                    
                                   </div>
                                   <button
                                     onClick={() => removeItem(group.id, item.id)}

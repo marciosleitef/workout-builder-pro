@@ -19,6 +19,15 @@ interface Student {
   plan: string | null;
   status: string | null;
   registration_date: string | null;
+  birth_date: string | null;
+  whatsapp: string | null;
+  gender: string | null;
+  group_id: string | null;
+}
+
+interface StudentGroup {
+  id: string;
+  name: string;
 }
 
 const INITIALS_COLORS = [
@@ -54,9 +63,23 @@ const Students = () => {
   const [showJourneyEdit, setShowJourneyEdit] = useState(false);
   const [activeJourney, setActiveJourney] = useState<{ id: string; name: string; objective: string; level: string; format: string; start_date: string; end_date: string; status: string | null } | null>(null);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
-  const [form, setForm] = useState({ full_name: "", email: "", phone: "", plan: "PS Prime" });
+  const [form, setForm] = useState({ full_name: "", email: "", phone: "", plan: "PS Prime", birth_date: "", whatsapp: "", gender: "", group_id: "" });
+  const [groups, setGroups] = useState<StudentGroup[]>([]);
+  const [newGroupName, setNewGroupName] = useState("");
 
-  useEffect(() => { fetchStudents(); }, []);
+  useEffect(() => { fetchStudents(); fetchGroups(); }, []);
+
+  const fetchGroups = async () => {
+    const { data } = await supabase.from("student_groups").select("*").order("name");
+    setGroups((data as any[]) || []);
+  };
+
+  const handleAddGroup = async () => {
+    if (!newGroupName.trim()) return;
+    const { error } = await supabase.from("student_groups").insert({ name: newGroupName.trim(), professor_id: user?.id } as any);
+    if (error) toast.error("Erro ao criar grupo");
+    else { toast.success("Grupo criado!"); setNewGroupName(""); fetchGroups(); }
+  };
 
   useEffect(() => {
     if (searchParams.get("addWorkout") === "true" && students.length > 0) {
@@ -76,7 +99,7 @@ const Students = () => {
     }
     if (searchParams.get("showForm") === "true") {
       setEditingStudent(null);
-      setForm({ full_name: "", email: "", phone: "", plan: "PS Prime" });
+      setForm({ full_name: "", email: "", phone: "", plan: "PS Prime", birth_date: "", whatsapp: "", gender: "", group_id: "" });
       setShowForm(true);
       setSearchParams({}, { replace: true });
     }
@@ -92,18 +115,29 @@ const Students = () => {
 
   const handleSave = async () => {
     if (!form.full_name.trim()) { toast.error("Nome é obrigatório"); return; }
+    const payload: any = {
+      full_name: form.full_name,
+      email: form.email || null,
+      phone: form.phone || null,
+      plan: form.plan,
+      birth_date: form.birth_date || null,
+      whatsapp: form.whatsapp || null,
+      gender: form.gender || null,
+      group_id: form.group_id || null,
+    };
     if (editingStudent) {
-      const { error } = await supabase.from("students").update({ full_name: form.full_name, email: form.email || null, phone: form.phone || null, plan: form.plan }).eq("id", editingStudent.id);
+      const { error } = await supabase.from("students").update(payload).eq("id", editingStudent.id);
       if (error) toast.error("Erro ao atualizar");
       else { toast.success("Aluno atualizado!"); fetchStudents(); }
     } else {
-      const { error } = await supabase.from("students").insert({ full_name: form.full_name, email: form.email || null, phone: form.phone || null, plan: form.plan, professor_id: user?.id });
+      payload.professor_id = user?.id;
+      const { error } = await supabase.from("students").insert(payload);
       if (error) toast.error("Erro ao cadastrar");
       else { toast.success("Aluno cadastrado!"); fetchStudents(); }
     }
     setShowForm(false);
     setEditingStudent(null);
-    setForm({ full_name: "", email: "", phone: "", plan: "PS Prime" });
+    setForm({ full_name: "", email: "", phone: "", plan: "PS Prime", birth_date: "", whatsapp: "", gender: "", group_id: "" });
   };
 
   const handleDelete = async (id: string) => {
@@ -114,7 +148,7 @@ const Students = () => {
 
   const openEdit = (s: Student) => {
     setEditingStudent(s);
-    setForm({ full_name: s.full_name, email: s.email || "", phone: s.phone || "", plan: s.plan || "PS Prime" });
+    setForm({ full_name: s.full_name, email: s.email || "", phone: s.phone || "", plan: s.plan || "PS Prime", birth_date: s.birth_date || "", whatsapp: s.whatsapp || "", gender: s.gender || "", group_id: s.group_id || "" });
     setShowForm(true);
   };
 
@@ -208,11 +242,33 @@ const Students = () => {
 
       {/* Add/Edit dialog */}
       <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle className="font-display">{editingStudent ? "Editar Aluno" : "Novo Aluno"}</DialogTitle></DialogHeader>
           <div className="space-y-4 mt-2">
             <div><label className="text-sm font-medium text-foreground">Nome Completo *</label><input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className="w-full mt-1 px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" /></div>
-            <div><label className="text-sm font-medium text-foreground">Email</label><input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="w-full mt-1 px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" /></div>
+            <div><label className="text-sm font-medium text-foreground">E-mail</label><input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="w-full mt-1 px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" /></div>
+            <div>
+              <label className="text-sm font-medium text-foreground">Grupo</label>
+              <select value={form.group_id} onChange={(e) => setForm({ ...form, group_id: e.target.value })} className="w-full mt-1 px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
+                <option value="">Selecione um grupo</option>
+                {groups.map((g) => (<option key={g.id} value={g.id}>{g.name}</option>))}
+              </select>
+              <div className="flex gap-2 mt-2">
+                <input value={newGroupName} onChange={(e) => setNewGroupName(e.target.value)} placeholder="Novo grupo..." className="flex-1 px-3 py-1.5 rounded-lg bg-secondary border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                <button type="button" onClick={handleAddGroup} className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90">Criar</button>
+              </div>
+            </div>
+            <div><label className="text-sm font-medium text-foreground">Data de Nascimento</label><input type="date" value={form.birth_date} onChange={(e) => setForm({ ...form, birth_date: e.target.value })} className="w-full mt-1 px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" /></div>
+            <div><label className="text-sm font-medium text-foreground">WhatsApp</label><input value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: e.target.value })} placeholder="(11) 99999-9999" className="w-full mt-1 px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" /></div>
+            <div>
+              <label className="text-sm font-medium text-foreground">Gênero</label>
+              <select value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value })} className="w-full mt-1 px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
+                <option value="">Selecione</option>
+                <option value="masculino">Masculino</option>
+                <option value="feminino">Feminino</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
             <div><label className="text-sm font-medium text-foreground">Telefone</label><input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full mt-1 px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" /></div>
             <div><label className="text-sm font-medium text-foreground">Plano</label><input value={form.plan} onChange={(e) => setForm({ ...form, plan: e.target.value })} className="w-full mt-1 px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" /></div>
             <div className="flex gap-3 pt-2">
@@ -258,7 +314,7 @@ const Students = () => {
         <DialogContent className="max-w-sm">
           <DialogHeader><DialogTitle className="font-display">Novo Aluno</DialogTitle></DialogHeader>
           <div className="space-y-3 mt-1">
-            <button onClick={() => { setShowNewStudentMenu(false); setEditingStudent(null); setForm({ full_name: "", email: "", phone: "", plan: "PS Prime" }); setShowForm(true); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors">
+            <button onClick={() => { setShowNewStudentMenu(false); setEditingStudent(null); setForm({ full_name: "", email: "", phone: "", plan: "PS Prime", birth_date: "", whatsapp: "", gender: "", group_id: "" }); setShowForm(true); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Plus className="w-5 h-5 text-primary" /></div>
               <div className="text-left"><p className="font-display font-bold text-sm text-foreground">Cadastro Manual</p><p className="text-xs text-muted-foreground">Preencher os dados do aluno agora</p></div>
             </button>

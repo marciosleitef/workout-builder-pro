@@ -225,13 +225,44 @@ export default function DailyTrackingDialog({ open, onOpenChange, student }: Pro
   const latestPost = sessionRecords.find(r => r.feedback_type === "post");
   const latestDaily = dailyRecords[0];
 
-  const radarData = latestPre ? [
-    { metric: "Fadiga", value: latestPre.fatigue_scale || 0, max: 5 },
-    { metric: "Sono", value: latestPre.sleep_quality_scale || 0, max: 5 },
-    { metric: "Dor", value: latestPre.muscle_soreness_scale || 0, max: 5 },
-    { metric: "Estresse", value: latestPre.stress_level_scale || 0, max: 5 },
-    { metric: "Humor", value: latestPre.mood_scale || 0, max: 5 },
-    { metric: "Recuperação", value: (latestPre.recovery_perception_scale || 0) / 2, max: 5 },
+  // Calculate averages from all session records
+  const allPre = sessionRecords.filter(r => r.feedback_type === "pre");
+  const allPost = sessionRecords.filter(r => r.feedback_type === "post");
+
+  function avg(arr: any[], key: string): number | null {
+    const vals = arr.map(r => r[key]).filter((v: any) => v != null && v !== 0) as number[];
+    if (vals.length === 0) return null;
+    return Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10;
+  }
+
+  const avgBpm = avg(allPost, "workout_bpm_avg");
+  const avgCalories = avg(allPost, "calories_burned");
+  const avgBpmMax = avg(allPost, "workout_bpm_max");
+
+  // Average training duration
+  const avgDuration = (() => {
+    const durations: number[] = [];
+    for (const post of allPost) {
+      const pre = allPre.find(p => p.workout_checkin_id === post.workout_checkin_id);
+      const checkin = pre?.checkin_time || post.checkin_time;
+      const checkout = post.checkout_time;
+      if (checkin && checkout) {
+        durations.push(Math.round((new Date(checkout).getTime() - new Date(checkin).getTime()) / 60000));
+      }
+    }
+    if (durations.length === 0) return null;
+    return Math.round(durations.reduce((a, b) => a + b, 0) / durations.length);
+  })();
+
+  const totalSessions = allPost.length || allPre.length;
+
+  const radarData = allPre.length > 0 ? [
+    { metric: "Fadiga", value: avg(allPre, "fatigue_scale") || 0, max: 5 },
+    { metric: "Sono", value: avg(allPre, "sleep_quality_scale") || 0, max: 5 },
+    { metric: "Dor", value: avg(allPre, "muscle_soreness_scale") || 0, max: 5 },
+    { metric: "Estresse", value: avg(allPre, "stress_level_scale") || 0, max: 5 },
+    { metric: "Humor", value: avg(allPre, "mood_scale") || 0, max: 5 },
+    { metric: "Recuperação", value: (avg(allPre, "recovery_perception_scale") || 0) / 2, max: 5 },
   ] : [];
 
   const renderMain = () => (

@@ -2,17 +2,24 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { ArrowLeft, Plus, Pencil, Trash2, Users, X, Check } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, Users, X, Check, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Group {
   id: string;
   name: string;
   created_at: string;
   studentCount?: number;
+}
+
+interface Student {
+  id: string;
+  full_name: string;
+  group_id: string | null;
 }
 
 const StudentGroups = () => {
@@ -25,6 +32,9 @@ const StudentGroups = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [manageGroup, setManageGroup] = useState<Group | null>(null);
+  const [allStudents, setAllStudents] = useState<Student[]>([]);
+  const [selectedStudentIds, setSelectedStudentIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (user) fetchGroups();
@@ -85,16 +95,8 @@ const StudentGroups = () => {
   };
 
   const handleDelete = async (id: string) => {
-    // First unlink students from this group
-    await supabase
-      .from("students")
-      .update({ group_id: null })
-      .eq("group_id", id);
-
-    const { error } = await supabase
-      .from("student_groups")
-      .delete()
-      .eq("id", id);
+    await supabase.from("students").update({ group_id: null }).eq("group_id", id);
+    const { error } = await supabase.from("student_groups").delete().eq("id", id);
     if (error) {
       toast.error("Erro ao excluir grupo");
     } else {
@@ -102,6 +104,44 @@ const StudentGroups = () => {
       setDeleteConfirm(null);
       fetchGroups();
     }
+  };
+
+  const openManageMembers = async (group: Group) => {
+    setManageGroup(group);
+    const { data } = await supabase
+      .from("students")
+      .select("id, full_name, group_id")
+      .eq("professor_id", user!.id)
+      .order("full_name");
+    setAllStudents(data || []);
+    const memberIds = new Set((data || []).filter((s) => s.group_id === group.id).map((s) => s.id));
+    setSelectedStudentIds(memberIds);
+  };
+
+  const handleSaveMembers = async () => {
+    if (!manageGroup) return;
+    // Remove students from this group who are unchecked
+    const toRemove = allStudents.filter((s) => s.group_id === manageGroup.id && !selectedStudentIds.has(s.id));
+    for (const s of toRemove) {
+      await supabase.from("students").update({ group_id: null }).eq("id", s.id);
+    }
+    // Add students who are checked
+    const toAdd = allStudents.filter((s) => selectedStudentIds.has(s.id) && s.group_id !== manageGroup.id);
+    for (const s of toAdd) {
+      await supabase.from("students").update({ group_id: manageGroup.id }).eq("id", s.id);
+    }
+    toast.success("Membros atualizados!");
+    setManageGroup(null);
+    fetchGroups();
+  };
+
+  const toggleStudent = (id: string) => {
+    setSelectedStudentIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
 
   return (
@@ -150,7 +190,7 @@ const StudentGroups = () => {
                       className="h-9"
                     />
                     <Button size="icon" variant="ghost" onClick={() => handleUpdate(group.id)} className="shrink-0">
-                      <Check className="w-4 h-4 text-green-500" />
+                      <Check className="w-4 h-4 text-primary" />
                     </Button>
                     <Button size="icon" variant="ghost" onClick={() => setEditingId(null)} className="shrink-0">
                       <X className="w-4 h-4" />
@@ -168,6 +208,14 @@ const StudentGroups = () => {
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => openManageMembers(group)}
+                        title="Gerenciar membros"
+                      >
+                        <UserPlus className="w-4 h-4 text-primary" />
+                      </Button>
                       <Button
                         size="icon"
                         variant="ghost"
@@ -220,6 +268,49 @@ const StudentGroups = () => {
           <div className="flex gap-2 mt-4">
             <Button variant="outline" onClick={() => setDeleteConfirm(null)} className="flex-1">Cancelar</Button>
             <Button variant="destructive" onClick={() => deleteConfirm && handleDelete(deleteConfirm)} className="flex-1">Excluir</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manage members dialog */}
+      <Dialog open={!!manageGroup} onOpenChange={() => setManageGroup(null)}>
+        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display">Membros: {manageGroup?.name}</DialogTitle>
+          </DialogHeader>
+          <p className="text-xs text-muted-foreground mb-3">
+            Marque os alunos que pertencem a este grupo. Alunos já em outro grupo serão transferidos.
+          </p>
+          {allStudents.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">Nenhum aluno cadastrado.</p>
+          ) : (
+            <div className="space-y-1">
+              {allStudents.map((s) => {
+                const isInOtherGroup = s.group_id && s.group_id !== manageGroup?.id;
+                const otherGroupName = isInOtherGroup ? groups.find((g) => g.id === s.group_id)?.name : null;
+                return (
+                  <label
+                    key={s.id}
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-secondary/50 cursor-pointer transition-colors"
+                  >
+                    <Checkbox
+                      checked={selectedStudentIds.has(s.id)}
+                      onCheckedChange={() => toggleStudent(s.id)}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{s.full_name}</p>
+                      {otherGroupName && (
+                        <p className="text-[10px] text-muted-foreground">Atualmente em: {otherGroupName}</p>
+                      )}
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+          )}
+          <div className="flex gap-2 mt-4">
+            <Button variant="outline" onClick={() => setManageGroup(null)} className="flex-1">Cancelar</Button>
+            <Button onClick={handleSaveMembers} className="flex-1">Salvar</Button>
           </div>
         </DialogContent>
       </Dialog>

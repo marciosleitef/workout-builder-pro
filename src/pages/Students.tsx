@@ -49,6 +49,7 @@ const Students = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [students, setStudents] = useState<Student[]>([]);
   const [search, setSearch] = useState("");
+  const [filterGroupId, setFilterGroupId] = useState("");
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [showWorkoutMenu, setShowWorkoutMenu] = useState(false);
@@ -152,7 +153,11 @@ const Students = () => {
     setShowForm(true);
   };
 
-  const filtered = students.filter((s) => s.full_name.toLowerCase().includes(search.toLowerCase()));
+  const filtered = students.filter((s) => {
+    const matchesSearch = s.full_name.toLowerCase().includes(search.toLowerCase());
+    const matchesGroup = !filterGroupId || s.group_id === filterGroupId;
+    return matchesSearch && matchesGroup;
+  });
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -168,16 +173,36 @@ const Students = () => {
 
       <div className="max-w-7xl mx-auto p-6">
         {/* Search + Add */}
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-3 mb-4">
           <div className="flex-1 relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar atleta por nome..." className="w-full pl-12 pr-4 py-3 rounded-xl bg-card border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
           </div>
-          <button onClick={() => setShowNewStudentMenu(true)} className="flex items-center gap-2 px-5 py-3 bg-primary text-primary-foreground rounded-xl font-display font-bold text-sm hover:bg-primary/90 transition-colors">
+          <button onClick={() => setShowNewStudentMenu(true)} className="flex items-center gap-2 px-5 py-3 bg-primary text-primary-foreground rounded-xl font-display font-bold text-sm hover:bg-primary/90 transition-colors shrink-0">
             <Plus className="w-4 h-4" />
             Novo Aluno
           </button>
         </div>
+        {/* Group filter */}
+        {groups.length > 0 && (
+          <div className="flex items-center gap-2 mb-6 flex-wrap">
+            <button
+              onClick={() => setFilterGroupId("")}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${!filterGroupId ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"}`}
+            >
+              Todos
+            </button>
+            {groups.map((g) => (
+              <button
+                key={g.id}
+                onClick={() => setFilterGroupId(filterGroupId === g.id ? "" : g.id)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${filterGroupId === g.id ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"}`}
+              >
+                {g.name}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Student grid */}
         {loading ? (

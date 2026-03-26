@@ -17,6 +17,7 @@ interface Challenge {
   points_per_checkin: number;
   points_weekly_bonus: number;
   points_streak_bonus: number;
+  source_journey_id: string | null;
 }
 
 interface Participant {
@@ -260,7 +261,7 @@ const ChallengePublic = () => {
               {participants.length} inscritos
             </span>
           </div>
-          {ended && <span className="inline-block mt-3 text-xs font-bold px-3 py-1 rounded-full bg-primary-foreground/10 text-primary-foreground/60">ENCERRADO</span>}
+          {ended && <span className="inline-block mt-3 text-xs font-bold px-3 py-1 rounded-full bg-muted text-muted-foreground">ENCERRADO</span>}
         </div>
       </div>
 
@@ -315,7 +316,7 @@ const ChallengePublic = () => {
         )}
 
         {signupSuccess && (
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 dark:bg-emerald-950/20 dark:border-emerald-800 p-6 text-center">
+          <div className="rounded-2xl border border-border bg-card p-6 text-center">
             <CheckCircle className="w-10 h-10 text-emerald-500 mx-auto mb-2" />
             <p className="font-display font-bold text-foreground">Inscrição confirmada!</p>
             <p className="text-sm text-muted-foreground mt-1">Você está no desafio. Boa sorte! 💪</p>

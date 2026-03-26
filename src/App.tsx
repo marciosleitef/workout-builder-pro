@@ -10,6 +10,8 @@ import ExerciseLibraryPage from "./pages/ExerciseLibraryPage";
 import AttendanceCalendar from "./pages/AttendanceCalendar";
 import StudentGroups from "./pages/StudentGroups";
 import Plans from "./pages/Plans";
+import Challenges from "./pages/Challenges";
+import ChallengePublic from "./pages/ChallengePublic";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";

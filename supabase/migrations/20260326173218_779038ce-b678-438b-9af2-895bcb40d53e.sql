@@ -1,0 +1,17 @@
+ALTER TABLE public.student_bioimpedance
+  ADD COLUMN IF NOT EXISTS height numeric,
+  ADD COLUMN IF NOT EXISTS bmi numeric,
+  ADD COLUMN IF NOT EXISTS age integer,
+  ADD COLUMN IF NOT EXISTS fat_mass numeric,
+  ADD COLUMN IF NOT EXISTS total_body_water numeric,
+  ADD COLUMN IF NOT EXISTS water_lean_mass_pct numeric,
+  ADD COLUMN IF NOT EXISTS hydration_index numeric,
+  ADD COLUMN IF NOT EXISTS water_lean_mass_abs_pct numeric,
+  ADD COLUMN IF NOT EXISTS intracellular_water numeric,
+  ADD COLUMN IF NOT EXISTS intracellular_water_pct numeric,
+  ADD COLUMN IF NOT EXISTS extracellular_water numeric,
+  ADD COLUMN IF NOT EXISTS lean_mass_pct numeric,
+  ADD COLUMN IF NOT EXISTS muscle_fat_ratio numeric,
+  ADD COLUMN IF NOT EXISTS muscle_mass_pct numeric,
+  ADD COLUMN IF NOT EXISTS phase_angle numeric,
+  ADD COLUMN IF NOT EXISTS cellular_age integer;

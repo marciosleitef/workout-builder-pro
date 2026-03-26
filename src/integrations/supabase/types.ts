@@ -76,54 +76,102 @@ export type Database = {
       }
       student_bioimpedance: {
         Row: {
+          age: number | null
           basal_metabolism: number | null
+          bmi: number | null
           body_fat_pct: number | null
           body_water_pct: number | null
           bone_mass: number | null
+          cellular_age: number | null
           created_at: string
+          extracellular_water: number | null
+          fat_mass: number | null
           file_url: string | null
+          height: number | null
+          hydration_index: number | null
           id: string
+          intracellular_water: number | null
+          intracellular_water_pct: number | null
           lean_mass: number | null
+          lean_mass_pct: number | null
           measured_at: string
+          muscle_fat_ratio: number | null
           muscle_mass: number | null
+          muscle_mass_pct: number | null
           notes: string | null
+          phase_angle: number | null
           professor_id: string
           student_id: string
+          total_body_water: number | null
           visceral_fat: number | null
+          water_lean_mass_abs_pct: number | null
+          water_lean_mass_pct: number | null
           weight: number | null
         }
         Insert: {
+          age?: number | null
           basal_metabolism?: number | null
+          bmi?: number | null
           body_fat_pct?: number | null
           body_water_pct?: number | null
           bone_mass?: number | null
+          cellular_age?: number | null
           created_at?: string
+          extracellular_water?: number | null
+          fat_mass?: number | null
           file_url?: string | null
+          height?: number | null
+          hydration_index?: number | null
           id?: string
+          intracellular_water?: number | null
+          intracellular_water_pct?: number | null
           lean_mass?: number | null
+          lean_mass_pct?: number | null
           measured_at?: string
+          muscle_fat_ratio?: number | null
           muscle_mass?: number | null
+          muscle_mass_pct?: number | null
           notes?: string | null
+          phase_angle?: number | null
           professor_id: string
           student_id: string
+          total_body_water?: number | null
           visceral_fat?: number | null
+          water_lean_mass_abs_pct?: number | null
+          water_lean_mass_pct?: number | null
           weight?: number | null
         }
         Update: {
+          age?: number | null
           basal_metabolism?: number | null
+          bmi?: number | null
           body_fat_pct?: number | null
           body_water_pct?: number | null
           bone_mass?: number | null
+          cellular_age?: number | null
           created_at?: string
+          extracellular_water?: number | null
+          fat_mass?: number | null
           file_url?: string | null
+          height?: number | null
+          hydration_index?: number | null
           id?: string
+          intracellular_water?: number | null
+          intracellular_water_pct?: number | null
           lean_mass?: number | null
+          lean_mass_pct?: number | null
           measured_at?: string
+          muscle_fat_ratio?: number | null
           muscle_mass?: number | null
+          muscle_mass_pct?: number | null
           notes?: string | null
+          phase_angle?: number | null
           professor_id?: string
           student_id?: string
+          total_body_water?: number | null
           visceral_fat?: number | null
+          water_lean_mass_abs_pct?: number | null
+          water_lean_mass_pct?: number | null
           weight?: number | null
         }
         Relationships: [

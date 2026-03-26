@@ -206,6 +206,7 @@ export function useStudentScores(studentIds: string[]) {
     const bios = bioRes.data || [];
     const checkins = checkinsRes.data || [];
     const feedbacks = feedbackRes.data || [];
+    const dailyRecords = dailyRes.data || [];
     const studentGenders: Record<string, string | null> = {};
     (studentsRes.data || []).forEach((s: any) => { studentGenders[s.id] = s.gender; });
 
@@ -217,10 +218,17 @@ export function useStudentScores(studentIds: string[]) {
       const gender = studentGenders[sid];
       const badges: string[] = [];
 
-      // === HEALTH ===
+      // === HEALTH: combine bioimpedance + daily records ===
       const studentBios = bios.filter((b: any) => b.student_id === sid);
-      const latestBio = studentBios[0]; // already ordered desc
-      let healthBase = latestBio ? (computeHealthScore(latestBio, gender) ?? 0) : 0;
+      const latestBio = studentBios[0];
+      const bioScore = latestBio ? computeHealthScore(latestBio, gender) : null;
+
+      const studentDaily = dailyRecords.filter((r: any) => r.student_id === sid);
+      const dailyScore = scoreDailyHealth(studentDaily);
+
+      // Combine: average of available sources
+      const healthParts = [bioScore, dailyScore].filter((v): v is number => v !== null);
+      let healthBase = healthParts.length > 0 ? Math.round(healthParts.reduce((a, b) => a + b, 0) / healthParts.length) : 0;
 
       // Health gamification
       let healthBonus = 0;

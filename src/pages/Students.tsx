@@ -44,12 +44,12 @@ interface Plan {
 }
 
 const INITIALS_COLORS = [
-  "hsl(220 60% 50%)",
-  "hsl(150 55% 45%)",
-  "hsl(35 85% 50%)",
-  "hsl(280 55% 55%)",
-  "hsl(0 65% 55%)",
-  "hsl(180 55% 45%)",
+  "hsl(0 0% 15%)",
+  "hsl(0 0% 25%)",
+  "hsl(0 0% 35%)",
+  "hsl(0 0% 20%)",
+  "hsl(0 0% 30%)",
+  "hsl(0 0% 40%)",
 ];
 
 function getInitials(name: string) {

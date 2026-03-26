@@ -24,11 +24,12 @@ const Dashboard = () => {
   const [groups, setGroups] = useState<{ id: string; name: string }[]>([]);
 
   useEffect(() => {
+    if (!user) return;
     fetchProfile();
     fetchStudentCount();
     fetchGroupCount();
     fetchGroups();
-  }, []);
+  }, [user]);
 
   const fetchGroups = async () => {
     const { data } = await supabase.from("student_groups").select("id, name").eq("professor_id", user?.id).order("name");

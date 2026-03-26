@@ -63,7 +63,8 @@ const Challenges = () => {
   const fetchChallenges = async () => {
     setLoading(true);
     const { data } = await supabase
-      .from("challenges")
+      .from("challenges" as any)
+      .select("*")
       .select("*")
       .eq("professor_id", user!.id)
       .order("created_at", { ascending: false });

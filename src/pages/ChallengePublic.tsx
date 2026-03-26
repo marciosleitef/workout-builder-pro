@@ -62,7 +62,7 @@ const ChallengePublic = () => {
     const { data: parts } = await supabase
       .from("challenge_participants" as any)
       .select("id, student_id, total_points, joined_at")
-      .eq("challenge_id", challengeData.id)
+      .eq("challenge_id", (challengeData as any).id)
       .order("total_points", { ascending: false });
 
     if (parts && parts.length > 0) {

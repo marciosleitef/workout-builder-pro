@@ -110,6 +110,11 @@ const Challenges = () => {
     setPointsCheckin(10);
     setPointsWeekly(25);
     setPointsStreak(5);
+    setJourneyMode("existing");
+    setNewJourneyName("");
+    setNewJourneyObjective("SAÚDE - T1");
+    setNewJourneyLevel("Iniciante");
+    setNewJourneyFormat("Semanal");
   };
 
   const openEdit = (c: Challenge) => {
@@ -131,12 +136,39 @@ const Challenges = () => {
       return;
     }
 
+    let finalJourneyId = sourceJourneyId || null;
+
+    // If creating a new journey for the challenge
+    if (journeyMode === "new" && newJourneyName.trim()) {
+      const { data: newJ, error: jErr } = await supabase
+        .from("workout_journeys")
+        .insert({
+          name: newJourneyName.trim(),
+          professor_id: user!.id,
+          student_id: user!.id, // template: professor as placeholder
+          objective: newJourneyObjective,
+          level: newJourneyLevel,
+          format: newJourneyFormat,
+          start_date: startDate,
+          end_date: endDate,
+          status: "active",
+        })
+        .select("id")
+        .single();
+
+      if (jErr || !newJ) {
+        toast.error("Erro ao criar jornada");
+        return;
+      }
+      finalJourneyId = newJ.id;
+    }
+
     const payload = {
       name: name.trim(),
       description: description.trim(),
       start_date: startDate,
       end_date: endDate,
-      source_journey_id: sourceJourneyId || null,
+      source_journey_id: finalJourneyId,
       points_per_checkin: pointsCheckin,
       points_weekly_bonus: pointsWeekly,
       points_streak_bonus: pointsStreak,
@@ -151,6 +183,15 @@ const Challenges = () => {
       const { error } = await supabase.from("challenges" as any).insert(payload);
       if (error) { toast.error("Erro ao criar desafio"); return; }
       toast.success("Desafio criado!");
+    }
+
+    // If we created a new journey, offer to go build workouts
+    if (journeyMode === "new" && finalJourneyId && !editingChallenge) {
+      const goToWorkout = confirm("Jornada criada! Deseja montar os treinos agora?");
+      if (goToWorkout) {
+        navigate(`/workout/${user!.id}?journeyId=${finalJourneyId}&journeyFormat=${newJourneyFormat}`);
+        return;
+      }
     }
 
     setShowCreate(false);

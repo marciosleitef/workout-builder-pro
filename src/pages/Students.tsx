@@ -311,25 +311,28 @@ const Students = () => {
             {filtered.map((s, i) => {
               const isInactive = s.status === "inactive";
               return (
-                <div key={s.id} className={`rounded-xl border bg-card p-5 transition-colors ${isInactive ? "border-border/50 opacity-70" : "border-border hover:border-primary/30"}`}>
-                  <div className="flex items-start gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-display font-bold text-sm shrink-0" style={{ backgroundColor: isInactive ? "hsl(var(--muted-foreground))" : INITIALS_COLORS[i % INITIALS_COLORS.length] }}>
-                      {getInitials(s.full_name)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="font-display font-bold text-foreground text-sm truncate">{s.full_name.toUpperCase()}</p>
-                        <span className={`shrink-0 px-1.5 py-0.5 rounded-full text-[9px] font-bold ${isInactive ? "bg-destructive/15 text-destructive" : "bg-accent/15 text-accent"}`}>
-                          {isInactive ? "INATIVO" : "ATIVO"}
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">{getPlanName(s)}</p>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                        <Calendar className="w-3 h-3" />
-                        {s.registration_date ? new Date(s.registration_date).toLocaleDateString("pt-BR") : "Sem registro"}
-                      </p>
-                    </div>
-                  </div>
+                 <div key={s.id} className={`rounded-xl border bg-card p-5 transition-colors ${isInactive ? "border-border/50 opacity-70" : "border-border hover:border-primary/30"}`}>
+                   <button
+                     onClick={() => { setDetailStudent(s); setShowLoginInfo(false); setShowStudentDetail(true); }}
+                     className="flex items-start gap-3 mb-4 w-full text-left hover:opacity-80 transition-opacity"
+                   >
+                     <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-display font-bold text-sm shrink-0" style={{ backgroundColor: isInactive ? "hsl(var(--muted-foreground))" : INITIALS_COLORS[i % INITIALS_COLORS.length] }}>
+                       {getInitials(s.full_name)}
+                     </div>
+                     <div className="flex-1 min-w-0">
+                       <div className="flex items-center gap-2">
+                         <p className="font-display font-bold text-foreground text-sm truncate">{s.full_name.toUpperCase()}</p>
+                         <span className={`shrink-0 px-1.5 py-0.5 rounded-full text-[9px] font-bold ${isInactive ? "bg-destructive/15 text-destructive" : "bg-accent/15 text-accent"}`}>
+                           {isInactive ? "INATIVO" : "ATIVO"}
+                         </span>
+                       </div>
+                       <p className="text-xs text-muted-foreground">{getPlanName(s)}</p>
+                       <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                         <Calendar className="w-3 h-3" />
+                         {s.registration_date ? new Date(s.registration_date).toLocaleDateString("pt-BR") : "Sem registro"}
+                       </p>
+                     </div>
+                   </button>
                   <div className="grid grid-cols-2 gap-3 mb-4">
                     <div className="bg-secondary/50 rounded-lg p-2">
                       <p className="text-[10px] text-muted-foreground uppercase font-medium">Saúde</p>

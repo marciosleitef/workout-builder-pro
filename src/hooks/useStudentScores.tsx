@@ -10,6 +10,12 @@ export interface StudentScore {
   healthBase: number;
   performanceBase: number;
   badges: string[];
+  // Detail breakdown
+  bioScore: number | null;
+  dailyScore: number | null;
+  presenceScore: number;
+  qualityScore: number;
+  bonusDetails: string[];
 }
 
 // Healthy ranges for bioimpedance metrics — returns 0-1 how "healthy" the value is

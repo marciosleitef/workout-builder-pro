@@ -239,13 +239,13 @@ const Students = () => {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Top bar */}
-      <div className="bg-card border-b border-border px-6 py-4">
+      <div className="bg-foreground px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center gap-3">
-          <button onClick={() => navigate("/dashboard")} className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-foreground hover:bg-secondary/80 transition-colors">
+          <button onClick={() => navigate("/dashboard")} className="w-9 h-9 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:bg-primary-foreground/15 transition-colors">
             <ArrowLeft className="w-4 h-4" />
           </button>
-          <h1 className="font-display font-bold text-lg text-foreground flex-1">Meus Alunos</h1>
-          <button onClick={() => setShowPlansDialog(true)} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary text-foreground text-sm font-medium hover:bg-secondary/80 transition-colors">
+          <h1 className="font-display font-bold text-lg text-primary-foreground flex-1">Meus Alunos</h1>
+          <button onClick={() => setShowPlansDialog(true)} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary-foreground/10 text-primary-foreground/60 text-sm font-medium hover:bg-primary-foreground/15 transition-colors">
             <Package className="w-4 h-4" />
             Planos
           </button>
@@ -259,7 +259,7 @@ const Students = () => {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar atleta por nome..." className="w-full pl-12 pr-4 py-3 rounded-xl bg-card border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
           </div>
-          <button onClick={() => setShowNewStudentMenu(true)} className="flex items-center gap-2 px-5 py-3 bg-primary text-primary-foreground rounded-xl font-display font-bold text-sm hover:bg-primary/90 transition-colors shrink-0">
+          <button onClick={() => setShowNewStudentMenu(true)} className="flex items-center gap-2 px-5 py-3 bg-foreground text-background rounded-xl font-display font-bold text-sm hover:opacity-90 transition-opacity shrink-0">
             <Plus className="w-4 h-4" />
             Novo Aluno
           </button>
@@ -381,12 +381,12 @@ const Students = () => {
                   </div>
                   <div className="grid grid-cols-4 gap-2">
                     {[
-                      { icon: Play, label: "Iniciar", color: "hsl(220 60% 50%)", onClick: () => { setStartStudent(s); setSelectedStudent(s); setShowStartJourney(true); } },
-                      { icon: User, label: "Bio", color: "hsl(150 55% 45%)", onClick: () => { setBioStudent(s); setShowBioDialog(true); } },
-                      { icon: TrendingUp, label: "Detalhes", color: "hsl(35 85% 50%)", onClick: () => { setDailyTrackingStudent(s); setShowDailyTracking(true); } },
-                      { icon: Dumbbell, label: "Treinos", color: "hsl(82 85% 55%)", onClick: () => { setSelectedStudent(s); setShowWorkoutMenu(true); } },
+                      { icon: Play, label: "Iniciar", onClick: () => { setStartStudent(s); setSelectedStudent(s); setShowStartJourney(true); } },
+                      { icon: User, label: "Bio", onClick: () => { setBioStudent(s); setShowBioDialog(true); } },
+                      { icon: TrendingUp, label: "Detalhes", onClick: () => { setDailyTrackingStudent(s); setShowDailyTracking(true); } },
+                      { icon: Dumbbell, label: "Treinos", onClick: () => { setSelectedStudent(s); setShowWorkoutMenu(true); } },
                     ].map((a) => (
-                      <button key={a.label} onClick={a.onClick} className="flex flex-col items-center gap-1 py-2 rounded-lg text-white text-[10px] font-medium hover:opacity-90 transition-opacity" style={{ backgroundColor: a.color }}>
+                      <button key={a.label} onClick={a.onClick} className="flex flex-col items-center gap-1 py-2.5 rounded-lg bg-foreground text-background text-[10px] font-medium hover:opacity-90 transition-opacity">
                         <a.icon className="w-4 h-4" />
                         {a.label}
                       </button>

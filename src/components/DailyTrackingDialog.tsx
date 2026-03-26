@@ -225,13 +225,44 @@ export default function DailyTrackingDialog({ open, onOpenChange, student }: Pro
   const latestPost = sessionRecords.find(r => r.feedback_type === "post");
   const latestDaily = dailyRecords[0];
 
-  const radarData = latestPre ? [
-    { metric: "Fadiga", value: latestPre.fatigue_scale || 0, max: 5 },
-    { metric: "Sono", value: latestPre.sleep_quality_scale || 0, max: 5 },
-    { metric: "Dor", value: latestPre.muscle_soreness_scale || 0, max: 5 },
-    { metric: "Estresse", value: latestPre.stress_level_scale || 0, max: 5 },
-    { metric: "Humor", value: latestPre.mood_scale || 0, max: 5 },
-    { metric: "Recuperação", value: (latestPre.recovery_perception_scale || 0) / 2, max: 5 },
+  // Calculate averages from all session records
+  const allPre = sessionRecords.filter(r => r.feedback_type === "pre");
+  const allPost = sessionRecords.filter(r => r.feedback_type === "post");
+
+  function avg(arr: any[], key: string): number | null {
+    const vals = arr.map(r => r[key]).filter((v: any) => v != null && v !== 0) as number[];
+    if (vals.length === 0) return null;
+    return Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10;
+  }
+
+  const avgBpm = avg(allPost, "workout_bpm_avg");
+  const avgCalories = avg(allPost, "calories_burned");
+  const avgBpmMax = avg(allPost, "workout_bpm_max");
+
+  // Average training duration
+  const avgDuration = (() => {
+    const durations: number[] = [];
+    for (const post of allPost) {
+      const pre = allPre.find(p => p.workout_checkin_id === post.workout_checkin_id);
+      const checkin = pre?.checkin_time || post.checkin_time;
+      const checkout = post.checkout_time;
+      if (checkin && checkout) {
+        durations.push(Math.round((new Date(checkout).getTime() - new Date(checkin).getTime()) / 60000));
+      }
+    }
+    if (durations.length === 0) return null;
+    return Math.round(durations.reduce((a, b) => a + b, 0) / durations.length);
+  })();
+
+  const totalSessions = allPost.length || allPre.length;
+
+  const radarData = allPre.length > 0 ? [
+    { metric: "Fadiga", value: avg(allPre, "fatigue_scale") || 0, max: 5 },
+    { metric: "Sono", value: avg(allPre, "sleep_quality_scale") || 0, max: 5 },
+    { metric: "Dor", value: avg(allPre, "muscle_soreness_scale") || 0, max: 5 },
+    { metric: "Estresse", value: avg(allPre, "stress_level_scale") || 0, max: 5 },
+    { metric: "Humor", value: avg(allPre, "mood_scale") || 0, max: 5 },
+    { metric: "Recuperação", value: (avg(allPre, "recovery_perception_scale") || 0) / 2, max: 5 },
   ] : [];
 
   const renderMain = () => (
@@ -275,54 +306,45 @@ export default function DailyTrackingDialog({ open, onOpenChange, student }: Pro
           Indicadores de Treino
         </h3>
 
-        {/* Latest session info */}
-        {(latestPre || latestPost) && (
-          <div className="grid grid-cols-2 gap-2 mb-3">
-            {latestPost && (
-              <>
-                <div className="bg-secondary/30 rounded-lg p-2 text-center">
-                  <p className="text-lg">❤️‍🔥</p>
-                  <p className="text-xs font-bold text-foreground">{latestPost.workout_bpm_avg ?? "—"} bpm</p>
-                  <p className="text-[9px] text-muted-foreground">BPM Médio</p>
-                </div>
-                <div className="bg-secondary/30 rounded-lg p-2 text-center">
-                  <p className="text-lg">🔥</p>
-                  <p className="text-xs font-bold text-foreground">{latestPost.calories_burned ?? "—"} kcal</p>
-                  <p className="text-[9px] text-muted-foreground">Calorias</p>
-                </div>
-              </>
-            )}
-            {/* Training duration from checkin_time + checkout_time */}
-            {(() => {
-              const pre = latestPre;
-              const post = latestPost;
-              const checkin = pre?.checkin_time || post?.checkin_time;
-              const checkout = post?.checkout_time;
-              if (checkin && checkout) {
-                const durationMin = Math.round((new Date(checkout).getTime() - new Date(checkin).getTime()) / 60000);
-                return (
-                  <div className="bg-secondary/30 rounded-lg p-2 text-center col-span-2">
-                    <p className="text-lg">⏱️</p>
-                    <p className="text-xs font-bold text-foreground">{durationMin} min</p>
-                    <p className="text-[9px] text-muted-foreground">Tempo de Treino</p>
-                  </div>
-                );
-              }
-              return null;
-            })()}
-          </div>
+        {/* Average session indicators */}
+        {totalSessions > 0 && (
+          <>
+            <p className="text-[10px] text-muted-foreground mb-2">Média de {totalSessions} sessão(ões)</p>
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              <div className="bg-secondary/30 rounded-lg p-2 text-center">
+                <p className="text-lg">❤️‍🔥</p>
+                <p className="text-xs font-bold text-foreground">{avgBpm ?? "—"} bpm</p>
+                <p className="text-[9px] text-muted-foreground">BPM Médio</p>
+              </div>
+              <div className="bg-secondary/30 rounded-lg p-2 text-center">
+                <p className="text-lg">🔥</p>
+                <p className="text-xs font-bold text-foreground">{avgCalories ?? "—"} kcal</p>
+                <p className="text-[9px] text-muted-foreground">Calorias</p>
+              </div>
+              <div className="bg-secondary/30 rounded-lg p-2 text-center">
+                <p className="text-lg">💓</p>
+                <p className="text-xs font-bold text-foreground">{avgBpmMax ?? "—"} bpm</p>
+                <p className="text-[9px] text-muted-foreground">BPM Máximo</p>
+              </div>
+              <div className="bg-secondary/30 rounded-lg p-2 text-center">
+                <p className="text-lg">⏱️</p>
+                <p className="text-xs font-bold text-foreground">{avgDuration ?? "—"} min</p>
+                <p className="text-[9px] text-muted-foreground">Tempo de Treino</p>
+              </div>
+            </div>
+          </>
         )}
 
-        {/* Radar chart if pre data exists */}
+        {/* Radar chart with averaged pre data */}
         {radarData.length > 0 && (
           <div className="bg-secondary/20 rounded-xl p-3 mb-3">
-            <p className="text-xs font-medium text-muted-foreground mb-2">Perfil Pré-Treino (último)</p>
+            <p className="text-xs font-medium text-muted-foreground mb-2">Perfil Pré-Treino (média)</p>
             <ResponsiveContainer width="100%" height={180}>
               <RadarChart data={radarData} outerRadius={60}>
                 <PolarGrid stroke="hsl(var(--border))" />
                 <PolarAngleAxis dataKey="metric" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
                 <PolarRadiusAxis domain={[0, 5]} tick={false} axisLine={false} />
-                <Radar name="Atual" dataKey="value" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.3} />
+                <Radar name="Média" dataKey="value" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.3} />
               </RadarChart>
             </ResponsiveContainer>
           </div>

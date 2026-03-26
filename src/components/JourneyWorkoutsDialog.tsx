@@ -107,41 +107,35 @@ function getScaleColor(value: number, max: number, inverted = false) {
   return "hsl(var(--destructive))";
 }
 
-function ScaleSelector({ scale, value, onChange }: { scale: typeof PRE_SCALES[0]; value: number | null; onChange: (v: number) => void }) {
-  const [expanded, setExpanded] = useState(false);
+// Step-by-step scale question component
+function StepScaleQuestion({ scale, onSelect }: { scale: typeof PRE_SCALES[0]; onSelect: (v: number) => void }) {
   const Icon = scale.icon;
   const isUrine = scale.key === "urine_color_scale";
+  const options = Array.from({ length: scale.max - scale.min + 1 }, (_, i) => scale.min + i);
 
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden">
-      <button onClick={() => setExpanded(!expanded)} className="w-full flex items-center gap-3 p-3 hover:bg-secondary/30 transition-colors">
-        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-          <Icon className="w-4 h-4 text-primary" />
-        </div>
-        <div className="flex-1 text-left">
-          <p className="text-sm font-medium text-foreground">{scale.label}</p>
-          {value !== null && <p className="text-xs text-muted-foreground">{value} — {(scale.labels as any)[value]}</p>}
-        </div>
-        {value !== null && (
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white"
-            style={{ backgroundColor: isUrine ? URINE_COLORS[value - 1] : getScaleColor(value, scale.max), color: isUrine && value < 4 ? "#333" : "white" }}>
-            {value}
-          </div>
-        )}
-        {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
-      </button>
-      {expanded && (
-        <div className="px-3 pb-3 space-y-1 max-h-[200px] overflow-y-auto">
-          {Array.from({ length: scale.max - scale.min + 1 }, (_, i) => scale.min + i).map((v) => (
-            <button key={v} onClick={() => { onChange(v); setExpanded(false); }}
-              className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm transition-colors ${value === v ? "bg-primary text-primary-foreground" : "hover:bg-secondary/50 text-foreground"}`}>
-              {isUrine && <div className="w-5 h-5 rounded-full border border-border shrink-0" style={{ backgroundColor: URINE_COLORS[v - 1] }} />}
-              <span className="font-medium">{v}</span>
-              <span className="text-xs opacity-80">{(scale.labels as any)[v]}</span>
-            </button>
-          ))}
-        </div>
-      )}
+    <div className="flex flex-col items-center">
+      <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-3">
+        <Icon className="w-7 h-7 text-primary" />
+      </div>
+      <h3 className="font-display font-bold text-lg text-foreground text-center mb-1">{scale.label}</h3>
+      <p className="text-xs text-muted-foreground mb-4">Selecione o valor que melhor representa seu estado</p>
+      <div className="w-full space-y-1.5">
+        {options.map((v) => (
+          <button key={v} onClick={() => onSelect(v)}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm transition-all hover:bg-primary/10 hover:scale-[1.01] active:scale-[0.99] border border-border bg-card">
+            {isUrine ? (
+              <div className="w-7 h-7 rounded-full border border-border shrink-0 shadow-sm" style={{ backgroundColor: URINE_COLORS[v - 1] }} />
+            ) : (
+              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                style={{ backgroundColor: getScaleColor(v, scale.max), color: "white" }}>
+                {v}
+              </div>
+            )}
+            <span className="font-medium text-foreground">{(scale.labels as any)[v]}</span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -173,6 +167,7 @@ const JourneyWorkoutsDialog = ({
 
   // Workout session flow
   const [phase, setPhase] = useState<Phase>("workouts");
+  const [currentStep, setCurrentStep] = useState(0);
   const [checkinForm, setCheckinForm] = useState<Record<string, any>>({});
   const [checkoutForm, setCheckoutForm] = useState<Record<string, any>>({});
   const [metricsForm, setMetricsForm] = useState({ workout_bpm_avg: "", workout_bpm_max: "", calories_burned: "" });
@@ -195,6 +190,7 @@ const JourneyWorkoutsDialog = ({
       setSelectedWorkout(null);
       setShowOrientations(false);
       setPhase("workouts");
+      setCurrentStep(0);
       setCheckinForm({});
       setCheckoutForm({});
       setMetricsForm({ workout_bpm_avg: "", workout_bpm_max: "", calories_burned: "" });
@@ -233,6 +229,7 @@ const JourneyWorkoutsDialog = ({
   const handleStartWorkout = () => {
     if (!selectedWorkout) return;
     setCheckinForm({});
+    setCurrentStep(0);
     setPhase("checkin");
   };
 
@@ -273,6 +270,7 @@ const JourneyWorkoutsDialog = ({
   const handleFinishWorkout = () => {
     if (timerRef.current) clearInterval(timerRef.current);
     setCheckoutForm({});
+    setCurrentStep(0);
     setPhase("checkout");
   };
 
@@ -454,25 +452,59 @@ const JourneyWorkoutsDialog = ({
   };
 
   // ── CHECKIN PHASE ──
-  const renderCheckin = () => (
-    <div className="space-y-3">
-      <div className="bg-gradient-to-r from-[hsl(150,55%,45%)] to-[hsl(170,50%,45%)] rounded-xl p-4 text-white">
-        <div className="flex items-center gap-2 mb-1">
-          <Clock className="w-5 h-5" />
-          <h3 className="font-display font-bold">Pré-Treino (Check-in)</h3>
+  const renderCheckin = () => {
+    const totalSteps = PRE_SCALES.length;
+    const progress = (currentStep / totalSteps) * 100;
+
+    if (currentStep >= totalSteps) {
+      // All answered - show confirm
+      return (
+        <div className="space-y-4">
+          <div className="bg-gradient-to-r from-[hsl(150,55%,45%)] to-[hsl(170,50%,45%)] rounded-xl p-4 text-white text-center">
+            <CheckCircle2 className="w-8 h-8 mx-auto mb-2" />
+            <h3 className="font-display font-bold">Check-in Completo!</h3>
+            <p className="text-white/70 text-xs mt-1">Todas as escalas foram respondidas</p>
+          </div>
+          <div className="space-y-2">
+            {PRE_SCALES.map((s) => (
+              <div key={s.key} className="flex items-center justify-between bg-card border border-border rounded-lg px-3 py-2">
+                <span className="text-sm text-foreground">{s.label}</span>
+                <span className="text-sm font-bold text-primary">{checkinForm[s.key]} — {(s.labels as any)[checkinForm[s.key]]}</span>
+              </div>
+            ))}
+          </div>
+          <button onClick={handleSubmitCheckin} disabled={saving}
+            className="w-full py-3 rounded-xl bg-[hsl(150,55%,45%)] text-white font-display font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50">
+            {saving ? "Salvando..." : "Confirmar Check-in e Iniciar Treino"}
+          </button>
         </div>
-        <p className="text-white/70 text-xs">Responda as escalas antes de iniciar o treino</p>
+      );
+    }
+
+    const currentScale = PRE_SCALES[currentStep];
+    return (
+      <div className="space-y-3">
+        {/* Progress bar */}
+        <div className="space-y-1">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>Pergunta {currentStep + 1} de {totalSteps}</span>
+            <span>{Math.round(progress)}%</span>
+          </div>
+          <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
+            <div className="h-full bg-primary rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+          </div>
+        </div>
+
+        <StepScaleQuestion
+          scale={currentScale}
+          onSelect={(v) => {
+            setCheckinForm({ ...checkinForm, [currentScale.key]: v });
+            setCurrentStep(currentStep + 1);
+          }}
+        />
       </div>
-      {PRE_SCALES.map((scale) => (
-        <ScaleSelector key={scale.key} scale={scale} value={checkinForm[scale.key] ?? null}
-          onChange={(v) => setCheckinForm({ ...checkinForm, [scale.key]: v })} />
-      ))}
-      <button onClick={handleSubmitCheckin} disabled={saving}
-        className="w-full py-3 rounded-xl bg-[hsl(150,55%,45%)] text-white font-display font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50">
-        {saving ? "Salvando..." : "Confirmar Check-in e Iniciar Treino"}
-      </button>
-    </div>
-  );
+    );
+  };
 
   // ── ACTIVE PHASE ──
   const renderActive = () => (
@@ -509,25 +541,56 @@ const JourneyWorkoutsDialog = ({
   );
 
   // ── CHECKOUT PHASE ──
-  const renderCheckout = () => (
-    <div className="space-y-3">
-      <div className="bg-gradient-to-r from-destructive to-[hsl(0,55%,45%)] rounded-xl p-4 text-white">
-        <div className="flex items-center gap-2 mb-1">
-          <Flame className="w-5 h-5" />
-          <h3 className="font-display font-bold">Pós-Treino (Check-out)</h3>
+  const renderCheckout = () => {
+    const totalSteps = POST_SCALES.length;
+    const progress = (currentStep / totalSteps) * 100;
+
+    if (currentStep >= totalSteps) {
+      return (
+        <div className="space-y-4">
+          <div className="bg-gradient-to-r from-destructive to-[hsl(0,55%,45%)] rounded-xl p-4 text-white text-center">
+            <CheckCircle2 className="w-8 h-8 mx-auto mb-2" />
+            <h3 className="font-display font-bold">Check-out Completo!</h3>
+          </div>
+          <div className="space-y-2">
+            {POST_SCALES.map((s) => (
+              <div key={s.key} className="flex items-center justify-between bg-card border border-border rounded-lg px-3 py-2">
+                <span className="text-sm text-foreground">{s.label}</span>
+                <span className="text-sm font-bold text-primary">{checkoutForm[s.key]} — {(s.labels as any)[checkoutForm[s.key]]}</span>
+              </div>
+            ))}
+          </div>
+          <button onClick={handleSubmitCheckout}
+            className="w-full py-3 rounded-xl bg-destructive text-destructive-foreground font-display font-bold text-sm hover:opacity-90 transition-opacity">
+            Confirmar Check-out
+          </button>
         </div>
-        <p className="text-white/70 text-xs">Como foi o treino? Avalie suas sensações</p>
+      );
+    }
+
+    const currentScale = POST_SCALES[currentStep];
+    return (
+      <div className="space-y-3">
+        <div className="space-y-1">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>Pergunta {currentStep + 1} de {totalSteps}</span>
+            <span>{Math.round(progress)}%</span>
+          </div>
+          <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
+            <div className="h-full bg-destructive rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+          </div>
+        </div>
+
+        <StepScaleQuestion
+          scale={currentScale}
+          onSelect={(v) => {
+            setCheckoutForm({ ...checkoutForm, [currentScale.key]: v });
+            setCurrentStep(currentStep + 1);
+          }}
+        />
       </div>
-      {POST_SCALES.map((scale) => (
-        <ScaleSelector key={scale.key} scale={scale} value={checkoutForm[scale.key] ?? null}
-          onChange={(v) => setCheckoutForm({ ...checkoutForm, [scale.key]: v })} />
-      ))}
-      <button onClick={handleSubmitCheckout}
-        className="w-full py-3 rounded-xl bg-destructive text-destructive-foreground font-display font-bold text-sm hover:opacity-90 transition-opacity">
-        Confirmar Check-out
-      </button>
-    </div>
-  );
+    );
+  };
 
   // ── METRICS PHASE ──
   const renderMetrics = () => (
@@ -697,11 +760,16 @@ const JourneyWorkoutsDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (phase === "active") return; onOpenChange(v); }}>
-      <DialogContent className="max-w-md p-0 overflow-hidden max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-md p-0 max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-[hsl(220,60%,45%)] to-[hsl(250,55%,50%)] px-4 py-4 text-white flex items-center gap-3 shrink-0">
           <button
-            onClick={() => { if (phase === "workouts") onOpenChange(false); else if (phase !== "active") setPhase("workouts"); }}
+            onClick={() => {
+              if (phase === "workouts") onOpenChange(false);
+              else if (phase === "checkin" && currentStep > 0) setCurrentStep(currentStep - 1);
+              else if (phase === "checkout" && currentStep > 0) setCurrentStep(currentStep - 1);
+              else if (phase !== "active") setPhase("workouts");
+            }}
             className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors">
             <ArrowLeft className="w-4 h-4" />
           </button>
@@ -711,7 +779,7 @@ const JourneyWorkoutsDialog = ({
           </div>
         </div>
 
-        <ScrollArea className="flex-1">
+        <ScrollArea className="flex-1 min-h-0">
           <div className="px-4 py-4 space-y-4">
             {phase === "workouts" && renderWorkouts()}
             {phase === "checkin" && renderCheckin()}

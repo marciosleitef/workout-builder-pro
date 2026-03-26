@@ -320,6 +320,53 @@ const StudentHealth = () => {
     { label: "Água Corporal", key: "total_body_water" as keyof BioRecord, unit: "L", icon: "💧" },
   ];
 
+  // ── Session analytics ──
+  const avgFn = (arr: any[], key: string): number | null => {
+    const vals = arr.map(r => r[key]).filter((v: any) => v != null && v !== 0) as number[];
+    if (vals.length === 0) return null;
+    return Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10;
+  };
+  const allPre = sessionRecords.filter(r => r.feedback_type === "pre");
+  const allPost = sessionRecords.filter(r => r.feedback_type === "post");
+  const totalSessions = allPost.length || allPre.length;
+  const avgBpm = avgFn(allPost, "workout_bpm_avg");
+  const avgCalories = avgFn(allPost, "calories_burned");
+  const avgBpmMax = avgFn(allPost, "workout_bpm_max");
+  const avgDuration = (() => {
+    const durations: number[] = [];
+    for (const post of allPost) {
+      const pre = allPre.find(p => p.workout_checkin_id === post.workout_checkin_id);
+      const checkin = pre?.checkin_time || post.checkin_time;
+      const checkout = post.checkout_time;
+      if (checkin && checkout) durations.push(Math.round((new Date(checkout).getTime() - new Date(checkin).getTime()) / 60000));
+    }
+    return durations.length === 0 ? null : Math.round(durations.reduce((a, b) => a + b, 0) / durations.length);
+  })();
+  const preRadarData = allPre.length > 0 ? [
+    { metric: "Fadiga", value: avgFn(allPre, "fatigue_scale") || 0 },
+    { metric: "Sono", value: avgFn(allPre, "sleep_quality_scale") || 0 },
+    { metric: "Dor", value: avgFn(allPre, "muscle_soreness_scale") || 0 },
+    { metric: "Estresse", value: avgFn(allPre, "stress_level_scale") || 0 },
+    { metric: "Humor", value: avgFn(allPre, "mood_scale") || 0 },
+    { metric: "Recuperação", value: (avgFn(allPre, "recovery_perception_scale") || 0) / 2 },
+  ] : [];
+  const postRadarData = allPost.length > 0 ? [
+    { metric: "Recuperação", value: avgFn(allPost, "post_recovery_scale") || 0 },
+    { metric: "Esforço (PSE)", value: avgFn(allPost, "perceived_exertion_scale") || 0 },
+    { metric: "Dor (EVA)", value: avgFn(allPost, "pain_scale_eva") || 0 },
+  ] : [];
+  const preSessionChartData = sessionRecords.filter(r => r.feedback_type === "pre").map(r => ({
+    date: formatDateShort(r.session_date), fadiga: r.fatigue_scale, sono: r.sleep_quality_scale,
+    humor: r.mood_scale, estresse: r.stress_level_scale,
+  })).reverse();
+  const postSessionChartData = sessionRecords.filter(r => r.feedback_type === "post").map(r => ({
+    date: formatDateShort(r.session_date), recuperacao: r.post_recovery_scale,
+    esforco: r.perceived_exertion_scale, dor: r.pain_scale_eva,
+  })).reverse();
+  const weightChartData = dailyRecords.filter(r => r.weight).map(r => ({
+    date: formatDate(r.recorded_at), peso: Number(r.weight), imc: Number(r.bmi),
+  })).reverse();
+
   // ── BIO DETAIL VIEW ──
   const renderBioDetail = () => {
     if (!selectedBio) return null;

@@ -74,6 +74,12 @@ const Students = () => {
       }
       setSearchParams({}, { replace: true });
     }
+    if (searchParams.get("showForm") === "true") {
+      setEditingStudent(null);
+      setForm({ full_name: "", email: "", phone: "", plan: "PS Prime" });
+      setShowForm(true);
+      setSearchParams({}, { replace: true });
+    }
   }, [searchParams, students]);
 
   const fetchStudents = async () => {

@@ -73,7 +73,7 @@ const Challenges = () => {
       // Get participant counts
       const ids = data.map((c: any) => c.id);
       const { data: participants } = await supabase
-        .from("challenge_participants")
+        .from("challenge_participants" as any)
         .select("challenge_id")
         .in("challenge_id", ids.length > 0 ? ids : ["none"]);
 

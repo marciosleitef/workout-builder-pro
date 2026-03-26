@@ -23,7 +23,7 @@ import { useStudentScores } from "@/hooks/useStudentScores";
 import {
   AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend, BarChart, Bar, RadarChart,
-  PolarGrid, PolarAngleAxis, Radar
+  PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
 } from "recharts";
 
 // ── Bio types ──

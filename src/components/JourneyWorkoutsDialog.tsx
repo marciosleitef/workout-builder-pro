@@ -167,6 +167,7 @@ const JourneyWorkoutsDialog = ({
 
   // Workout session flow
   const [phase, setPhase] = useState<Phase>("workouts");
+  const [currentStep, setCurrentStep] = useState(0);
   const [checkinForm, setCheckinForm] = useState<Record<string, any>>({});
   const [checkoutForm, setCheckoutForm] = useState<Record<string, any>>({});
   const [metricsForm, setMetricsForm] = useState({ workout_bpm_avg: "", workout_bpm_max: "", calories_burned: "" });

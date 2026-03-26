@@ -764,7 +764,12 @@ const JourneyWorkoutsDialog = ({
         {/* Header */}
         <div className="bg-gradient-to-r from-[hsl(220,60%,45%)] to-[hsl(250,55%,50%)] px-4 py-4 text-white flex items-center gap-3 shrink-0">
           <button
-            onClick={() => { if (phase === "workouts") onOpenChange(false); else if (phase !== "active") setPhase("workouts"); }}
+            onClick={() => {
+              if (phase === "workouts") onOpenChange(false);
+              else if (phase === "checkin" && currentStep > 0) setCurrentStep(currentStep - 1);
+              else if (phase === "checkout" && currentStep > 0) setCurrentStep(currentStep - 1);
+              else if (phase !== "active") setPhase("workouts");
+            }}
             className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors">
             <ArrowLeft className="w-4 h-4" />
           </button>

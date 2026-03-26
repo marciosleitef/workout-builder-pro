@@ -1,109 +1,56 @@
 
 
-# Telas do Aluno e Participante de Desafio
+# O que está faltando no app
 
-## Visão Geral
+## Funcionalidades já implementadas
+- Dashboard do professor com cards de navegação
+- Cadastro e gestão de alunos, grupos, planos
+- Biblioteca de exercícios
+- Jornadas e treinos (criação pelo professor)
+- Calendário de frequência
+- Desafios com gamificação
+- Bioimpedância e registros diários
+- Notificações do professor
+- Dashboard do aluno com treino do dia e água
+- Treinos do aluno (fluxo completo com check-in/checkout/feedback)
+- Histórico do aluno (calendário de presença)
+- Saúde do aluno (BIA, gráficos, métricas)
+- Desafios do aluno (ranking, pontos)
 
-Criar um sistema completo de telas para o aluno, com detecção automática de papel (professor vs aluno) no login, e telas específicas para participantes de desafio.
+## O que falta (além do painel financeiro que você já mencionou)
 
-## Arquitetura de Roteamento
+### 1. Painel Financeiro do Professor
+- Receita mensal prevista vs recebida
+- Lista de alunos inadimplentes (com dias de atraso)
+- Próximos vencimentos da semana
+- Histórico de pagamentos por aluno
+- Tabela `payments` no banco para registrar pagamentos
 
-Ao fazer login, o sistema detecta se o `user_id` existe na tabela `students`. Se sim, redireciona para `/student-dashboard`. Se não, vai para `/dashboard` (professor).
+### 2. Perfil editável do Aluno
+- O aluno não consegue editar seus próprios dados (foto, telefone, senha)
+- Tela de "Meu Perfil" acessível pela bottom nav ou header
 
-```text
-Login → useAuth detecta role
-  ├── Professor → /dashboard (atual)
-  └── Aluno → /student-dashboard (novo)
-        ├── /student-workouts (treinos do dia)
-        ├── /student-history (histórico/presença)
-        ├── /student-health (indicadores de saúde)
-        └── /student-challenges (desafios)
-```
+### 3. Notificações do Aluno
+- O aluno recebe notificações na tela (Sheet já existe no dashboard), mas falta marcar como lida e ter uma tela dedicada
 
-## Banco de Dados
+### 4. Registro diário pelo aluno
+- O aluno deveria poder registrar peso, pressão, sono etc. pela tela de saúde (hoje só o professor faz via `DailyTrackingDialog`)
 
-**Tabela `notifications`** (nova):
-- `id`, `user_id`, `title`, `body`, `type` (reminder/challenge/payment), `read`, `created_at`
-- RLS: usuário vê apenas suas notificações
+### 5. Relatórios/Exportação para o Professor
+- Exportar dados de alunos, frequência, financeiro em CSV/PDF
 
-**Tabela `water_intake`** (nova):
-- `id`, `student_id`, `date`, `glasses` (int), `goal` (int, default 8)
-- RLS: aluno gerencia seus próprios registros
+### 6. Edição de perfil do Professor
+- Alterar nome, foto, dados do perfil
 
-## Telas do Aluno
+---
 
-### 1. Student Dashboard (`/student-dashboard`)
-- Header com nome, avatar e sino de notificações (badge com contagem)
-- Card "Treino de Hoje": mostra o treino do dia baseado na jornada ativa (formato semanal → dia da semana, numérico → próximo treino pendente)
-- Botão "Iniciar Treino" → abre fluxo de check-in (indicadores pré) → timer → check-out (indicadores pós) → métricas finais
-- Card "Consumo de Água": contador visual de copos (toque para adicionar/remover), meta diária configurável
-- Card "Indicadores Diários": botão para registrar métricas diárias (peso, pressão, O2, sono, BPM, hidratação) — reutiliza lógica existente do DailyTrackingDialog
-- Cards resumo: streak atual, treinos no mês, score saúde/performance
-- Bottom navigation: Home | Treinos | Saúde | Desafios
+## Recomendação de prioridade
 
-### 2. Treinos (`/student-workouts`)
-- Lista de treinos da jornada ativa com status (feito/pendente)
-- Cada treino mostra exercícios com vídeos, séries, repetições, carga
-- Botão de check-in que dispara o fluxo completo (pré → treino → pós → métricas)
+1. **Painel Financeiro** (tabela `payments` + tela com visão de receita, inadimplentes, vencimentos)
+2. **Registro diário pelo aluno** (permitir que o aluno insira peso/pressão/sono na tela de saúde)
+3. **Perfil editável** (aluno e professor)
+4. **Notificações do aluno** (tela dedicada com marcar como lido)
+5. **Relatórios/Exportação**
 
-### 3. Histórico e Presença (`/student-history`)
-- Calendário mensal com marcações dos dias treinados (heatmap)
-- Estatísticas: total de treinos no mês, streak atual, frequência semanal
-- Lista de check-ins recentes com detalhes
-
-### 4. Indicadores de Saúde (`/student-health`)
-- Scores de Saúde e Performance (barras visuais)
-- Últimos registros diários com gráficos de tendência
-- Dados de bioimpedância (se houver) com avatar e evolução
-- Registro rápido de indicadores diários
-
-### 5. Desafios (`/student-challenges`)
-- Lista de desafios que participa com status e posição no ranking
-- Ao clicar: ranking completo, seus pontos detalhados, calendário do desafio
-- Treinos da jornada do desafio com possibilidade de execução/check-in
-
-### 6. Notificações (Dialog/Sheet)
-- "Hoje é dia de treino!" (baseado na jornada ativa)
-- "Faltam X dias para o pagamento do plano"
-- "Você está no desafio X, fulano passou você no ranking!"
-- Geradas por cron ou triggers no banco
-
-## Tela do Participante de Desafio (não-aluno)
-
-Quem se inscreveu via link do desafio sem ser aluno regular:
-- Ao logar → detecta que é aluno vinculado a challenge_participants
-- Dashboard simplificado com foco no desafio: ranking, treinos da jornada, check-in
-- Não tem acesso a indicadores de saúde avançados ou bioimpedância
-
-## Implementação Técnica
-
-### Detecção de Papel
-- Adicionar ao `useAuth` uma query que verifica se `user_id` existe em `students`
-- Retornar `role: "professor" | "student"` no hook
-- `ProtectedRoute` redireciona baseado no role
-
-### Fluxo de Treino do Aluno
-- Reutilizar componentes existentes de feedback (DailyTrackingDialog, escalas pré/pós)
-- Adaptar para execução pelo próprio aluno (hoje é feito pelo professor)
-- Check-in cria registro em `workout_checkins` com `checked_in_by = user_id`
-
-### Notificações
-- Edge function schedulada (ou trigger) que gera notificações
-- Polling no frontend a cada 60s ou realtime via Supabase channel
-- Push notifications futuras via PWA/Capacitor
-
-### Consumo de Água
-- Tabela simples, UI de "copos" clicáveis
-- Reset diário automático, histórico semanal
-
-## Ordem de Implementação
-
-1. Migração DB (notifications, water_intake) + hook de detecção de role
-2. Student Dashboard com navegação bottom bar
-3. Tela de treinos com fluxo de check-in autônomo
-4. Tela de histórico/presença
-5. Tela de indicadores de saúde
-6. Tela de desafios do aluno
-7. Sistema de notificações
-8. Tela simplificada para participante de desafio
+Quer que eu comece pelo painel financeiro do professor?
 

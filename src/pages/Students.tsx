@@ -475,21 +475,21 @@ const Students = () => {
           <DialogHeader><DialogTitle className="font-display">Treinos</DialogTitle></DialogHeader>
           {selectedStudent && (
             <div className="space-y-3 mt-1">
-              <div className="rounded-xl p-4 text-white bg-gradient-to-r from-[hsl(220,60%,50%)] to-[hsl(170,50%,45%)]">
+              <div className="rounded-xl p-4 text-primary-foreground bg-foreground">
                 <div className="flex items-center gap-2">
                   <User className="w-5 h-5" />
                   <div>
                     <p className="font-display font-bold text-sm">Treino para: {selectedStudent.full_name.toUpperCase()}</p>
-                    <p className="text-white/70 text-xs">Categoria: {getPlanName(selectedStudent)}</p>
+                    <p className="text-primary-foreground/60 text-xs">Categoria: {getPlanName(selectedStudent)}</p>
                   </div>
                 </div>
               </div>
-              <button onClick={() => { setShowWorkoutMenu(false); setShowJourneyWizard(true); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Plus className="w-5 h-5 text-primary" /></div>
+              <button onClick={() => { setShowWorkoutMenu(false); setShowJourneyWizard(true); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-foreground/20 transition-colors">
+                <div className="w-10 h-10 rounded-lg bg-foreground/5 flex items-center justify-center"><Plus className="w-5 h-5 text-foreground/70" /></div>
                 <div className="text-left"><p className="font-display font-bold text-sm text-foreground">Novo Treino</p><p className="text-xs text-muted-foreground">Criar nova jornada ou treino</p></div>
               </button>
-              <button onClick={() => { setShowWorkoutMenu(false); setShowJourneyList(true); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><List className="w-5 h-5 text-primary" /></div>
+              <button onClick={() => { setShowWorkoutMenu(false); setShowJourneyList(true); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-foreground/20 transition-colors">
+                <div className="w-10 h-10 rounded-lg bg-foreground/5 flex items-center justify-center"><List className="w-5 h-5 text-foreground/70" /></div>
                 <div className="text-left"><p className="font-display font-bold text-sm text-foreground">Visualizar Treinos</p><p className="text-xs text-muted-foreground">Consultar jornadas e treinos</p></div>
               </button>
             </div>

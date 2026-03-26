@@ -85,6 +85,9 @@ const Students = () => {
   const [showPlansDialog, setShowPlansDialog] = useState(false);
   const [showBioDialog, setShowBioDialog] = useState(false);
   const [bioStudent, setBioStudent] = useState<Student | null>(null);
+  const [showStudentDetail, setShowStudentDetail] = useState(false);
+  const [detailStudent, setDetailStudent] = useState<Student | null>(null);
+  const [showLoginInfo, setShowLoginInfo] = useState(false);
 
   // Journey start dialog
   const [showStartJourney, setShowStartJourney] = useState(false);

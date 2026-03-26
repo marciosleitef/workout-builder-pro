@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Search, Plus, Play, User, TrendingUp, Dumbbell, Calendar, UserCircle, List, Link2, ArrowLeft, Package, Filter } from "lucide-react";
+import { Search, Plus, Play, User, TrendingUp, Dumbbell, Calendar, UserCircle, List, Link2, ArrowLeft, Package, Filter, Mail, Phone, Key, Eye, EyeOff, Copy, Edit } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import NewJourneyWizard from "@/components/NewJourneyWizard";
 import WorkoutInfoDialog from "@/components/WorkoutInfoDialog";

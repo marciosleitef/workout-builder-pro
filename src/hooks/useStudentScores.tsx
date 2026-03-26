@@ -222,7 +222,7 @@ export function useStudentScores(studentIds: string[]) {
 
     for (const sid of studentIds) {
       const gender = studentGenders[sid];
-      const badges: string[] = [];
+      const bonusDetails: string[] = [];
 
       // === HEALTH: combine bioimpedance + daily records ===
       const studentBios = bios.filter((b: any) => b.student_id === sid);

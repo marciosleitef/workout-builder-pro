@@ -14,6 +14,7 @@ import Challenges from "./pages/Challenges";
 import ChallengePublic from "./pages/ChallengePublic";
 import ChallengeDashboard from "./pages/ChallengeDashboard";
 import ProfessorNotifications from "./pages/ProfessorNotifications";
+import Financial from "./pages/Financial";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -55,6 +56,7 @@ const App = () => (
           <Route path="/challenges" element={<ProtectedRoute allowedRole="professor"><Challenges /></ProtectedRoute>} />
           <Route path="/challenge-dashboard/:challengeId" element={<ProtectedRoute allowedRole="professor"><ChallengeDashboard /></ProtectedRoute>} />
           <Route path="/notifications" element={<ProtectedRoute allowedRole="professor"><ProfessorNotifications /></ProtectedRoute>} />
+          <Route path="/financial" element={<ProtectedRoute allowedRole="professor"><Financial /></ProtectedRoute>} />
           <Route path="/workout/:studentId" element={<ProtectedRoute allowedRole="professor"><Index /></ProtectedRoute>} />
           {/* Student routes */}
           <Route path="/student-dashboard" element={<ProtectedRoute><StudentDashboard /></ProtectedRoute>} />

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { UserCircle, Dumbbell, Calendar, LogOut, Sun, Moon, Plus, Link2, Users, Package, Trophy, Bell } from "lucide-react";
+import { UserCircle, Dumbbell, Calendar, LogOut, Sun, Moon, Plus, Link2, Users, Package, Trophy, Bell, DollarSign } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useTheme } from "@/hooks/useTheme";
@@ -128,6 +128,13 @@ const Dashboard = () => {
       description: "Crie desafios com ranking e gamificação para engajar",
       stat: `${challengeCount} desafio(s)`,
       route: "/challenges",
+    },
+    {
+      icon: DollarSign,
+      title: "Financeiro",
+      description: "Receitas, cobranças, inadimplência e vencimentos",
+      stat: "Painel completo",
+      route: "/financial",
     },
   ];
 

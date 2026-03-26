@@ -194,6 +194,53 @@ export type Database = {
         }
         Relationships: []
       }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          due_date: string
+          id: string
+          notes: string | null
+          paid_date: string | null
+          payment_method: string | null
+          professor_id: string
+          status: string
+          student_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          due_date: string
+          id?: string
+          notes?: string | null
+          paid_date?: string | null
+          payment_method?: string | null
+          professor_id: string
+          status?: string
+          student_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          due_date?: string
+          id?: string
+          notes?: string | null
+          paid_date?: string | null
+          payment_method?: string | null
+          professor_id?: string
+          status?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plans: {
         Row: {
           created_at: string

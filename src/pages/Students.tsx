@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Search, Plus, Play, User, TrendingUp, Dumbbell, Calendar, UserCircle, List, Link2, ArrowLeft, Package, Filter, Mail, Phone, Key, Eye, EyeOff, Copy, Edit } from "lucide-react";
+import { Search, Plus, Play, User, TrendingUp, Dumbbell, Calendar, UserCircle, List, Link2, ArrowLeft, Package, Filter, Mail, Phone, Key, Eye, EyeOff, Copy, Edit, MessageCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import NewJourneyWizard from "@/components/NewJourneyWizard";
 import WorkoutInfoDialog from "@/components/WorkoutInfoDialog";
@@ -93,6 +93,7 @@ const Students = () => {
   const [showDailyTracking, setShowDailyTracking] = useState(false);
   const [dailyTrackingStudent, setDailyTrackingStudent] = useState<Student | null>(null);
   const [scoreDialog, setScoreDialog] = useState<{ type: "health" | "performance"; studentId: string } | null>(null);
+  const [professorName, setProfessorName] = useState("");
 
   // Journey start dialog
   const [showStartJourney, setShowStartJourney] = useState(false);
@@ -106,6 +107,9 @@ const Students = () => {
     fetchStudents();
     fetchGroups();
     fetchPlans();
+    supabase.from("profiles").select("full_name").eq("user_id", user.id).single().then(({ data }) => {
+      if (data) setProfessorName(data.full_name);
+    });
   }, [user]);
 
   const fetchGroups = async () => {

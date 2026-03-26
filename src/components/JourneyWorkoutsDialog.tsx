@@ -146,7 +146,7 @@ function VideoPlayer({ url, onClose }: { url: string; onClose: () => void }) {
     <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center" onClick={onClose}>
       <div className="w-full max-w-lg mx-4" onClick={(e) => e.stopPropagation()}>
         <video src={url} controls autoPlay className="w-full rounded-xl" />
-        <button onClick={onClose} className="mt-3 w-full py-2 rounded-xl bg-primary-foreground/10 text-white text-sm font-bold hover:bg-primary-foreground/15 transition-colors">
+        <button onClick={onClose} className="mt-3 w-full py-2 rounded-xl bg-primary-foreground/10 text-primary-foreground text-sm font-bold hover:bg-primary-foreground/15 transition-colors">
           Fechar
         </button>
       </div>
@@ -349,7 +349,7 @@ const JourneyWorkoutsDialog = ({
           {isActive && (
             <button onClick={() => toggleExerciseComplete(ex.id)}
               className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isCompleted ? "bg-accent border-accent" : "border-muted-foreground/40 hover:border-primary"}`}>
-              {isCompleted && <Check className="w-3.5 h-3.5 text-white" />}
+              {isCompleted && <Check className="w-3.5 h-3.5 text-primary-foreground" />}
             </button>
           )}
           <Dumbbell className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
@@ -548,7 +548,7 @@ const JourneyWorkoutsDialog = ({
     if (currentStep >= totalSteps) {
       return (
         <div className="space-y-4">
-          <div className="bg-gradient-to-r from-destructive to-[hsl(0,55%,45%)] rounded-xl p-4 text-white text-center">
+          <div className="bg-gradient-to-r from-destructive to-[hsl(0,55%,45%)] rounded-xl p-4 text-primary-foreground text-center">
             <CheckCircle2 className="w-8 h-8 mx-auto mb-2" />
             <h3 className="font-display font-bold">Check-out Completo!</h3>
           </div>
@@ -734,11 +734,11 @@ const JourneyWorkoutsDialog = ({
 
           {/* Action buttons */}
           <div className="space-y-2">
-            <button className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[hsl(220,60%,50%)] text-white font-display font-bold text-sm hover:opacity-90 transition-opacity">
+            <button className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-foreground text-primary-foreground font-display font-bold text-sm hover:opacity-90 transition-opacity">
               <Printer className="w-4 h-4" />Imprimir Treino
             </button>
             <button onClick={handleStartWorkout}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-foreground text-white font-display font-bold text-sm hover:opacity-90 transition-opacity">
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-foreground text-primary-foreground font-display font-bold text-sm hover:opacity-90 transition-opacity">
               <Play className="w-4 h-4" />Iniciar Treino
             </button>
           </div>

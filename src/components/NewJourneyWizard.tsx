@@ -111,7 +111,7 @@ const NewJourneyWizard = ({ open, onOpenChange, studentId, studentName, onCreate
           /* Success screen */
           <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
             <div className="w-16 h-16 rounded-full bg-foreground flex items-center justify-center mb-5">
-              <Check className="w-8 h-8 text-white" />
+              <Check className="w-8 h-8 text-primary-foreground" />
             </div>
             <h3 className="font-display font-bold text-xl text-foreground mb-2">Jornada Criada!</h3>
             <p className="text-sm text-muted-foreground mb-6">

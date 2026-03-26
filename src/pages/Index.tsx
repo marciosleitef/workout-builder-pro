@@ -5,7 +5,7 @@ import ExerciseLibrary from "@/components/ExerciseLibrary";
 import WorkoutBuilder from "@/components/WorkoutBuilder";
 import { ExerciseGroup, WorkoutExercise } from "@/types/workout";
 import { type Exercise } from "@/data/exercises";
-import { Dumbbell, ArrowLeft, Save, Loader2 } from "lucide-react";
+import { Dumbbell, ArrowLeft, Save, Loader2, Search, Plus } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -28,6 +28,7 @@ const Index = () => {
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [showFinishDialog, setShowFinishDialog] = useState(false);
+  const [mobileTab, setMobileTab] = useState<"library" | "builder">("library");
 
   useEffect(() => {
     if (studentId) {
@@ -76,6 +77,8 @@ const Index = () => {
         newGroup.items.push(item);
         setGroups([newGroup]);
         setActiveGroupId(newGroup.id);
+        // On mobile, switch to builder after adding
+        setMobileTab("builder");
         return;
       }
 
@@ -87,6 +90,8 @@ const Index = () => {
       setGroups((prev) =>
         prev.map((g) => (g.id === targetId ? { ...g, items: [...g.items, item] } : g))
       );
+      // On mobile, switch to builder after adding
+      setMobileTab("builder");
     },
     [groups, activeGroupId]
   );
@@ -112,7 +117,6 @@ const Index = () => {
 
   const handleAddAnother = () => {
     setShowFinishDialog(false);
-    // Navigate back to dashboard where WorkoutInfoDialog can be opened for the same journey
     if (journeyId && journeyFormat) {
       navigate(`/students?addWorkout=true&journeyId=${journeyId}&journeyFormat=${journeyFormat}&studentId=${studentId}`);
     } else {
@@ -129,51 +133,82 @@ const Index = () => {
 
   return (
     <div className="flex flex-col h-screen bg-background">
-      {/* Header with gradient matching other pages */}
-      <header className="bg-foreground px-6 py-4">
-        <div className="flex items-center gap-3">
+      {/* Header */}
+      <header className="bg-foreground px-3 sm:px-6 py-3 sm:py-4 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => navigate("/dashboard")}
-            className="w-8 h-8 rounded-lg bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/15 transition-colors"
+            className="w-8 h-8 rounded-lg bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/15 transition-colors shrink-0"
           >
             <ArrowLeft className="w-4 h-4 text-primary-foreground/60" />
           </button>
-          <div className="w-9 h-9 rounded-xl bg-primary-foreground/10 flex items-center justify-center">
-            <Dumbbell className="w-5 h-5 text-primary-foreground/60" />
-          </div>
           <div className="flex-1 min-w-0">
-            <h1 className="font-display text-lg font-bold text-primary-foreground truncate">
-              {workoutName ? `Montagem de Treino — ${workoutName}` : "Montagem de Treino"}
+            <h1 className="font-display text-sm sm:text-lg font-bold text-primary-foreground truncate">
+              {workoutName || "Montagem de Treino"}
             </h1>
-            <p className="text-primary-foreground/40 text-xs truncate">
+            <p className="text-primary-foreground/40 text-[10px] sm:text-xs truncate">
               {studentName ? `Aluno: ${studentName}` : "Monte seu treino ideal"}
             </p>
           </div>
           <button
             onClick={handleFinalize}
             disabled={saving || totalExercises === 0}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-foreground text-foreground font-display font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl bg-primary-foreground text-foreground font-display font-bold text-xs sm:text-sm hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Finalizar
+            <span className="hidden sm:inline">Finalizar</span>
+            <span className="sm:hidden">Salvar</span>
           </button>
         </div>
       </header>
 
-      {/* Main content */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left: Exercise Library */}
+      {/* Mobile tab switcher */}
+      <div className="md:hidden flex border-b border-border bg-card shrink-0">
+        <button
+          onClick={() => setMobileTab("library")}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs font-display font-bold transition-colors ${mobileTab === "library" ? "text-primary border-b-2 border-primary" : "text-muted-foreground"}`}
+        >
+          <Search className="w-3.5 h-3.5" />
+          Exercícios
+        </button>
+        <button
+          onClick={() => setMobileTab("builder")}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs font-display font-bold transition-colors ${mobileTab === "builder" ? "text-primary border-b-2 border-primary" : "text-muted-foreground"}`}
+        >
+          <Dumbbell className="w-3.5 h-3.5" />
+          Treino
+          {totalExercises > 0 && (
+            <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center">
+              {totalExercises}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Desktop: side-by-side layout */}
+      <div className="hidden md:flex flex-1 overflow-hidden">
         <aside className="w-[380px] border-r border-border bg-card flex-shrink-0 overflow-hidden">
           <ExerciseLibrary onAddExercise={handleAddExercise} />
         </aside>
-
-        {/* Right: Workout Builder */}
         <main className="flex-1 overflow-hidden">
           <WorkoutBuilder groups={groups} setGroups={setGroups} activeGroupId={activeGroupId} onActiveGroupChange={setActiveGroupId} />
         </main>
       </div>
 
-      {/* Finish dialog - ask if user wants to add another workout */}
+      {/* Mobile: tabbed layout */}
+      <div className="md:hidden flex-1 overflow-hidden">
+        {mobileTab === "library" ? (
+          <div className="h-full overflow-hidden">
+            <ExerciseLibrary onAddExercise={handleAddExercise} />
+          </div>
+        ) : (
+          <div className="h-full overflow-hidden">
+            <WorkoutBuilder groups={groups} setGroups={setGroups} activeGroupId={activeGroupId} onActiveGroupChange={setActiveGroupId} />
+          </div>
+        )}
+      </div>
+
+      {/* Finish dialog */}
       <Dialog open={showFinishDialog} onOpenChange={setShowFinishDialog}>
         <DialogContent className="max-w-sm p-0 overflow-hidden">
           <div className="bg-foreground px-5 py-4 text-primary-foreground">

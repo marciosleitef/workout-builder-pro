@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Trophy, Users, Calendar, Link2, Copy, Edit, Trash2, Eye } from "lucide-react";
+import { ArrowLeft, Plus, Trophy, Users, Calendar, Link2, Copy, Edit, Trash2, Eye, Dumbbell } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -288,7 +288,18 @@ const Challenges = () => {
                   <span>🔥 {c.points_streak_bonus}pts/streak</span>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  {c.source_journey_id && (
+                    <button
+                      onClick={() => {
+                        const j = journeys.find(j => j.id === c.source_journey_id);
+                        navigate(`/workout/${user!.id}?journeyId=${c.source_journey_id}&journeyFormat=${j?.format || "Semanal"}`);
+                      }}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-foreground text-background text-xs font-bold hover:opacity-90 transition-opacity"
+                    >
+                      <Dumbbell className="w-3 h-3" /> Montar Treinos
+                    </button>
+                  )}
                   <button onClick={() => copyLink(c)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-secondary text-foreground text-xs font-medium hover:bg-secondary/80 transition-colors">
                     <Link2 className="w-3 h-3" /> Copiar Link
                   </button>

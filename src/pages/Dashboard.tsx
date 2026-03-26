@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { UserCircle, Dumbbell, Calendar, LogOut, Sun, Moon, Plus, Link2 } from "lucide-react";
+import { UserCircle, Dumbbell, Calendar, LogOut, Sun, Moon, Plus, Link2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useTheme } from "@/hooks/useTheme";
@@ -17,11 +17,13 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [profileName, setProfileName] = useState("");
   const [studentCount, setStudentCount] = useState(0);
+  const [groupCount, setGroupCount] = useState(0);
   const [showNewStudentMenu, setShowNewStudentMenu] = useState(false);
 
   useEffect(() => {
     fetchProfile();
     fetchStudentCount();
+    fetchGroupCount();
   }, []);
 
   const fetchProfile = async () => {
@@ -32,6 +34,11 @@ const Dashboard = () => {
   const fetchStudentCount = async () => {
     const { count } = await supabase.from("students").select("*", { count: "exact", head: true });
     setStudentCount(count || 0);
+  };
+
+  const fetchGroupCount = async () => {
+    const { count } = await supabase.from("student_groups").select("*", { count: "exact", head: true }).eq("professor_id", user?.id);
+    setGroupCount(count || 0);
   };
 
   const handleLogout = async () => {
@@ -66,6 +73,15 @@ const Dashboard = () => {
       color: "hsl(150 55% 45%)",
       bgClass: "bg-[hsl(150,55%,45%)]/10",
       route: "/attendance",
+    },
+    {
+      icon: Users,
+      title: "Grupos de Alunos",
+      description: "Gerencie seus grupos: online, presencial, corrida...",
+      stat: `${groupCount} grupo(s)`,
+      color: "hsl(280 60% 55%)",
+      bgClass: "bg-[hsl(280,60%,55%)]/10",
+      route: "/groups",
     },
   ];
 

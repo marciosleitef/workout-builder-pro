@@ -47,11 +47,35 @@ export type Database = {
         }
         Relationships: []
       }
+      student_groups: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          professor_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          professor_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          professor_id?: string
+        }
+        Relationships: []
+      }
       students: {
         Row: {
+          birth_date: string | null
           created_at: string
           email: string | null
           full_name: string
+          gender: string | null
+          group_id: string | null
           id: string
           phone: string | null
           plan: string | null
@@ -60,11 +84,15 @@ export type Database = {
           status: string | null
           updated_at: string
           user_id: string | null
+          whatsapp: string | null
         }
         Insert: {
+          birth_date?: string | null
           created_at?: string
           email?: string | null
           full_name: string
+          gender?: string | null
+          group_id?: string | null
           id?: string
           phone?: string | null
           plan?: string | null
@@ -73,11 +101,15 @@ export type Database = {
           status?: string | null
           updated_at?: string
           user_id?: string | null
+          whatsapp?: string | null
         }
         Update: {
+          birth_date?: string | null
           created_at?: string
           email?: string | null
           full_name?: string
+          gender?: string | null
+          group_id?: string | null
           id?: string
           phone?: string | null
           plan?: string | null
@@ -86,8 +118,17 @@ export type Database = {
           status?: string | null
           updated_at?: string
           user_id?: string | null
+          whatsapp?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "students_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "student_groups"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       workout_checkins: {
         Row: {

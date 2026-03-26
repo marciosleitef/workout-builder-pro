@@ -303,7 +303,7 @@ const Challenges = () => {
                   <button onClick={() => copyLink(c)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-secondary text-foreground text-xs font-medium hover:bg-secondary/80 transition-colors">
                     <Link2 className="w-3 h-3" /> Copiar Link
                   </button>
-                  <button onClick={() => navigate(`/challenge/${c.invite_code}`)} className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-foreground/60 hover:bg-secondary/80 transition-colors" title="Ver ranking">
+                  <button onClick={() => navigate(`/challenge-dashboard/${c.id}`)} className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-foreground/60 hover:bg-secondary/80 transition-colors" title="Dashboard">
                     <Eye className="w-3.5 h-3.5" />
                   </button>
                   <button onClick={() => openEdit(c)} className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-foreground/60 hover:bg-secondary/80 transition-colors" title="Editar">

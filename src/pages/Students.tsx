@@ -346,8 +346,8 @@ const Students = () => {
                       const sc = studentScores[s.id];
                       const health = sc?.health ?? null;
                       const perf = sc?.performance ?? null;
-                      const hColor = health != null ? (health >= 70 ? "hsl(var(--accent))" : health >= 40 ? "hsl(var(--primary))" : "hsl(var(--destructive))") : "hsl(var(--muted-foreground))";
-                      const pColor = perf != null ? (perf >= 70 ? "hsl(var(--accent))" : perf >= 40 ? "hsl(var(--primary))" : "hsl(var(--destructive))") : "hsl(var(--muted-foreground))";
+                       const hColor = health != null ? (health >= 70 ? "hsl(var(--success))" : health >= 40 ? "hsl(var(--warning))" : "hsl(var(--destructive))") : "hsl(var(--muted-foreground))";
+                       const pColor = perf != null ? (perf >= 70 ? "hsl(var(--success))" : perf >= 40 ? "hsl(var(--warning))" : "hsl(var(--destructive))") : "hsl(var(--muted-foreground))";
 
                       return (
                         <>
@@ -722,7 +722,7 @@ const Students = () => {
             const sc = studentScores[scoreDialog.studentId];
             if (!sc) return <p className="text-sm text-muted-foreground">Sem dados</p>;
             if (scoreDialog.type === "health") {
-              const color = sc.health >= 70 ? "hsl(var(--accent))" : sc.health >= 40 ? "hsl(var(--primary))" : "hsl(var(--destructive))";
+              const color = sc.health >= 70 ? "hsl(var(--success))" : sc.health >= 40 ? "hsl(var(--warning))" : "hsl(var(--destructive))";
               return (
                 <div className="space-y-3">
                   <div className="text-center">
@@ -758,7 +758,7 @@ const Students = () => {
                 </div>
               );
             } else {
-              const color = sc.performance >= 70 ? "hsl(var(--accent))" : sc.performance >= 40 ? "hsl(var(--primary))" : "hsl(var(--destructive))";
+              const color = sc.performance >= 70 ? "hsl(var(--success))" : sc.performance >= 40 ? "hsl(var(--warning))" : "hsl(var(--destructive))";
               return (
                 <div className="space-y-3">
                   <div className="text-center">

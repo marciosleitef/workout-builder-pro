@@ -182,30 +182,30 @@ export function useStudentScores(studentIds: string[]) {
       const studentCheckins = checkins.filter((c: any) => c.student_id === sid);
       const studentFeedbacks = feedbacks.filter((f: any) => f.student_id === sid);
 
-      // Frequency score (50% of performance): days trained vs working days
+      // Frequency: if student trained at all this month, base 50% is guaranteed
       const uniqueDays = new Set(studentCheckins.map((c: any) => c.checked_in_at.slice(0, 10)));
-      const freqScore = workingDays > 0 ? Math.min(1, uniqueDays.size / workingDays) : 0;
+      const hasTrainedThisMonth = uniqueDays.size > 0;
+      const presenceScore = hasTrainedThisMonth ? 50 : 0; // 50% just for showing up
 
-      // Training quality score (50% of performance): from session feedback
+      // Training quality (other 50%): from session feedback indicators
       const postFeedbacks = studentFeedbacks.filter((f: any) => f.feedback_type === "post-workout");
       let qualityScore = 0;
       if (postFeedbacks.length > 0) {
-        // PSE inverted (lower effort = better recovery), Recovery (higher = better)
         const avgRecovery = avg(postFeedbacks, "post_recovery_scale", 10);
         const avgPSE = avg(postFeedbacks, "perceived_exertion_scale", 10);
         const avgPain = avg(postFeedbacks, "pain_scale_eva", 10);
 
         // Recovery: higher is better (0-10 → 0-1)
-        // PSE: moderate is ideal (5-7 is good training), too low means easy, too high means overtraining
+        // PSE: moderate is ideal (4-7 is good training)
         const pseScore = avgPSE != null ? (avgPSE >= 4 && avgPSE <= 7 ? 1 : avgPSE < 4 ? avgPSE / 4 : Math.max(0, 1 - (avgPSE - 7) / 3)) : null;
         // Pain: lower is better (inverted)
         const painScore = avgPain != null ? Math.max(0, 1 - avgPain) : null;
 
         const qualityParts = [avgRecovery, pseScore, painScore].filter((v): v is number => v !== null);
-        qualityScore = qualityParts.length > 0 ? qualityParts.reduce((a, b) => a + b, 0) / qualityParts.length : 0;
+        qualityScore = qualityParts.length > 0 ? (qualityParts.reduce((a, b) => a + b, 0) / qualityParts.length) * 50 : 0;
       }
 
-      let performanceBase = Math.round((freqScore * 0.5 + qualityScore * 0.5) * 100);
+      let performanceBase = Math.round(presenceScore + qualityScore);
 
       // Performance gamification
       let performanceBonus = 0;

@@ -594,7 +594,7 @@ const Students = () => {
                 </div>
                 <div>
                   <p className="font-display font-bold text-foreground text-lg">{detailStudent.full_name}</p>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${detailStudent.status === "inactive" ? "bg-destructive/15 text-destructive" : "bg-accent/15 text-accent"}`}>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${detailStudent.status === "inactive" ? "bg-destructive/15 text-destructive" : "bg-foreground/10 text-foreground"}`}>
                     {detailStudent.status === "inactive" ? "INATIVO" : "ATIVO"}
                   </span>
                 </div>

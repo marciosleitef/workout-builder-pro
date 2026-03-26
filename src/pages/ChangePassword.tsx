@@ -90,7 +90,7 @@ const ChangePassword = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-lg font-display font-bold text-sm text-primary-foreground bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity disabled:opacity-50"
+              className="w-full py-3 rounded-lg font-display font-bold text-sm text-background bg-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
             >
               {loading ? "SALVANDO..." : "SALVAR NOVA SENHA"}
             </button>

@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Search, Plus, Play, User, TrendingUp, Dumbbell, Calendar, UserCircle, List, Link2, ArrowLeft, Package, Filter, Mail, Phone, Key, Eye, EyeOff, Copy, Edit } from "lucide-react";
+import { Search, Plus, Play, User, TrendingUp, Dumbbell, Calendar, UserCircle, List, Link2, ArrowLeft, Package, Filter, Mail, Phone, Key, Eye, EyeOff, Copy, Edit, MessageCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import NewJourneyWizard from "@/components/NewJourneyWizard";
 import WorkoutInfoDialog from "@/components/WorkoutInfoDialog";
@@ -93,6 +93,7 @@ const Students = () => {
   const [showDailyTracking, setShowDailyTracking] = useState(false);
   const [dailyTrackingStudent, setDailyTrackingStudent] = useState<Student | null>(null);
   const [scoreDialog, setScoreDialog] = useState<{ type: "health" | "performance"; studentId: string } | null>(null);
+  const [professorName, setProfessorName] = useState("");
 
   // Journey start dialog
   const [showStartJourney, setShowStartJourney] = useState(false);
@@ -106,6 +107,9 @@ const Students = () => {
     fetchStudents();
     fetchGroups();
     fetchPlans();
+    supabase.from("profiles").select("full_name").eq("user_id", user.id).single().then(({ data }) => {
+      if (data) setProfessorName(data.full_name);
+    });
   }, [user]);
 
   const fetchGroups = async () => {
@@ -695,10 +699,24 @@ const Students = () => {
               </div>
 
               {/* Action buttons */}
-              <div className="flex gap-3 pt-2">
+              <div className="flex flex-col gap-2 pt-2">
+                {(detailStudent.whatsapp || detailStudent.phone) && (
+                  <button
+                    onClick={() => {
+                      const rawNumber = (detailStudent.whatsapp || detailStudent.phone || "").replace(/\D/g, "");
+                      const number = rawNumber.length <= 11 ? `55${rawNumber}` : rawNumber;
+                      const message = encodeURIComponent(`Oi, aqui é seu personal ${professorName || ""}`.trim());
+                      window.open(`https://wa.me/${number}?text=${message}`, "_blank");
+                    }}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[hsl(142,70%,40%)] text-white font-display font-bold text-sm hover:opacity-90 transition-opacity"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    Falar com o Aluno
+                  </button>
+                )}
                 <button
                   onClick={() => { setShowStudentDetail(false); openEdit(detailStudent); }}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-primary text-primary-foreground font-display font-bold text-sm hover:bg-primary/90 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-primary text-primary-foreground font-display font-bold text-sm hover:bg-primary/90 transition-colors"
                 >
                   <Edit className="w-4 h-4" />
                   Editar Informações

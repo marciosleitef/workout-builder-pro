@@ -612,6 +612,7 @@ export type Database = {
           checked_in_at: string
           checked_in_by: string
           created_at: string
+          execution_data: Json | null
           id: string
           journey_id: string
           notes: string | null
@@ -623,6 +624,7 @@ export type Database = {
           checked_in_at?: string
           checked_in_by: string
           created_at?: string
+          execution_data?: Json | null
           id?: string
           journey_id: string
           notes?: string | null
@@ -634,6 +636,7 @@ export type Database = {
           checked_in_at?: string
           checked_in_by?: string
           created_at?: string
+          execution_data?: Json | null
           id?: string
           journey_id?: string
           notes?: string | null

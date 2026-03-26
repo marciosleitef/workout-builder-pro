@@ -164,6 +164,8 @@ const JourneyWorkoutsDialog = ({
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
   const [loading, setLoading] = useState(false);
   const [showOrientations, setShowOrientations] = useState(false);
+  const [executionData, setExecutionData] = useState<Record<string, Record<string, Record<string, string>>>>({});
+  // executionData[workoutId] = { [exerciseId]: { sets: "4", load: "20", ... } }
 
   // Workout session flow
   const [phase, setPhase] = useState<Phase>("workouts");
@@ -222,6 +224,27 @@ const JourneyWorkoutsDialog = ({
       const mapped = (data || []).map((w) => ({ ...w, exercises_data: (w.exercises_data as unknown as ExerciseGroupData[]) || [] }));
       setWorkouts(mapped);
       if (mapped.length > 0) setSelectedWorkout(mapped[0]);
+
+      // Fetch latest execution data for each workout
+      if (studentId && data && data.length > 0) {
+        const workoutIds = data.map(w => w.id);
+        const { data: checkins } = await supabase
+          .from("workout_checkins")
+          .select("workout_id, execution_data, checked_in_at")
+          .eq("student_id", studentId)
+          .in("workout_id", workoutIds)
+          .order("checked_in_at", { ascending: false });
+        
+        if (checkins) {
+          const execMap: Record<string, Record<string, Record<string, string>>> = {};
+          checkins.forEach((c: any) => {
+            if (c.execution_data && !execMap[c.workout_id]) {
+              execMap[c.workout_id] = c.execution_data;
+            }
+          });
+          setExecutionData(execMap);
+        }
+      }
     }
     setLoading(false);
   };
@@ -342,6 +365,8 @@ const JourneyWorkoutsDialog = ({
     const isExpanded = expandedExercise === ex.id;
     const hasParams = PARAM_FIELDS.some((f) => (ex as any)[f.key]);
     const hasVideo = !!ex.exercise.videoUrl;
+    const studentExec = selectedWorkout ? executionData[selectedWorkout.id]?.[ex.id] : null;
+    const hasExecData = !!studentExec && Object.keys(studentExec).length > 0;
 
     return (
       <div key={ex.id} className={`transition-colors ${isCompleted && isActive ? "bg-accent/5" : ""}`}>
@@ -364,13 +389,16 @@ const JourneyWorkoutsDialog = ({
             )}
           </button>
           <div className="flex items-center gap-1 shrink-0">
+            {hasExecData && !isActive && (
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-accent/15 text-accent font-bold">Executado</span>
+            )}
             {hasVideo && (
               <button onClick={() => setVideoUrl(ex.exercise.videoUrl!)}
                 className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors">
                 <Video className="w-3.5 h-3.5 text-primary" />
               </button>
             )}
-            {hasParams && (
+            {(hasParams || hasExecData) && (
               <button onClick={() => setExpandedExercise(isExpanded ? null : ex.id)}
                 className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
                 <Eye className="w-3.5 h-3.5 text-muted-foreground" />
@@ -380,23 +408,52 @@ const JourneyWorkoutsDialog = ({
         </div>
         {/* Expanded params */}
         {isExpanded && (
-          <div className="px-4 pb-3 pt-0">
-            <div className="grid grid-cols-3 gap-2">
-              {PARAM_FIELDS.filter((f) => (ex as any)[f.key]).map((f) => {
-                const Icon = f.icon;
-                return (
-                  <div key={f.key} className="bg-secondary/50 rounded-lg px-2 py-1.5 flex items-center gap-1.5">
-                    <Icon className="w-3 h-3 text-muted-foreground shrink-0" />
-                    <div>
-                      <p className="text-[9px] text-muted-foreground leading-tight">{f.label}</p>
-                      <p className="text-xs font-bold text-foreground">{(ex as any)[f.key]}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+          <div className="px-4 pb-3 pt-0 space-y-2">
+            {/* Prescribed params */}
+            {hasParams && (
+              <div>
+                {hasExecData && <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-1">📋 Prescrito</p>}
+                <div className="grid grid-cols-3 gap-2">
+                  {PARAM_FIELDS.filter((f) => (ex as any)[f.key]).map((f) => {
+                    const Icon = f.icon;
+                    return (
+                      <div key={f.key} className="bg-secondary/50 rounded-lg px-2 py-1.5 flex items-center gap-1.5">
+                        <Icon className="w-3 h-3 text-muted-foreground shrink-0" />
+                        <div>
+                          <p className="text-[9px] text-muted-foreground leading-tight">{f.label}</p>
+                          <p className="text-xs font-bold text-foreground">{(ex as any)[f.key]}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            {/* Student execution data */}
+            {hasExecData && (
+              <div>
+                <p className="text-[9px] font-bold text-accent uppercase tracking-wider mb-1">🏋️ Executado pelo aluno</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {PARAM_FIELDS.filter((f) => studentExec![f.key]).map((f) => {
+                    const Icon = f.icon;
+                    const prescribed = (ex as any)[f.key];
+                    const executed = studentExec![f.key];
+                    const isDiff = prescribed && prescribed !== executed;
+                    return (
+                      <div key={f.key} className={`rounded-lg px-2 py-1.5 flex items-center gap-1.5 ${isDiff ? "bg-accent/10 border border-accent/30" : "bg-accent/5"}`}>
+                        <Icon className="w-3 h-3 text-accent shrink-0" />
+                        <div>
+                          <p className="text-[9px] text-muted-foreground leading-tight">{f.label}</p>
+                          <p className="text-xs font-bold text-accent">{executed}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             {ex.notes && (
-              <div className="mt-2 bg-secondary/50 rounded-lg px-2 py-1.5">
+              <div className="bg-secondary/50 rounded-lg px-2 py-1.5">
                 <p className="text-[9px] text-muted-foreground">Observações</p>
                 <p className="text-xs text-foreground">{ex.notes}</p>
               </div>

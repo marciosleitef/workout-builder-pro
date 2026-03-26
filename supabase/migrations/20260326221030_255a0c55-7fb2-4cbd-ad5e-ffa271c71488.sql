@@ -1,0 +1,1 @@
+ALTER TABLE public.workout_checkins ADD COLUMN execution_data jsonb DEFAULT NULL;

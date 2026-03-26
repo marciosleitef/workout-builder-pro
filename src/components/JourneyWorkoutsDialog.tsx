@@ -190,6 +190,7 @@ const JourneyWorkoutsDialog = ({
       setSelectedWorkout(null);
       setShowOrientations(false);
       setPhase("workouts");
+      setCurrentStep(0);
       setCheckinForm({});
       setCheckoutForm({});
       setMetricsForm({ workout_bpm_avg: "", workout_bpm_max: "", calories_burned: "" });

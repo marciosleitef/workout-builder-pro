@@ -144,6 +144,7 @@ const StudentWorkouts = () => {
   const [expandedExercise, setExpandedExercise] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [showOrientations, setShowOrientations] = useState(false);
+  const [currentCheckinId, setCurrentCheckinId] = useState<string | null>(null);
 
   // Editable exercise params (student can override during workout)
   const [exerciseOverrides, setExerciseOverrides] = useState<Record<string, Record<string, string>>>({});
@@ -236,10 +237,11 @@ const StudentWorkouts = () => {
       recovery_perception_scale: checkinForm.recovery_perception_scale || null,
       urine_color_scale: checkinForm.urine_color_scale || null,
     } as any);
-    await supabase.from("workout_checkins").insert({
+    const { data: checkinData } = await supabase.from("workout_checkins").insert({
       student_id: studentId, professor_id: activeJourney.professor_id,
       journey_id: activeJourney.id, workout_id: selectedWorkout.id, checked_in_by: user.id,
-    });
+    } as any).select("id").single();
+    setCurrentCheckinId(checkinData?.id || null);
     setSaving(false);
     setStartTime(new Date());
     setCompletedExercises(new Set());
@@ -271,6 +273,13 @@ const StudentWorkouts = () => {
       workout_bpm_max: parseInt(metricsForm.workout_bpm_max) || null,
       calories_burned: parseInt(metricsForm.calories_burned) || null,
     } as any);
+
+    // Save execution data (student overrides) to checkin
+    if (currentCheckinId && Object.keys(exerciseOverrides).length > 0) {
+      await supabase.from("workout_checkins").update({
+        execution_data: exerciseOverrides,
+      } as any).eq("id", currentCheckinId);
+    }
 
     // Send notification to professor with feedback
     const trainingMin = startTime ? Math.round((Date.now() - startTime.getTime()) / 60000) : 0;

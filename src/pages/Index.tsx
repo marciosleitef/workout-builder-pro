@@ -114,7 +114,7 @@ const Index = () => {
     setShowFinishDialog(false);
     // Navigate back to dashboard where WorkoutInfoDialog can be opened for the same journey
     if (journeyId && journeyFormat) {
-      navigate(`/dashboard?addWorkout=true&journeyId=${journeyId}&journeyFormat=${journeyFormat}&studentId=${studentId}`);
+      navigate(`/students?addWorkout=true&journeyId=${journeyId}&journeyFormat=${journeyFormat}&studentId=${studentId}`);
     } else {
       navigate("/dashboard");
     }

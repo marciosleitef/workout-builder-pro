@@ -239,29 +239,30 @@ const Students = () => {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Top bar */}
-      <div className="bg-foreground px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center gap-3">
-          <button onClick={() => navigate("/dashboard")} className="w-9 h-9 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:bg-primary-foreground/15 transition-colors">
+      <div className="bg-foreground px-4 sm:px-6 py-3 sm:py-4">
+        <div className="max-w-7xl mx-auto flex items-center gap-2 sm:gap-3">
+          <button onClick={() => navigate("/dashboard")} className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:bg-primary-foreground/15 transition-colors shrink-0">
             <ArrowLeft className="w-4 h-4" />
           </button>
-          <h1 className="font-display font-bold text-lg text-primary-foreground flex-1">Meus Alunos</h1>
-          <button onClick={() => setShowPlansDialog(true)} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary-foreground/10 text-primary-foreground/60 text-sm font-medium hover:bg-primary-foreground/15 transition-colors">
+          <h1 className="font-display font-bold text-base sm:text-lg text-primary-foreground flex-1 truncate">Meus Alunos</h1>
+          <button onClick={() => setShowPlansDialog(true)} className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-primary-foreground/10 text-primary-foreground/60 text-xs sm:text-sm font-medium hover:bg-primary-foreground/15 transition-colors shrink-0">
             <Package className="w-4 h-4" />
-            Planos
+            <span className="hidden sm:inline">Planos</span>
           </button>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6">
         {/* Search + Add */}
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-2 sm:gap-3 mb-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar atleta por nome..." className="w-full pl-12 pr-4 py-3 rounded-xl bg-card border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
+            <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-muted-foreground" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar atleta..." className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 rounded-xl bg-card border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm" />
           </div>
-          <button onClick={() => setShowNewStudentMenu(true)} className="flex items-center gap-2 px-5 py-3 bg-foreground text-background rounded-xl font-display font-bold text-sm hover:opacity-90 transition-opacity shrink-0">
+          <button onClick={() => setShowNewStudentMenu(true)} className="flex items-center gap-1 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 bg-foreground text-background rounded-xl font-display font-bold text-xs sm:text-sm hover:opacity-90 transition-opacity shrink-0">
             <Plus className="w-4 h-4" />
-            Novo Aluno
+            <span className="hidden sm:inline">Novo Aluno</span>
+            <span className="sm:hidden">Novo</span>
           </button>
         </div>
 
@@ -315,7 +316,7 @@ const Students = () => {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {filtered.map((s, i) => {
               const isInactive = s.status === "inactive";
               return (

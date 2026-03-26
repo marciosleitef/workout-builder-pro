@@ -111,19 +111,19 @@ const Reports = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-foreground px-6 py-5">
-        <div className="max-w-7xl mx-auto flex items-center gap-4">
-          <button onClick={() => navigate("/dashboard")} className="w-9 h-9 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:text-primary-foreground">
+      <header className="bg-foreground px-4 sm:px-6 py-4 sm:py-5">
+        <div className="max-w-7xl mx-auto flex items-center gap-3 sm:gap-4">
+          <button onClick={() => navigate("/dashboard")} className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:text-primary-foreground shrink-0">
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div>
-            <h1 className="text-primary-foreground font-bold text-lg">Relatórios</h1>
-            <p className="text-primary-foreground/40 text-xs">Exporte dados em CSV</p>
+            <h1 className="text-primary-foreground font-bold text-base sm:text-lg">Relatórios</h1>
+            <p className="text-primary-foreground/40 text-[10px] sm:text-xs">Exporte dados em CSV</p>
           </div>
         </div>
       </header>
 
-      <div className="max-w-3xl mx-auto p-6 space-y-4">
+      <div className="max-w-3xl mx-auto p-4 sm:p-6 space-y-4">
         {/* Month selector for attendance/financial */}
         <div className="flex items-center gap-3">
           <label className="text-sm font-medium text-foreground">Mês de referência:</label>

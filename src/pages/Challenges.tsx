@@ -52,6 +52,11 @@ const Challenges = () => {
   const [pointsCheckin, setPointsCheckin] = useState(10);
   const [pointsWeekly, setPointsWeekly] = useState(25);
   const [pointsStreak, setPointsStreak] = useState(5);
+  const [journeyMode, setJourneyMode] = useState<"existing" | "new">("existing");
+  const [newJourneyName, setNewJourneyName] = useState("");
+  const [newJourneyObjective, setNewJourneyObjective] = useState("SAÚDE - T1");
+  const [newJourneyLevel, setNewJourneyLevel] = useState("Iniciante");
+  const [newJourneyFormat, setNewJourneyFormat] = useState("Semanal");
 
   useEffect(() => {
     if (user) {
@@ -105,6 +110,11 @@ const Challenges = () => {
     setPointsCheckin(10);
     setPointsWeekly(25);
     setPointsStreak(5);
+    setJourneyMode("existing");
+    setNewJourneyName("");
+    setNewJourneyObjective("SAÚDE - T1");
+    setNewJourneyLevel("Iniciante");
+    setNewJourneyFormat("Semanal");
   };
 
   const openEdit = (c: Challenge) => {
@@ -126,12 +136,39 @@ const Challenges = () => {
       return;
     }
 
+    let finalJourneyId = sourceJourneyId || null;
+
+    // If creating a new journey for the challenge
+    if (journeyMode === "new" && newJourneyName.trim()) {
+      const { data: newJ, error: jErr } = await supabase
+        .from("workout_journeys")
+        .insert({
+          name: newJourneyName.trim(),
+          professor_id: user!.id,
+          student_id: user!.id, // template: professor as placeholder
+          objective: newJourneyObjective,
+          level: newJourneyLevel,
+          format: newJourneyFormat,
+          start_date: startDate,
+          end_date: endDate,
+          status: "active",
+        })
+        .select("id")
+        .single();
+
+      if (jErr || !newJ) {
+        toast.error("Erro ao criar jornada");
+        return;
+      }
+      finalJourneyId = newJ.id;
+    }
+
     const payload = {
       name: name.trim(),
       description: description.trim(),
       start_date: startDate,
       end_date: endDate,
-      source_journey_id: sourceJourneyId || null,
+      source_journey_id: finalJourneyId,
       points_per_checkin: pointsCheckin,
       points_weekly_bonus: pointsWeekly,
       points_streak_bonus: pointsStreak,
@@ -146,6 +183,15 @@ const Challenges = () => {
       const { error } = await supabase.from("challenges" as any).insert(payload);
       if (error) { toast.error("Erro ao criar desafio"); return; }
       toast.success("Desafio criado!");
+    }
+
+    // If we created a new journey, offer to go build workouts
+    if (journeyMode === "new" && finalJourneyId && !editingChallenge) {
+      const goToWorkout = confirm("Jornada criada! Deseja montar os treinos agora?");
+      if (goToWorkout) {
+        navigate(`/workout/${user!.id}?journeyId=${finalJourneyId}&journeyFormat=${newJourneyFormat}`);
+        return;
+      }
     }
 
     setShowCreate(false);
@@ -291,14 +337,69 @@ const Challenges = () => {
               </div>
             </div>
             <div>
-              <label className="text-sm font-medium text-foreground">Jornada de treinos (opcional)</label>
-              <select value={sourceJourneyId} onChange={(e) => setSourceJourneyId(e.target.value)} className="w-full mt-1 px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-ring/50">
-                <option value="">Sem jornada vinculada</option>
-                {journeys.map((j) => (
-                  <option key={j.id} value={j.id}>{j.name} ({j.objective} • {j.level})</option>
-                ))}
-              </select>
-              <p className="text-xs text-muted-foreground mt-1">A jornada será copiada para cada participante que se inscrever.</p>
+              <label className="text-sm font-medium text-foreground mb-2 block">Jornada de treinos (opcional)</label>
+              <div className="flex gap-2 mb-3">
+                <button
+                  type="button"
+                  onClick={() => setJourneyMode("existing")}
+                  className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-colors ${journeyMode === "existing" ? "bg-foreground text-background border-foreground" : "bg-secondary text-foreground border-border"}`}
+                >
+                  Selecionar existente
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setJourneyMode("new")}
+                  className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-colors ${journeyMode === "new" ? "bg-foreground text-background border-foreground" : "bg-secondary text-foreground border-border"}`}
+                >
+                  Criar nova jornada
+                </button>
+              </div>
+
+              {journeyMode === "existing" ? (
+                <>
+                  <select value={sourceJourneyId} onChange={(e) => setSourceJourneyId(e.target.value)} className="w-full px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-ring/50">
+                    <option value="">Sem jornada vinculada</option>
+                    {journeys.map((j) => (
+                      <option key={j.id} value={j.id}>{j.name} ({j.objective} • {j.level})</option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-muted-foreground mt-1">A jornada será copiada para cada participante que se inscrever.</p>
+                </>
+              ) : (
+                <div className="space-y-3 p-3 rounded-lg border border-border bg-secondary/50">
+                  <div>
+                    <label className="text-xs text-muted-foreground">Nome da jornada *</label>
+                    <input value={newJourneyName} onChange={(e) => setNewJourneyName(e.target.value)} className="w-full mt-1 px-3 py-2 rounded-lg bg-secondary border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/50" placeholder="Ex: Jornada do desafio" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-xs text-muted-foreground">Objetivo</label>
+                      <select value={newJourneyObjective} onChange={(e) => setNewJourneyObjective(e.target.value)} className="w-full mt-1 px-2 py-2 rounded-lg bg-secondary border border-border text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-ring/50">
+                        <option value="SAÚDE - T1">Saúde</option>
+                        <option value="QUALIDADE DE VIDA - T1">Qualidade de Vida</option>
+                        <option value="HIPERTROFIA - T1">Hipertrofia</option>
+                        <option value="EMAGRECIMENTO - T1">Emagrecimento</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs text-muted-foreground">Nível</label>
+                      <select value={newJourneyLevel} onChange={(e) => setNewJourneyLevel(e.target.value)} className="w-full mt-1 px-2 py-2 rounded-lg bg-secondary border border-border text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-ring/50">
+                        <option value="Iniciante">Iniciante</option>
+                        <option value="Moderado">Moderado</option>
+                        <option value="Avançado">Avançado</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground">Formato</label>
+                    <select value={newJourneyFormat} onChange={(e) => setNewJourneyFormat(e.target.value)} className="w-full mt-1 px-2 py-2 rounded-lg bg-secondary border border-border text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-ring/50">
+                      <option value="Semanal">Semanal</option>
+                      <option value="Numerico">Numérico</option>
+                    </select>
+                  </div>
+                  <p className="text-xs text-muted-foreground">A jornada será criada e vinculada ao desafio. Depois você poderá montar os treinos nela.</p>
+                </div>
+              )}
             </div>
 
             <div className="border-t border-border pt-4">

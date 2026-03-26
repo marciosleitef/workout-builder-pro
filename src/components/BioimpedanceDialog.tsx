@@ -652,7 +652,7 @@ const BioimpedanceDialog = ({ open, onOpenChange, studentId, studentName, gender
         </div>
 
         <div className="flex justify-center py-2">
-          <HumanBody record={selectedRecord} size="md" />
+          <HumanBody record={selectedRecord} size="md" gender={gender} />
         </div>
 
         <div className="grid grid-cols-2 gap-2">
@@ -719,12 +719,12 @@ const BioimpedanceDialog = ({ open, onOpenChange, studentId, studentName, gender
               <div className="text-center">
                 <p className="text-[10px] text-muted-foreground font-bold uppercase mb-1">{formatDate(oldest.measured_at)}</p>
                 <p className="text-[9px] text-muted-foreground mb-2">Início</p>
-                <HumanBody record={oldest} size="sm" />
+                <HumanBody record={oldest} size="sm" gender={gender} />
               </div>
               <div className="text-center">
                 <p className="text-[10px] text-primary font-bold uppercase mb-1">{formatDate(latest.measured_at)}</p>
                 <p className="text-[9px] text-primary mb-2">Atual</p>
-                <HumanBody record={latest} size="sm" />
+                <HumanBody record={latest} size="sm" gender={gender} />
               </div>
             </div>
           </div>

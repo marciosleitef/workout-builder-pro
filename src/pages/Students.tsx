@@ -92,6 +92,7 @@ const Students = () => {
   const [showLoginInfo, setShowLoginInfo] = useState(false);
   const [showDailyTracking, setShowDailyTracking] = useState(false);
   const [dailyTrackingStudent, setDailyTrackingStudent] = useState<Student | null>(null);
+  const [scoreDialog, setScoreDialog] = useState<{ type: "health" | "performance"; studentId: string } | null>(null);
 
   // Journey start dialog
   const [showStartJourney, setShowStartJourney] = useState(false);
@@ -348,23 +349,9 @@ const Students = () => {
                       const hColor = health != null ? (health >= 70 ? "hsl(var(--accent))" : health >= 40 ? "hsl(var(--primary))" : "hsl(var(--destructive))") : "hsl(var(--muted-foreground))";
                       const pColor = perf != null ? (perf >= 70 ? "hsl(var(--accent))" : perf >= 40 ? "hsl(var(--primary))" : "hsl(var(--destructive))") : "hsl(var(--muted-foreground))";
 
-                      const healthTooltip = sc ? [
-                        sc.bioScore != null ? `Bioimpedância: ${sc.bioScore}%` : null,
-                        sc.dailyScore != null ? `Reg. Diário: ${sc.dailyScore}%` : null,
-                        `Base: ${sc.healthBase}%`,
-                        ...sc.bonusDetails.filter(b => b.includes("BIA") || b.includes("Melhoria")),
-                      ].filter(Boolean).join("\n") : "";
-
-                      const perfTooltip = sc ? [
-                        `Presença: ${sc.presenceScore}%${sc.presenceScore > 0 ? " ✓" : ""}`,
-                        `Qualidade: ${sc.qualityScore}%`,
-                        `Base: ${sc.performanceBase}%`,
-                        ...sc.bonusDetails.filter(b => !b.includes("BIA") && !b.includes("Melhoria")),
-                      ].filter(Boolean).join("\n") : "";
-
                       return (
                         <>
-                          <div className="bg-secondary/50 rounded-lg p-2 relative group cursor-help" title={healthTooltip}>
+                          <button onClick={() => setScoreDialog({ type: "health", studentId: s.id })} className="bg-secondary/50 rounded-lg p-2 text-left hover:bg-secondary/70 transition-colors">
                             <p className="text-[10px] text-muted-foreground uppercase font-medium mb-1">Saúde</p>
                             <div className="flex items-end gap-1.5">
                               <span className="text-lg font-display font-bold" style={{ color: hColor }}>{health != null ? `${health}%` : "—"}</span>
@@ -375,20 +362,8 @@ const Students = () => {
                                 <div className="h-full rounded-full transition-all duration-500" style={{ width: `${health}%`, backgroundColor: hColor }} />
                               </div>
                             )}
-                            {sc && (
-                              <div className="absolute left-0 right-0 top-full mt-1 z-50 hidden group-hover:block">
-                                <div className="bg-popover text-popover-foreground border border-border rounded-lg shadow-lg p-2.5 text-[10px] space-y-1 whitespace-nowrap">
-                                  {sc.bioScore != null && <div className="flex justify-between gap-3"><span>Bioimpedância</span><span className="font-bold">{sc.bioScore}%</span></div>}
-                                  {sc.dailyScore != null && <div className="flex justify-between gap-3"><span>Registros Diários</span><span className="font-bold">{sc.dailyScore}%</span></div>}
-                                  <div className="border-t border-border pt-1 flex justify-between gap-3"><span>Base</span><span className="font-bold">{sc.healthBase}%</span></div>
-                                  {sc.bonusDetails.filter(b => b.includes("BIA") || b.includes("Melhoria")).map((b, i) => (
-                                    <div key={i} className="text-accent font-medium">🎮 {b}</div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                          <div className="bg-secondary/50 rounded-lg p-2 relative group cursor-help" title={perfTooltip}>
+                          </button>
+                          <button onClick={() => setScoreDialog({ type: "performance", studentId: s.id })} className="bg-secondary/50 rounded-lg p-2 text-left hover:bg-secondary/70 transition-colors">
                             <p className="text-[10px] text-muted-foreground uppercase font-medium mb-1">Performance</p>
                             <div className="flex items-end gap-1.5">
                               <span className="text-lg font-display font-bold" style={{ color: pColor }}>{perf != null ? `${perf}%` : "—"}</span>
@@ -399,19 +374,7 @@ const Students = () => {
                                 <div className="h-full rounded-full transition-all duration-500" style={{ width: `${perf}%`, backgroundColor: pColor }} />
                               </div>
                             )}
-                            {sc && (
-                              <div className="absolute left-0 right-0 top-full mt-1 z-50 hidden group-hover:block">
-                                <div className="bg-popover text-popover-foreground border border-border rounded-lg shadow-lg p-2.5 text-[10px] space-y-1 whitespace-nowrap">
-                                  <div className="flex justify-between gap-3"><span>Presença</span><span className="font-bold">{sc.presenceScore}%{sc.presenceScore > 0 ? " ✓" : ""}</span></div>
-                                  <div className="flex justify-between gap-3"><span>Qualidade</span><span className="font-bold">{sc.qualityScore}%</span></div>
-                                  <div className="border-t border-border pt-1 flex justify-between gap-3"><span>Base</span><span className="font-bold">{sc.performanceBase}%</span></div>
-                                  {sc.bonusDetails.filter(b => !b.includes("BIA") && !b.includes("Melhoria")).map((b, i) => (
-                                    <div key={i} className="text-accent font-medium">🎮 {b}</div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
+                          </button>
                         </>
                       );
                     })()}
@@ -746,6 +709,90 @@ const Students = () => {
       </Dialog>
 
       <DailyTrackingDialog open={showDailyTracking} onOpenChange={setShowDailyTracking} student={dailyTrackingStudent} />
+
+      {/* Score detail dialog */}
+      <Dialog open={!!scoreDialog} onOpenChange={(v) => !v && setScoreDialog(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-base font-display">
+              {scoreDialog?.type === "health" ? "🏥 Composição — Saúde" : "⚡ Composição — Performance"}
+            </DialogTitle>
+          </DialogHeader>
+          {scoreDialog && (() => {
+            const sc = studentScores[scoreDialog.studentId];
+            if (!sc) return <p className="text-sm text-muted-foreground">Sem dados</p>;
+            if (scoreDialog.type === "health") {
+              const color = sc.health >= 70 ? "hsl(var(--accent))" : sc.health >= 40 ? "hsl(var(--primary))" : "hsl(var(--destructive))";
+              return (
+                <div className="space-y-3">
+                  <div className="text-center">
+                    <span className="text-3xl font-display font-bold" style={{ color }}>{sc.health}%</span>
+                    {sc.healthBonus > 0 && <span className="text-sm font-bold text-accent ml-2">+{sc.healthBonus}%</span>}
+                    <div className="w-full h-2 bg-muted rounded-full mt-2 overflow-hidden">
+                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${sc.health}%`, backgroundColor: color }} />
+                    </div>
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    {sc.bioScore != null && (
+                      <div className="flex justify-between items-center p-2 bg-secondary/30 rounded-lg">
+                        <span className="text-muted-foreground">🧬 Bioimpedância</span>
+                        <span className="font-bold text-foreground">{sc.bioScore}%</span>
+                      </div>
+                    )}
+                    {sc.dailyScore != null && (
+                      <div className="flex justify-between items-center p-2 bg-secondary/30 rounded-lg">
+                        <span className="text-muted-foreground">📋 Registros Diários</span>
+                        <span className="font-bold text-foreground">{sc.dailyScore}%</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center p-2 bg-secondary/50 rounded-lg border border-border">
+                      <span className="font-medium text-foreground">Base Total</span>
+                      <span className="font-bold text-foreground">{sc.healthBase}%</span>
+                    </div>
+                    {sc.bonusDetails.filter(b => b.includes("BIA") || b.includes("Melhoria")).map((b, i) => (
+                      <div key={i} className="flex items-center gap-2 p-2 bg-accent/10 rounded-lg text-accent font-medium">
+                        <span>🎮</span> {b}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            } else {
+              const color = sc.performance >= 70 ? "hsl(var(--accent))" : sc.performance >= 40 ? "hsl(var(--primary))" : "hsl(var(--destructive))";
+              return (
+                <div className="space-y-3">
+                  <div className="text-center">
+                    <span className="text-3xl font-display font-bold" style={{ color }}>{sc.performance}%</span>
+                    {sc.performanceBonus > 0 && <span className="text-sm font-bold text-accent ml-2">+{sc.performanceBonus}%</span>}
+                    <div className="w-full h-2 bg-muted rounded-full mt-2 overflow-hidden">
+                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${sc.performance}%`, backgroundColor: color }} />
+                    </div>
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between items-center p-2 bg-secondary/30 rounded-lg">
+                      <span className="text-muted-foreground">📅 Presença no mês</span>
+                      <span className="font-bold text-foreground">{sc.presenceScore}%{sc.presenceScore > 0 ? " ✓" : ""}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-secondary/30 rounded-lg">
+                      <span className="text-muted-foreground">📊 Qualidade (indicadores)</span>
+                      <span className="font-bold text-foreground">{sc.qualityScore}%</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-secondary/50 rounded-lg border border-border">
+                      <span className="font-medium text-foreground">Base Total</span>
+                      <span className="font-bold text-foreground">{sc.performanceBase}%</span>
+                    </div>
+                    {sc.bonusDetails.filter(b => !b.includes("BIA") && !b.includes("Melhoria")).map((b, i) => (
+                      <div key={i} className="flex items-center gap-2 p-2 bg-accent/10 rounded-lg text-accent font-medium">
+                        <span>🎮</span> {b}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+          })()}
+        </DialogContent>
+      </Dialog>
 
       {selectedStudent && (
         <>

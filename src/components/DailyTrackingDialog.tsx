@@ -265,6 +265,19 @@ export default function DailyTrackingDialog({ open, onOpenChange, student }: Pro
     { metric: "Recuperação", value: (avg(allPre, "recovery_perception_scale") || 0) / 2, max: 5 },
   ] : [];
 
+  const postRadarData = allPost.length > 0 ? [
+    { metric: "Recuperação", value: avg(allPost, "post_recovery_scale") || 0, max: 10 },
+    { metric: "Esforço (PSE)", value: avg(allPost, "perceived_exertion_scale") || 0, max: 10 },
+    { metric: "Dor (EVA)", value: avg(allPost, "pain_scale_eva") || 0, max: 10 },
+  ] : [];
+
+  const postSessionData = sessionRecords.filter(r => r.feedback_type === "post").map(r => ({
+    date: format(new Date(r.session_date), "dd/MM", { locale: ptBR }),
+    recuperacao: r.post_recovery_scale,
+    esforco: r.perceived_exertion_scale,
+    dor: r.pain_scale_eva,
+  })).reverse();
+
   const renderMain = () => (
     <div className="space-y-4">
       {/* Latest daily metrics summary */}
@@ -350,6 +363,34 @@ export default function DailyTrackingDialog({ open, onOpenChange, student }: Pro
           </div>
         )}
 
+        {/* Post-workout radar */}
+        {postRadarData.length > 0 && (
+          <div className="bg-secondary/20 rounded-xl p-3 mb-3">
+            <p className="text-xs font-medium text-muted-foreground mb-2">Perfil Pós-Treino (média)</p>
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              {[
+                { label: "Recuperação", value: avg(allPost, "post_recovery_scale"), max: 10, icon: "💪" },
+                { label: "Esforço (PSE)", value: avg(allPost, "perceived_exertion_scale"), max: 10, icon: "🔥" },
+                { label: "Dor (EVA)", value: avg(allPost, "pain_scale_eva"), max: 10, icon: "⚡" },
+              ].map((m) => (
+                <div key={m.label} className="bg-secondary/30 rounded-lg p-2 text-center">
+                  <p className="text-lg mb-0.5">{m.icon}</p>
+                  <p className="text-xs font-bold text-foreground">{m.value ?? "—"}/{m.max}</p>
+                  <p className="text-[9px] text-muted-foreground">{m.label}</p>
+                </div>
+              ))}
+            </div>
+            <ResponsiveContainer width="100%" height={180}>
+              <RadarChart data={postRadarData} outerRadius={60}>
+                <PolarGrid stroke="hsl(var(--border))" />
+                <PolarAngleAxis dataKey="metric" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                <PolarRadiusAxis domain={[0, 10]} tick={false} axisLine={false} />
+                <Radar name="Média" dataKey="value" stroke="hsl(var(--destructive))" fill="hsl(var(--destructive))" fillOpacity={0.3} />
+              </RadarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
       </div>
 
       {/* Weight evolution chart */}
@@ -387,7 +428,24 @@ export default function DailyTrackingDialog({ open, onOpenChange, student }: Pro
         </div>
       )}
 
-      {/* History list */}
+      {/* Post-workout evolution chart */}
+      {postSessionData.length > 1 && (
+        <div className="bg-secondary/20 rounded-xl p-3">
+          <p className="text-xs font-medium text-muted-foreground mb-2">Evolução Pós-Treino</p>
+          <ResponsiveContainer width="100%" height={150}>
+            <LineChart data={postSessionData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="date" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+              <YAxis domain={[0, 10]} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+              <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+              <Line type="monotone" dataKey="recuperacao" stroke="hsl(150, 55%, 45%)" name="Recuperação" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="esforco" stroke="hsl(35, 85%, 50%)" name="Esforço" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="dor" stroke="hsl(0, 65%, 55%)" name="Dor" strokeWidth={2} dot={false} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
       <div>
         <h3 className="text-sm font-bold text-foreground mb-2">Histórico Recente</h3>
         <div className="space-y-2">

@@ -541,25 +541,56 @@ const JourneyWorkoutsDialog = ({
   );
 
   // ── CHECKOUT PHASE ──
-  const renderCheckout = () => (
-    <div className="space-y-3">
-      <div className="bg-gradient-to-r from-destructive to-[hsl(0,55%,45%)] rounded-xl p-4 text-white">
-        <div className="flex items-center gap-2 mb-1">
-          <Flame className="w-5 h-5" />
-          <h3 className="font-display font-bold">Pós-Treino (Check-out)</h3>
+  const renderCheckout = () => {
+    const totalSteps = POST_SCALES.length;
+    const progress = (currentStep / totalSteps) * 100;
+
+    if (currentStep >= totalSteps) {
+      return (
+        <div className="space-y-4">
+          <div className="bg-gradient-to-r from-destructive to-[hsl(0,55%,45%)] rounded-xl p-4 text-white text-center">
+            <CheckCircle2 className="w-8 h-8 mx-auto mb-2" />
+            <h3 className="font-display font-bold">Check-out Completo!</h3>
+          </div>
+          <div className="space-y-2">
+            {POST_SCALES.map((s) => (
+              <div key={s.key} className="flex items-center justify-between bg-card border border-border rounded-lg px-3 py-2">
+                <span className="text-sm text-foreground">{s.label}</span>
+                <span className="text-sm font-bold text-primary">{checkoutForm[s.key]} — {(s.labels as any)[checkoutForm[s.key]]}</span>
+              </div>
+            ))}
+          </div>
+          <button onClick={handleSubmitCheckout}
+            className="w-full py-3 rounded-xl bg-destructive text-destructive-foreground font-display font-bold text-sm hover:opacity-90 transition-opacity">
+            Confirmar Check-out
+          </button>
         </div>
-        <p className="text-white/70 text-xs">Como foi o treino? Avalie suas sensações</p>
+      );
+    }
+
+    const currentScale = POST_SCALES[currentStep];
+    return (
+      <div className="space-y-3">
+        <div className="space-y-1">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>Pergunta {currentStep + 1} de {totalSteps}</span>
+            <span>{Math.round(progress)}%</span>
+          </div>
+          <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
+            <div className="h-full bg-destructive rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+          </div>
+        </div>
+
+        <StepScaleQuestion
+          scale={currentScale}
+          onSelect={(v) => {
+            setCheckoutForm({ ...checkoutForm, [currentScale.key]: v });
+            setCurrentStep(currentStep + 1);
+          }}
+        />
       </div>
-      {POST_SCALES.map((scale) => (
-        <ScaleSelector key={scale.key} scale={scale} value={checkoutForm[scale.key] ?? null}
-          onChange={(v) => setCheckoutForm({ ...checkoutForm, [scale.key]: v })} />
-      ))}
-      <button onClick={handleSubmitCheckout}
-        className="w-full py-3 rounded-xl bg-destructive text-destructive-foreground font-display font-bold text-sm hover:opacity-90 transition-opacity">
-        Confirmar Check-out
-      </button>
-    </div>
-  );
+    );
+  };
 
   // ── METRICS PHASE ──
   const renderMetrics = () => (

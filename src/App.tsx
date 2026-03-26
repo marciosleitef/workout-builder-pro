@@ -18,6 +18,11 @@ import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import StudentRegister from "./pages/StudentRegister";
 import ChangePassword from "./pages/ChangePassword";
+import StudentDashboard from "./pages/StudentDashboard";
+import StudentWorkouts from "./pages/StudentWorkouts";
+import StudentHistory from "./pages/StudentHistory";
+import StudentHealth from "./pages/StudentHealth";
+import StudentChallenges from "./pages/StudentChallenges";
 
 const queryClient = new QueryClient();
 
@@ -39,78 +44,22 @@ const App = () => (
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/students"
-            element={
-              <ProtectedRoute>
-                <Students />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/exercises"
-            element={
-              <ProtectedRoute>
-                <ExerciseLibraryPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/attendance"
-            element={
-              <ProtectedRoute>
-                <AttendanceCalendar />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/groups"
-            element={
-              <ProtectedRoute>
-                <StudentGroups />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/plans"
-            element={
-              <ProtectedRoute>
-                <Plans />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/challenges"
-            element={
-              <ProtectedRoute>
-                <Challenges />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/challenge-dashboard/:challengeId"
-            element={
-              <ProtectedRoute>
-                <ChallengeDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/workout/:studentId"
-            element={
-              <ProtectedRoute>
-                <Index />
-              </ProtectedRoute>
-            }
-          />
+          {/* Professor routes */}
+          <Route path="/dashboard" element={<ProtectedRoute allowedRole="professor"><Dashboard /></ProtectedRoute>} />
+          <Route path="/students" element={<ProtectedRoute allowedRole="professor"><Students /></ProtectedRoute>} />
+          <Route path="/exercises" element={<ProtectedRoute allowedRole="professor"><ExerciseLibraryPage /></ProtectedRoute>} />
+          <Route path="/attendance" element={<ProtectedRoute allowedRole="professor"><AttendanceCalendar /></ProtectedRoute>} />
+          <Route path="/groups" element={<ProtectedRoute allowedRole="professor"><StudentGroups /></ProtectedRoute>} />
+          <Route path="/plans" element={<ProtectedRoute allowedRole="professor"><Plans /></ProtectedRoute>} />
+          <Route path="/challenges" element={<ProtectedRoute allowedRole="professor"><Challenges /></ProtectedRoute>} />
+          <Route path="/challenge-dashboard/:challengeId" element={<ProtectedRoute allowedRole="professor"><ChallengeDashboard /></ProtectedRoute>} />
+          <Route path="/workout/:studentId" element={<ProtectedRoute allowedRole="professor"><Index /></ProtectedRoute>} />
+          {/* Student routes */}
+          <Route path="/student-dashboard" element={<ProtectedRoute allowedRole="student"><StudentDashboard /></ProtectedRoute>} />
+          <Route path="/student-workouts" element={<ProtectedRoute allowedRole="student"><StudentWorkouts /></ProtectedRoute>} />
+          <Route path="/student-history" element={<ProtectedRoute allowedRole="student"><StudentHistory /></ProtectedRoute>} />
+          <Route path="/student-health" element={<ProtectedRoute allowedRole="student"><StudentHealth /></ProtectedRoute>} />
+          <Route path="/student-challenges" element={<ProtectedRoute allowedRole="student"><StudentChallenges /></ProtectedRoute>} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

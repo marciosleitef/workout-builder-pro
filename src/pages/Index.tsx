@@ -130,29 +130,29 @@ const Index = () => {
   return (
     <div className="flex flex-col h-screen bg-background">
       {/* Header with gradient matching other pages */}
-      <header className="bg-gradient-to-r from-[hsl(220,60%,45%)] to-[hsl(250,55%,50%)] px-6 py-4">
+      <header className="bg-foreground px-6 py-4">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate("/dashboard")}
-            className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
+            className="w-8 h-8 rounded-lg bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/15 transition-colors"
           >
-            <ArrowLeft className="w-4 h-4 text-white" />
+            <ArrowLeft className="w-4 h-4 text-primary-foreground/60" />
           </button>
-          <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
-            <Dumbbell className="w-5 h-5 text-white" />
+          <div className="w-9 h-9 rounded-xl bg-primary-foreground/10 flex items-center justify-center">
+            <Dumbbell className="w-5 h-5 text-primary-foreground/60" />
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="font-display text-lg font-bold text-white truncate">
+            <h1 className="font-display text-lg font-bold text-primary-foreground truncate">
               {workoutName ? `Montagem de Treino — ${workoutName}` : "Montagem de Treino"}
             </h1>
-            <p className="text-white/60 text-xs truncate">
+            <p className="text-primary-foreground/40 text-xs truncate">
               {studentName ? `Aluno: ${studentName}` : "Monte seu treino ideal"}
             </p>
           </div>
           <button
             onClick={handleFinalize}
             disabled={saving || totalExercises === 0}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[hsl(150,60%,45%)] text-white font-display font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-foreground text-foreground font-display font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             Finalizar
@@ -176,16 +176,16 @@ const Index = () => {
       {/* Finish dialog - ask if user wants to add another workout */}
       <Dialog open={showFinishDialog} onOpenChange={setShowFinishDialog}>
         <DialogContent className="max-w-sm p-0 overflow-hidden">
-          <div className="bg-gradient-to-r from-[hsl(150,60%,40%)] to-[hsl(170,50%,45%)] px-5 py-4 text-white">
+          <div className="bg-foreground px-5 py-4 text-primary-foreground">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center">
                 <Dumbbell className="w-5 h-5" />
               </div>
               <div>
-                <DialogTitle className="text-white font-display font-bold text-base">
+                <DialogTitle className="text-primary-foreground font-display font-bold text-base">
                   Treino Salvo!
                 </DialogTitle>
-                <DialogDescription className="text-white/70 text-xs mt-0.5">
+                <DialogDescription className="text-primary-foreground/50 text-xs mt-0.5">
                   {workoutName} foi salvo com sucesso
                 </DialogDescription>
               </div>
@@ -197,7 +197,7 @@ const Index = () => {
             </p>
             <button
               onClick={handleAddAnother}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[hsl(220,60%,50%)] text-white font-display font-bold text-sm hover:opacity-90 transition-opacity"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-foreground text-primary-foreground font-display font-bold text-sm hover:opacity-90 transition-opacity"
             >
               <Dumbbell className="w-4 h-4" />
               Sim, adicionar outro treino

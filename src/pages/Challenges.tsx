@@ -291,14 +291,69 @@ const Challenges = () => {
               </div>
             </div>
             <div>
-              <label className="text-sm font-medium text-foreground">Jornada de treinos (opcional)</label>
-              <select value={sourceJourneyId} onChange={(e) => setSourceJourneyId(e.target.value)} className="w-full mt-1 px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-ring/50">
-                <option value="">Sem jornada vinculada</option>
-                {journeys.map((j) => (
-                  <option key={j.id} value={j.id}>{j.name} ({j.objective} • {j.level})</option>
-                ))}
-              </select>
-              <p className="text-xs text-muted-foreground mt-1">A jornada será copiada para cada participante que se inscrever.</p>
+              <label className="text-sm font-medium text-foreground mb-2 block">Jornada de treinos (opcional)</label>
+              <div className="flex gap-2 mb-3">
+                <button
+                  type="button"
+                  onClick={() => setJourneyMode("existing")}
+                  className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-colors ${journeyMode === "existing" ? "bg-foreground text-background border-foreground" : "bg-secondary text-foreground border-border"}`}
+                >
+                  Selecionar existente
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setJourneyMode("new")}
+                  className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-colors ${journeyMode === "new" ? "bg-foreground text-background border-foreground" : "bg-secondary text-foreground border-border"}`}
+                >
+                  Criar nova jornada
+                </button>
+              </div>
+
+              {journeyMode === "existing" ? (
+                <>
+                  <select value={sourceJourneyId} onChange={(e) => setSourceJourneyId(e.target.value)} className="w-full px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-ring/50">
+                    <option value="">Sem jornada vinculada</option>
+                    {journeys.map((j) => (
+                      <option key={j.id} value={j.id}>{j.name} ({j.objective} • {j.level})</option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-muted-foreground mt-1">A jornada será copiada para cada participante que se inscrever.</p>
+                </>
+              ) : (
+                <div className="space-y-3 p-3 rounded-lg border border-border bg-secondary/50">
+                  <div>
+                    <label className="text-xs text-muted-foreground">Nome da jornada *</label>
+                    <input value={newJourneyName} onChange={(e) => setNewJourneyName(e.target.value)} className="w-full mt-1 px-3 py-2 rounded-lg bg-secondary border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/50" placeholder="Ex: Jornada do desafio" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-xs text-muted-foreground">Objetivo</label>
+                      <select value={newJourneyObjective} onChange={(e) => setNewJourneyObjective(e.target.value)} className="w-full mt-1 px-2 py-2 rounded-lg bg-secondary border border-border text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-ring/50">
+                        <option value="SAÚDE - T1">Saúde</option>
+                        <option value="QUALIDADE DE VIDA - T1">Qualidade de Vida</option>
+                        <option value="HIPERTROFIA - T1">Hipertrofia</option>
+                        <option value="EMAGRECIMENTO - T1">Emagrecimento</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs text-muted-foreground">Nível</label>
+                      <select value={newJourneyLevel} onChange={(e) => setNewJourneyLevel(e.target.value)} className="w-full mt-1 px-2 py-2 rounded-lg bg-secondary border border-border text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-ring/50">
+                        <option value="Iniciante">Iniciante</option>
+                        <option value="Moderado">Moderado</option>
+                        <option value="Avançado">Avançado</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground">Formato</label>
+                    <select value={newJourneyFormat} onChange={(e) => setNewJourneyFormat(e.target.value)} className="w-full mt-1 px-2 py-2 rounded-lg bg-secondary border border-border text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-ring/50">
+                      <option value="Semanal">Semanal</option>
+                      <option value="Numerico">Numérico</option>
+                    </select>
+                  </div>
+                  <p className="text-xs text-muted-foreground">A jornada será criada e vinculada ao desafio. Depois você poderá montar os treinos nela.</p>
+                </div>
+              )}
             </div>
 
             <div className="border-t border-border pt-4">

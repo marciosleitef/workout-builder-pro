@@ -99,7 +99,7 @@ const Students = () => {
     }
     if (searchParams.get("showForm") === "true") {
       setEditingStudent(null);
-      setForm({ full_name: "", email: "", phone: "", plan: "PS Prime" });
+      setForm({ full_name: "", email: "", phone: "", plan: "PS Prime", birth_date: "", whatsapp: "", gender: "", group_id: "" });
       setShowForm(true);
       setSearchParams({}, { replace: true });
     }
@@ -314,7 +314,7 @@ const Students = () => {
         <DialogContent className="max-w-sm">
           <DialogHeader><DialogTitle className="font-display">Novo Aluno</DialogTitle></DialogHeader>
           <div className="space-y-3 mt-1">
-            <button onClick={() => { setShowNewStudentMenu(false); setEditingStudent(null); setForm({ full_name: "", email: "", phone: "", plan: "PS Prime" }); setShowForm(true); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors">
+            <button onClick={() => { setShowNewStudentMenu(false); setEditingStudent(null); setForm({ full_name: "", email: "", phone: "", plan: "PS Prime", birth_date: "", whatsapp: "", gender: "", group_id: "" }); setShowForm(true); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Plus className="w-5 h-5 text-primary" /></div>
               <div className="text-left"><p className="font-display font-bold text-sm text-foreground">Cadastro Manual</p><p className="text-xs text-muted-foreground">Preencher os dados do aluno agora</p></div>
             </button>

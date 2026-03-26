@@ -90,6 +90,63 @@ function computeHealthScore(bio: any, gender?: string | null): number | null {
   return Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 100);
 }
 
+// Score daily health records (student_daily_records)
+function scoreDailyHealth(records: any[]): number | null {
+  if (records.length === 0) return null;
+  const scores: number[] = [];
+
+  // Average across recent records
+  const avgVal = (key: string) => {
+    const vals = records.map(r => r[key]).filter((v: any) => v != null);
+    return vals.length > 0 ? vals.reduce((a: number, b: number) => a + b, 0) / vals.length : null;
+  };
+
+  // BMI: ideal 18.5-24.9
+  const bmi = avgVal("bmi");
+  if (bmi != null) scores.push(scoreBMI(bmi) ?? 0);
+
+  // Oxygen saturation: ideal 95-100%
+  const o2 = avgVal("oxygen_saturation");
+  if (o2 != null) scores.push(o2 >= 95 ? 1 : Math.max(0, o2 / 95));
+
+  // Blood pressure: systolic ideal 90-120, diastolic 60-80
+  const sys = avgVal("blood_pressure_systolic");
+  const dia = avgVal("blood_pressure_diastolic");
+  if (sys != null) {
+    const sScore = sys >= 90 && sys <= 120 ? 1 : sys < 90 ? sys / 90 : Math.max(0, 1 - (sys - 120) / 60);
+    scores.push(sScore);
+  }
+  if (dia != null) {
+    const dScore = dia >= 60 && dia <= 80 ? 1 : dia < 60 ? dia / 60 : Math.max(0, 1 - (dia - 80) / 40);
+    scores.push(dScore);
+  }
+
+  // Sleep hours: ideal 7-9h
+  const sleep = avgVal("sleep_hours");
+  if (sleep != null) {
+    const slScore = sleep >= 7 && sleep <= 9 ? 1 : sleep < 7 ? Math.max(0, sleep / 7) : Math.max(0, 1 - (sleep - 9) / 4);
+    scores.push(slScore);
+  }
+
+  // Resting BPM: ideal 50-80
+  const bpm = avgVal("resting_bpm");
+  if (bpm != null) {
+    const bpmScore = bpm >= 50 && bpm <= 80 ? 1 : bpm < 50 ? Math.max(0, bpm / 50) : Math.max(0, 1 - (bpm - 80) / 40);
+    scores.push(bpmScore);
+  }
+
+  // Hydration level
+  const hydrations = records.map(r => r.hydration_level).filter(Boolean);
+  if (hydrations.length > 0) {
+    const hydMap: Record<string, number> = { "Boa": 1, "Adequada": 0.8, "Moderada": 0.6, "Baixa": 0.3, "Muito Baixa": 0.1 };
+    const hScores = hydrations.map((h: string) => hydMap[h] ?? 0.5);
+    scores.push(hScores.reduce((a: number, b: number) => a + b, 0) / hScores.length);
+  }
+
+  if (scores.length === 0) return null;
+  return Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 100);
+}
+
 function getWorkingDaysInMonth(): number {
   const now = new Date();
   const year = now.getFullYear();

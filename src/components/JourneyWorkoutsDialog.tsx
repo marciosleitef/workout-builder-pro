@@ -270,6 +270,7 @@ const JourneyWorkoutsDialog = ({
   const handleFinishWorkout = () => {
     if (timerRef.current) clearInterval(timerRef.current);
     setCheckoutForm({});
+    setCurrentStep(0);
     setPhase("checkout");
   };
 

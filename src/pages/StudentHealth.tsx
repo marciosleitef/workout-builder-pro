@@ -231,6 +231,7 @@ const StudentHealth = () => {
     fetchStudent();
     fetchDailyRecords();
     fetchBioRecords();
+    fetchSessionRecords();
   }, [studentId]);
 
   const fetchStudent = async () => {

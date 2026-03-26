@@ -55,11 +55,11 @@ const App = () => (
           <Route path="/challenge-dashboard/:challengeId" element={<ProtectedRoute allowedRole="professor"><ChallengeDashboard /></ProtectedRoute>} />
           <Route path="/workout/:studentId" element={<ProtectedRoute allowedRole="professor"><Index /></ProtectedRoute>} />
           {/* Student routes */}
-          <Route path="/student-dashboard" element={<ProtectedRoute allowedRole="student"><StudentDashboard /></ProtectedRoute>} />
-          <Route path="/student-workouts" element={<ProtectedRoute allowedRole="student"><StudentWorkouts /></ProtectedRoute>} />
-          <Route path="/student-history" element={<ProtectedRoute allowedRole="student"><StudentHistory /></ProtectedRoute>} />
-          <Route path="/student-health" element={<ProtectedRoute allowedRole="student"><StudentHealth /></ProtectedRoute>} />
-          <Route path="/student-challenges" element={<ProtectedRoute allowedRole="student"><StudentChallenges /></ProtectedRoute>} />
+          <Route path="/student-dashboard" element={<ProtectedRoute><StudentDashboard /></ProtectedRoute>} />
+          <Route path="/student-workouts" element={<ProtectedRoute><StudentWorkouts /></ProtectedRoute>} />
+          <Route path="/student-history" element={<ProtectedRoute><StudentHistory /></ProtectedRoute>} />
+          <Route path="/student-health" element={<ProtectedRoute><StudentHealth /></ProtectedRoute>} />
+          <Route path="/student-challenges" element={<ProtectedRoute><StudentChallenges /></ProtectedRoute>} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

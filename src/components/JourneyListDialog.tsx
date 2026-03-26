@@ -97,7 +97,8 @@ const JourneyListDialog = ({
               return (
                 <div
                   key={j.id}
-                  className="rounded-xl border border-border bg-card p-4 space-y-3"
+                  className="rounded-xl border border-border bg-card p-4 space-y-3 cursor-pointer hover:border-primary/40 transition-colors"
+                  onClick={() => onOpenJourney?.(j)}
                 >
                   {/* Top row */}
                   <div className="flex items-start justify-between">
@@ -110,14 +111,7 @@ const JourneyListDialog = ({
                         {status.label}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        onClick={() => onOpenJourney?.(j)}
-                        className="w-8 h-8 rounded-full bg-[hsl(150,60%,45%)] flex items-center justify-center text-white hover:opacity-90 transition-opacity"
-                        title="Abrir treinos"
-                      >
-                        <Dumbbell className="w-4 h-4" />
-                      </button>
+                    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => onEditJourney?.(j)}
                         className="w-8 h-8 rounded-full bg-[hsl(200,70%,50%)] flex items-center justify-center text-white hover:opacity-90 transition-opacity"

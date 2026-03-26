@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -7,7 +7,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ArrowLeft, CalendarDays, Dumbbell, Info, ChevronDown, ChevronUp,
   Printer, Play, Link2, Clock, Flame, CheckCircle2, Activity,
-  Zap, Moon, Brain, Smile, TrendingUp, Droplets, Thermometer, Square
+  Zap, Moon, Brain, Smile, TrendingUp, Droplets, Thermometer, Square,
+  Video, Eye, Hash, RotateCw, Timer, Gauge, Ruler, Wind, Check
 } from "lucide-react";
 
 interface WorkoutExerciseData {
@@ -17,6 +18,11 @@ interface WorkoutExerciseData {
   reps?: string;
   load?: string;
   rest?: string;
+  speed?: string;
+  distance?: string;
+  duration?: string;
+  breathing?: string;
+  calories?: string;
   notes?: string;
 }
 
@@ -81,6 +87,18 @@ const POST_SCALES = [
 
 const URINE_COLORS = ["#F5F5DC", "#FFFACD", "#FFEB3B", "#FFD54F", "#FFB74D", "#FF9800", "#E65100", "#BF360C"];
 
+const PARAM_FIELDS = [
+  { key: "sets", label: "Séries", icon: Hash },
+  { key: "reps", label: "Repetições", icon: RotateCw },
+  { key: "load", label: "Carga (kg)", icon: Dumbbell },
+  { key: "rest", label: "Intervalo (seg)", icon: Timer },
+  { key: "speed", label: "Velocidade", icon: Gauge },
+  { key: "distance", label: "Distância (m)", icon: Ruler },
+  { key: "duration", label: "Tempo (min)", icon: Clock },
+  { key: "breathing", label: "Respiração", icon: Wind },
+  { key: "calories", label: "Meta de calorias", icon: Flame },
+] as const;
+
 function getScaleColor(value: number, max: number, inverted = false) {
   const ratio = value / max;
   const r = inverted ? ratio : 1 - ratio;
@@ -128,6 +146,20 @@ function ScaleSelector({ scale, value, onChange }: { scale: typeof PRE_SCALES[0]
   );
 }
 
+// Video player component
+function VideoPlayer({ url, onClose }: { url: string; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center" onClick={onClose}>
+      <div className="w-full max-w-lg mx-4" onClick={(e) => e.stopPropagation()}>
+        <video src={url} controls autoPlay className="w-full rounded-xl" />
+        <button onClick={onClose} className="mt-3 w-full py-2 rounded-xl bg-white/20 text-white text-sm font-bold hover:bg-white/30 transition-colors">
+          Fechar
+        </button>
+      </div>
+    </div>
+  );
+}
+
 type Phase = "workouts" | "checkin" | "active" | "checkout" | "metrics" | "done";
 
 const JourneyWorkoutsDialog = ({
@@ -147,6 +179,16 @@ const JourneyWorkoutsDialog = ({
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [saving, setSaving] = useState(false);
 
+  // Active workout state
+  const [completedExercises, setCompletedExercises] = useState<Set<string>>(new Set());
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [expandedExercise, setExpandedExercise] = useState<string | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+
+  // Timer
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   useEffect(() => {
     if (open && journeyId) fetchWorkouts();
     if (!open) {
@@ -157,8 +199,22 @@ const JourneyWorkoutsDialog = ({
       setCheckoutForm({});
       setMetricsForm({ workout_bpm_avg: "", workout_bpm_max: "", calories_burned: "" });
       setStartTime(null);
+      setCompletedExercises(new Set());
+      setExpandedGroups(new Set());
+      setExpandedExercise(null);
+      setElapsedSeconds(0);
+      if (timerRef.current) clearInterval(timerRef.current);
     }
   }, [open, journeyId]);
+
+  useEffect(() => {
+    if (phase === "active" && startTime) {
+      timerRef.current = setInterval(() => {
+        setElapsedSeconds(Math.floor((Date.now() - startTime.getTime()) / 1000));
+      }, 1000);
+      return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    }
+  }, [phase, startTime]);
 
   const fetchWorkouts = async () => {
     setLoading(true);
@@ -183,7 +239,6 @@ const JourneyWorkoutsDialog = ({
   const handleSubmitCheckin = async () => {
     if (!user || !studentId || !selectedWorkout) return;
     setSaving(true);
-    // Save pre-workout feedback
     await supabase.from("workout_session_feedback").insert({
       student_id: studentId,
       professor_id: user.id,
@@ -199,7 +254,6 @@ const JourneyWorkoutsDialog = ({
       urine_color_scale: checkinForm.urine_color_scale || null,
     } as any);
 
-    // Also register workout checkin
     await supabase.from("workout_checkins").insert({
       student_id: studentId,
       professor_id: user.id,
@@ -209,12 +263,15 @@ const JourneyWorkoutsDialog = ({
     });
 
     setSaving(false);
-    setStartTime(new Date());
+    const now = new Date();
+    setStartTime(now);
+    setCompletedExercises(new Set());
     toast.success("Check-in registrado! Bom treino! 💪");
     setPhase("active");
   };
 
   const handleFinishWorkout = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
     setCheckoutForm({});
     setPhase("checkout");
   };
@@ -226,12 +283,16 @@ const JourneyWorkoutsDialog = ({
   const handleSubmitMetrics = async () => {
     if (!user || !studentId) return;
     setSaving(true);
+    // Calculate training duration in minutes
+    const trainingDurationMin = startTime ? Math.round((Date.now() - startTime.getTime()) / 60000) : null;
+    
     await supabase.from("workout_session_feedback").insert({
       student_id: studentId,
       professor_id: user.id,
       feedback_type: "post",
       session_date: new Date().toISOString().split("T")[0],
       checkout_time: new Date().toISOString(),
+      checkin_time: startTime?.toISOString() || null,
       post_recovery_scale: checkoutForm.post_recovery_scale || null,
       perceived_exertion_scale: checkoutForm.perceived_exertion_scale || null,
       pain_scale_eva: checkoutForm.pain_scale_eva || null,
@@ -244,27 +305,153 @@ const JourneyWorkoutsDialog = ({
     setPhase("done");
   };
 
+  const toggleExerciseComplete = (exId: string) => {
+    setCompletedExercises((prev) => {
+      const next = new Set(prev);
+      if (next.has(exId)) next.delete(exId);
+      else next.add(exId);
+      return next;
+    });
+  };
+
+  const toggleGroupExpanded = (groupId: string) => {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(groupId)) next.delete(groupId);
+      else next.add(groupId);
+      return next;
+    });
+  };
+
   const isWeekly = journeyFormat.toLowerCase() === "semanal";
   const isBiSetData = (item: WorkoutExerciseData | BiSetData): item is BiSetData =>
     "type" in item && item.type === "biset";
   const groups = selectedWorkout?.exercises_data || [];
   const hasExercises = groups.some((g) => g.items.length > 0);
 
-  const renderExerciseItem = (ex: WorkoutExerciseData) => (
-    <div key={ex.id} className="flex items-center gap-2 px-3 py-2">
-      <Dumbbell className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-      <div className="flex-1 min-w-0">
-        <p className="text-sm text-foreground truncate">{ex.exercise.name}</p>
-        {(ex.sets || ex.reps || ex.load) && (
-          <p className="text-[10px] text-muted-foreground">
-            {ex.sets && `${ex.sets}x`}{ex.reps || ""} {ex.load ? `• ${ex.load}` : ""} {ex.rest ? `• Desc: ${ex.rest}s` : ""}
-          </p>
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  };
+
+  const totalExCount = groups.reduce((acc, g) => acc + g.items.reduce((a, item) => a + (isBiSetData(item) ? item.exercises.length : 1), 0), 0);
+  const completedCount = completedExercises.size;
+
+  // ── Exercise item with params and video ──
+  const renderExerciseItemFull = (ex: WorkoutExerciseData, isActive: boolean) => {
+    const isCompleted = completedExercises.has(ex.id);
+    const isExpanded = expandedExercise === ex.id;
+    const hasParams = PARAM_FIELDS.some((f) => (ex as any)[f.key]);
+    const hasVideo = !!ex.exercise.videoUrl;
+
+    return (
+      <div key={ex.id} className={`transition-colors ${isCompleted && isActive ? "bg-accent/5" : ""}`}>
+        <div className="flex items-center gap-2 px-3 py-2.5">
+          {isActive && (
+            <button onClick={() => toggleExerciseComplete(ex.id)}
+              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isCompleted ? "bg-accent border-accent" : "border-muted-foreground/40 hover:border-primary"}`}>
+              {isCompleted && <Check className="w-3.5 h-3.5 text-white" />}
+            </button>
+          )}
+          <Dumbbell className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+          <button onClick={() => setExpandedExercise(isExpanded ? null : ex.id)} className="flex-1 min-w-0 text-left">
+            <p className={`text-sm truncate ${isCompleted && isActive ? "line-through text-muted-foreground" : "text-foreground"}`}>
+              {ex.exercise.name}
+            </p>
+            {(ex.sets || ex.reps || ex.load) && (
+              <p className="text-[10px] text-muted-foreground">
+                {ex.sets && `${ex.sets}x`}{ex.reps || ""} {ex.load ? `• ${ex.load}kg` : ""} {ex.rest ? `• Desc: ${ex.rest}s` : ""}
+              </p>
+            )}
+          </button>
+          <div className="flex items-center gap-1 shrink-0">
+            {hasVideo && (
+              <button onClick={() => setVideoUrl(ex.exercise.videoUrl!)}
+                className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors">
+                <Video className="w-3.5 h-3.5 text-primary" />
+              </button>
+            )}
+            {hasParams && (
+              <button onClick={() => setExpandedExercise(isExpanded ? null : ex.id)}
+                className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
+                <Eye className="w-3.5 h-3.5 text-muted-foreground" />
+              </button>
+            )}
+          </div>
+        </div>
+        {/* Expanded params */}
+        {isExpanded && (
+          <div className="px-4 pb-3 pt-0">
+            <div className="grid grid-cols-3 gap-2">
+              {PARAM_FIELDS.filter((f) => (ex as any)[f.key]).map((f) => {
+                const Icon = f.icon;
+                return (
+                  <div key={f.key} className="bg-secondary/50 rounded-lg px-2 py-1.5 flex items-center gap-1.5">
+                    <Icon className="w-3 h-3 text-muted-foreground shrink-0" />
+                    <div>
+                      <p className="text-[9px] text-muted-foreground leading-tight">{f.label}</p>
+                      <p className="text-xs font-bold text-foreground">{(ex as any)[f.key]}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {ex.notes && (
+              <div className="mt-2 bg-secondary/50 rounded-lg px-2 py-1.5">
+                <p className="text-[9px] text-muted-foreground">Observações</p>
+                <p className="text-xs text-foreground">{ex.notes}</p>
+              </div>
+            )}
+          </div>
         )}
       </div>
-    </div>
-  );
+    );
+  };
 
-  const elapsedMinutes = startTime ? Math.floor((Date.now() - startTime.getTime()) / 60000) : 0;
+  // Simple exercise item (no interaction)
+  const renderExerciseItemSimple = (ex: WorkoutExerciseData) => renderExerciseItemFull(ex, false);
+
+  // ── Collapsible group ──
+  const renderGroup = (group: ExerciseGroupData, isActive: boolean) => {
+    const isOpen = expandedGroups.has(group.id);
+    const groupExCount = group.items.reduce((a, item) => a + (isBiSetData(item) ? item.exercises.length : 1), 0);
+    const groupCompletedCount = group.items.reduce((a, item) => {
+      if (isBiSetData(item)) return a + item.exercises.filter((e) => completedExercises.has(e.id)).length;
+      return a + (completedExercises.has(item.id) ? 1 : 0);
+    }, 0);
+
+    return (
+      <div key={group.id} className="rounded-xl border overflow-hidden" style={{ backgroundColor: group.color, borderColor: group.color.replace("0.15", "0.4") }}>
+        <button onClick={() => toggleGroupExpanded(group.id)} className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-black/5 transition-colors">
+          <div className="flex items-center gap-2">
+            <p className="text-xs font-display font-bold text-foreground uppercase tracking-wide">{group.name}</p>
+            {isActive && (
+              <span className="text-[10px] text-muted-foreground font-medium">
+                {groupCompletedCount}/{groupExCount}
+              </span>
+            )}
+          </div>
+          {isOpen ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+        </button>
+        {isOpen && (
+          <div className="bg-background/60 divide-y divide-border/50">
+            {group.items.map((item) =>
+              isBiSetData(item) ? (
+                <div key={item.id} className="border-l-2 border-primary/50">
+                  <div className="flex items-center gap-1.5 px-3 py-1 bg-primary/5">
+                    <Link2 className="w-3 h-3 text-primary" />
+                    <span className="text-[10px] font-display font-semibold text-primary">Bi-Set</span>
+                  </div>
+                  {item.exercises.map((ex) => renderExerciseItemFull(ex, isActive))}
+                </div>
+              ) : renderExerciseItemFull(item, isActive)
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   // ── CHECKIN PHASE ──
   const renderCheckin = () => (
@@ -290,39 +477,26 @@ const JourneyWorkoutsDialog = ({
   // ── ACTIVE PHASE ──
   const renderActive = () => (
     <div className="space-y-4">
-      <div className="bg-gradient-to-r from-[hsl(220,60%,50%)] to-[hsl(250,55%,50%)] rounded-xl p-6 text-white text-center">
-        <Activity className="w-10 h-10 mx-auto mb-2 animate-pulse" />
+      <div className="bg-gradient-to-r from-[hsl(220,60%,50%)] to-[hsl(250,55%,50%)] rounded-xl p-4 text-white text-center">
+        <Activity className="w-8 h-8 mx-auto mb-2 animate-pulse" />
         <h3 className="font-display font-bold text-lg">Treino em Andamento</h3>
         <p className="text-white/70 text-sm">{selectedWorkout?.name}</p>
-        <div className="mt-3 bg-white/10 rounded-lg px-4 py-2 inline-block">
-          <p className="text-2xl font-display font-bold">{elapsedMinutes} min</p>
-          <p className="text-white/60 text-xs">tempo decorrido</p>
+        <div className="flex items-center justify-center gap-4 mt-3">
+          <div className="bg-white/10 rounded-lg px-4 py-2">
+            <p className="text-2xl font-display font-bold font-mono">{formatTime(elapsedSeconds)}</p>
+            <p className="text-white/60 text-[10px]">tempo</p>
+          </div>
+          <div className="bg-white/10 rounded-lg px-4 py-2">
+            <p className="text-2xl font-display font-bold">{completedCount}/{totalExCount}</p>
+            <p className="text-white/60 text-[10px]">exercícios</p>
+          </div>
         </div>
       </div>
 
-      {/* Show exercises for reference */}
+      {/* Collapsible exercise groups */}
       {hasExercises && (
         <div className="space-y-3">
-          {groups.map((group) => (
-            <div key={group.id} className="rounded-xl border overflow-hidden" style={{ backgroundColor: group.color, borderColor: group.color.replace("0.15", "0.4") }}>
-              <div className="px-3 py-2">
-                <p className="text-xs font-display font-bold text-foreground uppercase tracking-wide">{group.name}</p>
-              </div>
-              <div className="bg-background/60 divide-y divide-border/50">
-                {group.items.map((item) =>
-                  isBiSetData(item) ? (
-                    <div key={item.id} className="border-l-2 border-primary/50">
-                      <div className="flex items-center gap-1.5 px-3 py-1 bg-primary/5">
-                        <Link2 className="w-3 h-3 text-primary" />
-                        <span className="text-[10px] font-display font-semibold text-primary">Bi-Set</span>
-                      </div>
-                      {item.exercises.map((ex) => renderExerciseItem(ex))}
-                    </div>
-                  ) : renderExerciseItem(item)
-                )}
-              </div>
-            </div>
-          ))}
+          {groups.map((group) => renderGroup(group, true))}
         </div>
       )}
 
@@ -389,6 +563,8 @@ const JourneyWorkoutsDialog = ({
     </div>
   );
 
+  const trainingMinutes = startTime ? Math.round(elapsedSeconds / 60) : 0;
+
   // ── DONE PHASE ──
   const renderDone = () => (
     <div className="text-center py-8 space-y-4">
@@ -397,7 +573,7 @@ const JourneyWorkoutsDialog = ({
       </div>
       <h3 className="font-display font-bold text-xl text-foreground">Treino Concluído! 🎉</h3>
       <p className="text-sm text-muted-foreground">
-        {selectedWorkout?.name} • {elapsedMinutes} min
+        {selectedWorkout?.name} • {trainingMinutes} min
       </p>
       {(metricsForm.calories_burned || metricsForm.workout_bpm_avg) && (
         <div className="flex justify-center gap-4">
@@ -422,7 +598,7 @@ const JourneyWorkoutsDialog = ({
     </div>
   );
 
-  // ── WORKOUTS PHASE (original) ──
+  // ── WORKOUTS PHASE ──
   const renderWorkouts = () => (
     <>
       {loading ? (
@@ -445,7 +621,7 @@ const JourneyWorkoutsDialog = ({
               {workouts.map((w, i) => {
                 const isSelected = selectedWorkout?.id === w.id;
                 return (
-                  <button key={w.id} onClick={() => { setSelectedWorkout(w); setShowOrientations(false); }}
+                  <button key={w.id} onClick={() => { setSelectedWorkout(w); setShowOrientations(false); setExpandedGroups(new Set()); setExpandedExercise(null); }}
                     className={`shrink-0 rounded-xl p-3 min-w-[100px] text-left transition-all ${isSelected ? "bg-[hsl(250,55%,50%)] text-white shadow-lg shadow-[hsl(250,55%,50%)/0.3]" : "bg-secondary border border-border text-foreground hover:border-primary/30"}`}>
                     <div className="flex items-center gap-1 mb-1">
                       <div className={`w-2 h-2 rounded-full ${isSelected ? "bg-[hsl(150,60%,45%)]" : "bg-muted-foreground/40"}`} />
@@ -481,27 +657,10 @@ const JourneyWorkoutsDialog = ({
             </div>
           )}
 
-          {/* Exercises */}
+          {/* Exercises - collapsible */}
           {selectedWorkout && hasExercises ? (
             <div className="space-y-3">
-              {groups.map((group) => (
-                <div key={group.id} className="rounded-xl border overflow-hidden" style={{ backgroundColor: group.color, borderColor: group.color.replace("0.15", "0.4") }}>
-                  <div className="px-3 py-2"><p className="text-xs font-display font-bold text-foreground uppercase tracking-wide">{group.name}</p></div>
-                  <div className="bg-background/60 divide-y divide-border/50">
-                    {group.items.map((item) =>
-                      isBiSetData(item) ? (
-                        <div key={item.id} className="border-l-2 border-primary/50">
-                          <div className="flex items-center gap-1.5 px-3 py-1 bg-primary/5">
-                            <Link2 className="w-3 h-3 text-primary" />
-                            <span className="text-[10px] font-display font-semibold text-primary">Bi-Set</span>
-                          </div>
-                          {item.exercises.map((ex) => renderExerciseItem(ex))}
-                        </div>
-                      ) : renderExerciseItem(item)
-                    )}
-                  </div>
-                </div>
-              ))}
+              {groups.map((group) => renderGroup(group, false))}
             </div>
           ) : selectedWorkout ? (
             <div className="rounded-xl border border-border bg-secondary/30 p-4 text-center">
@@ -562,6 +721,9 @@ const JourneyWorkoutsDialog = ({
             {phase === "done" && renderDone()}
           </div>
         </ScrollArea>
+
+        {/* Video overlay */}
+        {videoUrl && <VideoPlayer url={videoUrl} onClose={() => setVideoUrl(null)} />}
       </DialogContent>
     </Dialog>
   );

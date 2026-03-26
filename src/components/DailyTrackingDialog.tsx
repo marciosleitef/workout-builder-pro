@@ -292,20 +292,24 @@ export default function DailyTrackingDialog({ open, onOpenChange, student }: Pro
                 </div>
               </>
             )}
-            {latestPre?.checkin_time && (
-              <div className="bg-secondary/30 rounded-lg p-2 text-center">
-                <p className="text-lg">📥</p>
-                <p className="text-xs font-bold text-foreground">{format(new Date(latestPre.checkin_time), "HH:mm")}</p>
-                <p className="text-[9px] text-muted-foreground">Check-in</p>
-              </div>
-            )}
-            {latestPost?.checkout_time && (
-              <div className="bg-secondary/30 rounded-lg p-2 text-center">
-                <p className="text-lg">📤</p>
-                <p className="text-xs font-bold text-foreground">{format(new Date(latestPost.checkout_time), "HH:mm")}</p>
-                <p className="text-[9px] text-muted-foreground">Check-out</p>
-              </div>
-            )}
+            {/* Training duration from checkin_time + checkout_time */}
+            {(() => {
+              const pre = latestPre;
+              const post = latestPost;
+              const checkin = pre?.checkin_time || post?.checkin_time;
+              const checkout = post?.checkout_time;
+              if (checkin && checkout) {
+                const durationMin = Math.round((new Date(checkout).getTime() - new Date(checkin).getTime()) / 60000);
+                return (
+                  <div className="bg-secondary/30 rounded-lg p-2 text-center col-span-2">
+                    <p className="text-lg">⏱️</p>
+                    <p className="text-xs font-bold text-foreground">{durationMin} min</p>
+                    <p className="text-[9px] text-muted-foreground">Tempo de Treino</p>
+                  </div>
+                );
+              }
+              return null;
+            })()}
           </div>
         )}
 
@@ -585,11 +589,13 @@ export default function DailyTrackingDialog({ open, onOpenChange, student }: Pro
           </div>
         )}
 
-        {r.checkin_time && (
-          <p className="text-xs text-muted-foreground">Check-in: {format(new Date(r.checkin_time), "HH:mm")}</p>
-        )}
-        {r.checkout_time && (
-          <p className="text-xs text-muted-foreground">Check-out: {format(new Date(r.checkout_time), "HH:mm")}</p>
+        {r.checkin_time && r.checkout_time && (
+          <div className="bg-secondary/30 rounded-xl p-3 text-center">
+            <p className="text-[10px] text-muted-foreground">Tempo de Treino</p>
+            <p className="text-lg font-bold text-foreground">
+              {Math.round((new Date(r.checkout_time).getTime() - new Date(r.checkin_time).getTime()) / 60000)} min
+            </p>
+          </div>
         )}
       </div>
     );

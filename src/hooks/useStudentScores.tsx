@@ -300,6 +300,7 @@ export function useStudentScores(studentIds: string[]) {
         performanceBonus += 5;
         badges.push("week_complete");
         bonusDetails.push("Semana completa (+5%)");
+      }
 
       // Streak: 3+ consecutive days
       const sortedDays = Array.from(uniqueDays).sort();

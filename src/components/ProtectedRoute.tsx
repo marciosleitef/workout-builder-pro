@@ -1,8 +1,13 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  skipPasswordCheck?: boolean;
+}
+
+const ProtectedRoute = ({ children, skipPasswordCheck }: ProtectedRouteProps) => {
+  const { user, loading, mustChangePassword } = useAuth();
 
   if (loading) {
     return (
@@ -14,6 +19,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   if (!user) {
     return <Navigate to="/auth" replace />;
+  }
+
+  if (!skipPasswordCheck && mustChangePassword) {
+    return <Navigate to="/change-password" replace />;
   }
 
   return <>{children}</>;

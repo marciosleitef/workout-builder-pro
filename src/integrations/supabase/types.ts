@@ -21,6 +21,7 @@ export type Database = {
           email: string | null
           full_name: string
           id: string
+          must_change_password: boolean | null
           updated_at: string
           user_id: string
         }
@@ -30,6 +31,7 @@ export type Database = {
           email?: string | null
           full_name?: string
           id?: string
+          must_change_password?: boolean | null
           updated_at?: string
           user_id: string
         }
@@ -39,6 +41,7 @@ export type Database = {
           email?: string | null
           full_name?: string
           id?: string
+          must_change_password?: boolean | null
           updated_at?: string
           user_id?: string
         }
@@ -56,6 +59,7 @@ export type Database = {
           registration_date: string | null
           status: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -68,6 +72,7 @@ export type Database = {
           registration_date?: string | null
           status?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -80,6 +85,7 @@ export type Database = {
           registration_date?: string | null
           status?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }

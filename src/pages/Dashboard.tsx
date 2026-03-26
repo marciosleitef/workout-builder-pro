@@ -148,62 +148,63 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-foreground px-6 py-5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <img src={logoPS} alt="PS" className="h-9" />
-            <div className="h-8 w-px bg-primary-foreground/15" />
-            <div>
-              <h1 className="text-primary-foreground font-display font-bold text-lg tracking-tight">{profileName.toUpperCase() || "PROFESSOR"}</h1>
-              <p className="text-primary-foreground/40 text-xs">{user?.email}</p>
+      <header className="bg-foreground px-4 sm:px-6 py-4 sm:py-5">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+            <img src={logoPS} alt="PS" className="h-7 sm:h-9 shrink-0" />
+            <div className="h-6 sm:h-8 w-px bg-primary-foreground/15 shrink-0 hidden sm:block" />
+            <div className="min-w-0">
+              <h1 className="text-primary-foreground font-display font-bold text-sm sm:text-lg tracking-tight truncate">{profileName.toUpperCase() || "PROFESSOR"}</h1>
+              <p className="text-primary-foreground/40 text-[10px] sm:text-xs truncate">{user?.email}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button onClick={() => navigate("/profile")} className="w-9 h-9 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:bg-primary-foreground/15 hover:text-primary-foreground transition-colors" title="Meu Perfil">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            <button onClick={() => navigate("/profile")} className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:bg-primary-foreground/15 hover:text-primary-foreground transition-colors" title="Meu Perfil">
               <User className="w-4 h-4" />
             </button>
-            <button onClick={() => navigate("/notifications")} className="relative w-9 h-9 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:bg-primary-foreground/15 hover:text-primary-foreground transition-colors" title="Notificações">
+            <button onClick={() => navigate("/notifications")} className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:bg-primary-foreground/15 hover:text-primary-foreground transition-colors" title="Notificações">
               <Bell className="w-4 h-4" />
               {unreadNotifCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">{unreadNotifCount}</span>
               )}
             </button>
-            <button onClick={toggleTheme} className="w-9 h-9 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:bg-primary-foreground/15 hover:text-primary-foreground transition-colors" title={isDark ? "Tema Claro" : "Tema Escuro"}>
+            <button onClick={toggleTheme} className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:bg-primary-foreground/15 hover:text-primary-foreground transition-colors" title={isDark ? "Tema Claro" : "Tema Escuro"}>
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
-            <button onClick={handleLogout} className="flex items-center gap-2 px-3 py-2 rounded-lg text-primary-foreground/50 hover:text-primary-foreground hover:bg-primary-foreground/10 text-sm transition-colors">
+            <button onClick={handleLogout} className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:bg-primary-foreground/15 hover:text-primary-foreground transition-colors sm:w-auto sm:h-auto sm:px-3 sm:py-2 sm:bg-transparent sm:text-primary-foreground/50 sm:hover:text-primary-foreground sm:hover:bg-primary-foreground/10" title="Sair">
               <LogOut className="w-4 h-4" />
-              Sair
+              <span className="hidden sm:inline ml-2 text-sm">Sair</span>
             </button>
           </div>
         </div>
       </header>
 
       {/* Cards */}
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="font-display font-bold text-lg text-foreground">Painel Principal</h2>
+      <div className="max-w-7xl mx-auto p-4 sm:p-6">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <h2 className="font-display font-bold text-base sm:text-lg text-foreground">Painel Principal</h2>
           <button
             onClick={() => setShowNewStudentMenu(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-foreground text-background rounded-xl font-display font-bold text-sm hover:opacity-90 transition-opacity"
+            className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-foreground text-background rounded-xl font-display font-bold text-xs sm:text-sm hover:opacity-90 transition-opacity"
           >
             <Plus className="w-4 h-4" />
-            Novo Aluno
+            <span className="hidden sm:inline">Novo Aluno</span>
+            <span className="sm:hidden">Novo</span>
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           {cards.map((card) => (
             <button
               key={card.route}
               onClick={() => navigate(card.route)}
-              className="rounded-2xl border border-border bg-card p-6 text-left hover:border-foreground/20 card-elevated group"
+              className="rounded-2xl border border-border bg-card p-4 sm:p-6 text-left hover:border-foreground/20 card-elevated group"
             >
-              <div className="w-12 h-12 rounded-xl bg-foreground/5 flex items-center justify-center mb-4 group-hover:bg-foreground/10 transition-colors">
-                <card.icon className="w-6 h-6 text-foreground/70" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-foreground/5 flex items-center justify-center mb-3 sm:mb-4 group-hover:bg-foreground/10 transition-colors">
+                <card.icon className="w-5 h-5 sm:w-6 sm:h-6 text-foreground/70" />
               </div>
-              <h3 className="font-display font-bold text-foreground text-base mb-1">{card.title}</h3>
-              <p className="text-sm text-muted-foreground mb-3">{card.description}</p>
-              <span className="text-xs font-medium px-3 py-1 rounded-full bg-secondary text-secondary-foreground">{card.stat}</span>
+              <h3 className="font-display font-bold text-foreground text-sm sm:text-base mb-1">{card.title}</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3 line-clamp-2">{card.description}</p>
+              <span className="text-[10px] sm:text-xs font-medium px-2 sm:px-3 py-1 rounded-full bg-secondary text-secondary-foreground">{card.stat}</span>
             </button>
           ))}
         </div>

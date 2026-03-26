@@ -433,6 +433,52 @@ const Dashboard = () => {
         </DialogContent>
       </Dialog>
 
+      {/* New student menu */}
+      <Dialog open={showNewStudentMenu} onOpenChange={setShowNewStudentMenu}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display">Novo Aluno</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 mt-1">
+            <button
+              onClick={() => {
+                setShowNewStudentMenu(false);
+                setEditingStudent(null);
+                setForm({ full_name: "", email: "", phone: "", plan: "PS Prime" });
+                setShowForm(true);
+              }}
+              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors"
+            >
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Plus className="w-5 h-5 text-primary" />
+              </div>
+              <div className="text-left">
+                <p className="font-display font-bold text-sm text-foreground">Cadastro Manual</p>
+                <p className="text-xs text-muted-foreground">Preencher os dados do aluno agora</p>
+              </div>
+            </button>
+
+            <button
+              onClick={() => {
+                const link = `${window.location.origin}/register/${user?.id}`;
+                navigator.clipboard.writeText(link);
+                toast.success("Link de cadastro copiado!");
+                setShowNewStudentMenu(false);
+              }}
+              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors"
+            >
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Link2 className="w-5 h-5 text-primary" />
+              </div>
+              <div className="text-left">
+                <p className="font-display font-bold text-sm text-foreground">Enviar Link de Cadastro</p>
+                <p className="text-xs text-muted-foreground">O aluno preenche seus próprios dados</p>
+              </div>
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Journey wizard */}
       {selectedStudent && (
         <>

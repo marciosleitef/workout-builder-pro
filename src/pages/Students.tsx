@@ -13,6 +13,7 @@ import JourneyEditDialog from "@/components/JourneyEditDialog";
 import PlansDialog from "@/components/PlansDialog";
 import BioimpedanceDialog from "@/components/BioimpedanceDialog";
 import DailyTrackingDialog from "@/components/DailyTrackingDialog";
+import { useStudentScores } from "@/hooks/useStudentScores";
 
 interface Student {
   id: string;

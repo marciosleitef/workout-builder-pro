@@ -184,6 +184,68 @@ export type Database = {
           },
         ]
       }
+      student_daily_records: {
+        Row: {
+          blood_pressure_diastolic: number | null
+          blood_pressure_systolic: number | null
+          bmi: number | null
+          created_at: string
+          height: number | null
+          hydration_level: string | null
+          id: string
+          notes: string | null
+          oxygen_saturation: number | null
+          professor_id: string
+          recorded_at: string
+          resting_bpm: number | null
+          sleep_hours: number | null
+          student_id: string
+          weight: number | null
+        }
+        Insert: {
+          blood_pressure_diastolic?: number | null
+          blood_pressure_systolic?: number | null
+          bmi?: number | null
+          created_at?: string
+          height?: number | null
+          hydration_level?: string | null
+          id?: string
+          notes?: string | null
+          oxygen_saturation?: number | null
+          professor_id: string
+          recorded_at?: string
+          resting_bpm?: number | null
+          sleep_hours?: number | null
+          student_id: string
+          weight?: number | null
+        }
+        Update: {
+          blood_pressure_diastolic?: number | null
+          blood_pressure_systolic?: number | null
+          bmi?: number | null
+          created_at?: string
+          height?: number | null
+          hydration_level?: string | null
+          id?: string
+          notes?: string | null
+          oxygen_saturation?: number | null
+          professor_id?: string
+          recorded_at?: string
+          resting_bpm?: number | null
+          sleep_hours?: number | null
+          student_id?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_daily_records_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_groups: {
         Row: {
           created_at: string
@@ -399,6 +461,99 @@ export type Database = {
             columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workout_session_feedback: {
+        Row: {
+          calories_burned: number | null
+          checkin_time: string | null
+          checkout_time: string | null
+          created_at: string
+          fatigue_scale: number | null
+          feedback_type: string
+          id: string
+          mood_scale: number | null
+          muscle_soreness_scale: number | null
+          notes: string | null
+          pain_scale_eva: number | null
+          perceived_exertion_scale: number | null
+          post_recovery_scale: number | null
+          professor_id: string
+          recovery_perception_scale: number | null
+          session_date: string
+          sleep_quality_scale: number | null
+          stress_level_scale: number | null
+          student_id: string
+          urine_color_scale: number | null
+          workout_bpm_avg: number | null
+          workout_bpm_max: number | null
+          workout_checkin_id: string | null
+        }
+        Insert: {
+          calories_burned?: number | null
+          checkin_time?: string | null
+          checkout_time?: string | null
+          created_at?: string
+          fatigue_scale?: number | null
+          feedback_type: string
+          id?: string
+          mood_scale?: number | null
+          muscle_soreness_scale?: number | null
+          notes?: string | null
+          pain_scale_eva?: number | null
+          perceived_exertion_scale?: number | null
+          post_recovery_scale?: number | null
+          professor_id: string
+          recovery_perception_scale?: number | null
+          session_date?: string
+          sleep_quality_scale?: number | null
+          stress_level_scale?: number | null
+          student_id: string
+          urine_color_scale?: number | null
+          workout_bpm_avg?: number | null
+          workout_bpm_max?: number | null
+          workout_checkin_id?: string | null
+        }
+        Update: {
+          calories_burned?: number | null
+          checkin_time?: string | null
+          checkout_time?: string | null
+          created_at?: string
+          fatigue_scale?: number | null
+          feedback_type?: string
+          id?: string
+          mood_scale?: number | null
+          muscle_soreness_scale?: number | null
+          notes?: string | null
+          pain_scale_eva?: number | null
+          perceived_exertion_scale?: number | null
+          post_recovery_scale?: number | null
+          professor_id?: string
+          recovery_perception_scale?: number | null
+          session_date?: string
+          sleep_quality_scale?: number | null
+          stress_level_scale?: number | null
+          student_id?: string
+          urine_color_scale?: number | null
+          workout_bpm_avg?: number | null
+          workout_bpm_max?: number | null
+          workout_checkin_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_session_feedback_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workout_session_feedback_workout_checkin_id_fkey"
+            columns: ["workout_checkin_id"]
+            isOneToOne: false
+            referencedRelation: "workout_checkins"
             referencedColumns: ["id"]
           },
         ]

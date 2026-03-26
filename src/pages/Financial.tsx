@@ -181,57 +181,59 @@ const Financial = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-foreground px-6 py-5">
-        <div className="max-w-7xl mx-auto flex items-center gap-4">
-          <button onClick={() => navigate("/dashboard")} className="w-9 h-9 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:text-primary-foreground"><ArrowLeft className="w-4 h-4" /></button>
-          <div>
-            <h1 className="text-primary-foreground font-bold text-lg">Painel Financeiro</h1>
-            <p className="text-primary-foreground/40 text-xs">Receitas, cobranças e inadimplência</p>
+      <header className="bg-foreground px-4 sm:px-6 py-4 sm:py-5">
+        <div className="max-w-7xl mx-auto flex items-center gap-3 sm:gap-4">
+          <button onClick={() => navigate("/dashboard")} className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:text-primary-foreground shrink-0"><ArrowLeft className="w-4 h-4" /></button>
+          <div className="min-w-0">
+            <h1 className="text-primary-foreground font-bold text-base sm:text-lg truncate">Painel Financeiro</h1>
+            <p className="text-primary-foreground/40 text-[10px] sm:text-xs">Receitas, cobranças e inadimplência</p>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="rounded-2xl border border-border bg-card p-5">
-            <div className="flex items-center gap-2 mb-2"><TrendingUp className="w-4 h-4 text-green-600" /><span className="text-xs text-muted-foreground">Previsto</span></div>
-            <p className="text-xl font-bold text-foreground">R$ {stats.totalExpected.toFixed(2)}</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+          <div className="rounded-2xl border border-border bg-card p-3 sm:p-5">
+            <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2"><TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-600" /><span className="text-[10px] sm:text-xs text-muted-foreground">Previsto</span></div>
+            <p className="text-base sm:text-xl font-bold text-foreground">R$ {stats.totalExpected.toFixed(2)}</p>
           </div>
-          <div className="rounded-2xl border border-border bg-card p-5">
-            <div className="flex items-center gap-2 mb-2"><DollarSign className="w-4 h-4 text-green-600" /><span className="text-xs text-muted-foreground">Recebido</span></div>
-            <p className="text-xl font-bold text-green-600">R$ {stats.totalReceived.toFixed(2)}</p>
+          <div className="rounded-2xl border border-border bg-card p-3 sm:p-5">
+            <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2"><DollarSign className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-600" /><span className="text-[10px] sm:text-xs text-muted-foreground">Recebido</span></div>
+            <p className="text-base sm:text-xl font-bold text-green-600">R$ {stats.totalReceived.toFixed(2)}</p>
           </div>
-          <div className="rounded-2xl border border-border bg-card p-5">
-            <div className="flex items-center gap-2 mb-2"><AlertTriangle className="w-4 h-4 text-destructive" /><span className="text-xs text-muted-foreground">Atrasados</span></div>
-            <p className="text-xl font-bold text-destructive">{stats.overdueCount}</p>
+          <div className="rounded-2xl border border-border bg-card p-3 sm:p-5">
+            <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2"><AlertTriangle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-destructive" /><span className="text-[10px] sm:text-xs text-muted-foreground">Atrasados</span></div>
+            <p className="text-base sm:text-xl font-bold text-destructive">{stats.overdueCount}</p>
           </div>
-          <div className="rounded-2xl border border-border bg-card p-5">
-            <div className="flex items-center gap-2 mb-2"><CalendarClock className="w-4 h-4 text-yellow-600" /><span className="text-xs text-muted-foreground">Pendentes</span></div>
-            <p className="text-xl font-bold text-foreground">{stats.upcomingCount}</p>
+          <div className="rounded-2xl border border-border bg-card p-3 sm:p-5">
+            <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2"><CalendarClock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-yellow-600" /><span className="text-[10px] sm:text-xs text-muted-foreground">Pendentes</span></div>
+            <p className="text-base sm:text-xl font-bold text-foreground">{stats.upcomingCount}</p>
           </div>
         </div>
 
         {/* Controls */}
-        <div className="flex flex-wrap items-center gap-3">
-          <input type="month" value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)} className="px-3 py-2 rounded-lg bg-secondary border border-border text-foreground text-sm" />
-          <div className="relative flex-1 min-w-[200px]">
+        <div className="space-y-2 sm:space-y-0 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
+          <input type="month" value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)} className="w-full sm:w-auto px-3 py-2 rounded-lg bg-secondary border border-border text-foreground text-sm" />
+          <div className="relative flex-1 min-w-0 sm:min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar aluno..." className="w-full pl-9 pr-3 py-2 rounded-lg bg-secondary border border-border text-foreground text-sm" />
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-1 flex-wrap">
             {(["all", "pending", "overdue", "paid"] as const).map(s => (
-              <button key={s} onClick={() => setFilterStatus(s)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${filterStatus === s ? "bg-foreground text-background" : "bg-secondary text-muted-foreground hover:text-foreground"}`}>
+              <button key={s} onClick={() => setFilterStatus(s)} className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${filterStatus === s ? "bg-foreground text-background" : "bg-secondary text-muted-foreground hover:text-foreground"}`}>
                 {s === "all" ? "Todos" : statusLabels[s]}
               </button>
             ))}
           </div>
-          <button onClick={() => setShowGenerate(true)} className="px-4 py-2 rounded-lg bg-secondary text-foreground text-sm font-medium hover:bg-secondary/80">
-            Gerar Cobranças
-          </button>
-          <button onClick={() => { setFormStudentId(""); setFormAmount(""); setFormDueDate(format(new Date(), "yyyy-MM-dd")); setFormMethod(""); setFormNotes(""); setShowNewPayment(true); }} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-foreground text-background text-sm font-bold hover:opacity-90">
-            <Plus className="w-4 h-4" /> Nova Cobrança
-          </button>
+          <div className="flex gap-2">
+            <button onClick={() => setShowGenerate(true)} className="flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg bg-secondary text-foreground text-xs sm:text-sm font-medium hover:bg-secondary/80">
+              Gerar Cobranças
+            </button>
+            <button onClick={() => { setFormStudentId(""); setFormAmount(""); setFormDueDate(format(new Date(), "yyyy-MM-dd")); setFormMethod(""); setFormNotes(""); setShowNewPayment(true); }} className="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg bg-foreground text-background text-xs sm:text-sm font-bold hover:opacity-90">
+              <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Nova Cobrança
+            </button>
+          </div>
         </div>
 
         {/* Table */}

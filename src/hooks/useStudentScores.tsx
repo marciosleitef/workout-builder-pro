@@ -10,6 +10,12 @@ export interface StudentScore {
   healthBase: number;
   performanceBase: number;
   badges: string[];
+  // Detail breakdown
+  bioScore: number | null;
+  dailyScore: number | null;
+  presenceScore: number;
+  qualityScore: number;
+  bonusDetails: string[];
 }
 
 // Healthy ranges for bioimpedance metrics — returns 0-1 how "healthy" the value is
@@ -217,6 +223,7 @@ export function useStudentScores(studentIds: string[]) {
     for (const sid of studentIds) {
       const gender = studentGenders[sid];
       const badges: string[] = [];
+      const bonusDetails: string[] = [];
 
       // === HEALTH: combine bioimpedance + daily records ===
       const studentBios = bios.filter((b: any) => b.student_id === sid);
@@ -237,6 +244,7 @@ export function useStudentScores(studentIds: string[]) {
       if (biosThisMonth.length > 0) {
         healthBonus += 2.5;
         badges.push("bia_month");
+        bonusDetails.push("Avaliação BIA no mês (+2.5%)");
       }
       // Improvement between last 2 BIAs
       if (studentBios.length >= 2) {
@@ -245,6 +253,7 @@ export function useStudentScores(studentIds: string[]) {
         if (prev != null && curr != null && curr > prev) {
           healthBonus += 2.5;
           badges.push("bia_improved");
+          bonusDetails.push("Melhoria na BIA (+2.5%)");
         }
       }
 
@@ -290,6 +299,7 @@ export function useStudentScores(studentIds: string[]) {
       if (last7.length > 0 && last7Trained.length === last7.length) {
         performanceBonus += 5;
         badges.push("week_complete");
+        bonusDetails.push("Semana completa (+5%)");
       }
 
       // Streak: 3+ consecutive days
@@ -302,13 +312,13 @@ export function useStudentScores(studentIds: string[]) {
         if (diffDays === 1) { currentStreak++; maxStreak = Math.max(maxStreak, currentStreak); }
         else currentStreak = 1;
       }
-      if (maxStreak >= 5) { performanceBonus += 5; badges.push("streak_5"); }
-      else if (maxStreak >= 3) { performanceBonus += 2.5; badges.push("streak_3"); }
+      if (maxStreak >= 5) { performanceBonus += 5; badges.push("streak_5"); bonusDetails.push("Streak 5+ dias (+5%)"); }
+      else if (maxStreak >= 3) { performanceBonus += 2.5; badges.push("streak_3"); bonusDetails.push("Streak 3+ dias (+2.5%)"); }
 
       const health = Math.min(100, healthBase + healthBonus);
       const performance = Math.min(100, performanceBase + performanceBonus);
 
-      result[sid] = { health, performance, healthBase, performanceBase, healthBonus, performanceBonus, badges };
+      result[sid] = { health, performance, healthBase, performanceBase, healthBonus, performanceBonus, badges, bioScore: bioScore ?? null, dailyScore: dailyScore ?? null, presenceScore, qualityScore: Math.round(qualityScore), bonusDetails };
     }
 
     setScores(result);

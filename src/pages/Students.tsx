@@ -97,6 +97,9 @@ const Students = () => {
   const [showStartJourney, setShowStartJourney] = useState(false);
   const [startStudent, setStartStudent] = useState<Student | null>(null);
 
+  const studentIds = students.map(s => s.id);
+  const { scores: studentScores } = useStudentScores(studentIds);
+
   useEffect(() => {
     if (!user) return;
     fetchStudents();

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { UserCircle, Dumbbell, Calendar, LogOut, Sun, Moon, Plus, Link2, Users, Package, Trophy } from "lucide-react";
+import { UserCircle, Dumbbell, Calendar, LogOut, Sun, Moon, Plus, Link2, Users, Package, Trophy, Bell } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useTheme } from "@/hooks/useTheme";
@@ -27,6 +27,7 @@ const Dashboard = () => {
   const [plans, setPlans] = useState<{ id: string; name: string }[]>([]);
   const [planCount, setPlanCount] = useState(0);
   const [challengeCount, setChallengeCount] = useState(0);
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
 
   useEffect(() => {
     if (!user) return;
@@ -37,7 +38,13 @@ const Dashboard = () => {
     fetchPlanCount();
     fetchPlans();
     fetchChallengeCount();
+    fetchUnreadNotifCount();
   }, [user]);
+
+  const fetchUnreadNotifCount = async () => {
+    const { count } = await supabase.from("notifications").select("*", { count: "exact", head: true }).eq("user_id", user?.id).eq("read", false);
+    setUnreadNotifCount(count || 0);
+  };
 
   const fetchPlans = async () => {
     const { data } = await supabase.from("plans").select("id, name").eq("professor_id", user?.id).order("name");
@@ -138,6 +145,12 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <button onClick={() => navigate("/notifications")} className="relative w-9 h-9 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:bg-primary-foreground/15 hover:text-primary-foreground transition-colors" title="Notificações">
+              <Bell className="w-4 h-4" />
+              {unreadNotifCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">{unreadNotifCount}</span>
+              )}
+            </button>
             <button onClick={toggleTheme} className="w-9 h-9 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:bg-primary-foreground/15 hover:text-primary-foreground transition-colors" title={isDark ? "Tema Claro" : "Tema Escuro"}>
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>

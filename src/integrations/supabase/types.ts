@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      plans: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          periodicity: string
+          price: number
+          professor_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          periodicity?: string
+          price?: number
+          professor_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          periodicity?: string
+          price?: number
+          professor_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -47,6 +74,68 @@ export type Database = {
         }
         Relationships: []
       }
+      student_bioimpedance: {
+        Row: {
+          basal_metabolism: number | null
+          body_fat_pct: number | null
+          body_water_pct: number | null
+          bone_mass: number | null
+          created_at: string
+          file_url: string | null
+          id: string
+          lean_mass: number | null
+          measured_at: string
+          muscle_mass: number | null
+          notes: string | null
+          professor_id: string
+          student_id: string
+          visceral_fat: number | null
+          weight: number | null
+        }
+        Insert: {
+          basal_metabolism?: number | null
+          body_fat_pct?: number | null
+          body_water_pct?: number | null
+          bone_mass?: number | null
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          lean_mass?: number | null
+          measured_at?: string
+          muscle_mass?: number | null
+          notes?: string | null
+          professor_id: string
+          student_id: string
+          visceral_fat?: number | null
+          weight?: number | null
+        }
+        Update: {
+          basal_metabolism?: number | null
+          body_fat_pct?: number | null
+          body_water_pct?: number | null
+          bone_mass?: number | null
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          lean_mass?: number | null
+          measured_at?: string
+          muscle_mass?: number | null
+          notes?: string | null
+          professor_id?: string
+          student_id?: string
+          visceral_fat?: number | null
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_bioimpedance_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_groups: {
         Row: {
           created_at: string
@@ -77,8 +166,10 @@ export type Database = {
           gender: string | null
           group_id: string | null
           id: string
+          payment_day: number | null
           phone: string | null
           plan: string | null
+          plan_id: string | null
           professor_id: string
           registration_date: string | null
           status: string | null
@@ -94,8 +185,10 @@ export type Database = {
           gender?: string | null
           group_id?: string | null
           id?: string
+          payment_day?: number | null
           phone?: string | null
           plan?: string | null
+          plan_id?: string | null
           professor_id: string
           registration_date?: string | null
           status?: string | null
@@ -111,8 +204,10 @@ export type Database = {
           gender?: string | null
           group_id?: string | null
           id?: string
+          payment_day?: number | null
           phone?: string | null
           plan?: string | null
+          plan_id?: string | null
           professor_id?: string
           registration_date?: string | null
           status?: string | null
@@ -126,6 +221,13 @@ export type Database = {
             columns: ["group_id"]
             isOneToOne: false
             referencedRelation: "student_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "students_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
             referencedColumns: ["id"]
           },
         ]

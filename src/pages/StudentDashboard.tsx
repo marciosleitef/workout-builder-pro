@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import StudentBottomNav from "@/components/StudentBottomNav";
-import { Bell, Sun, Moon, LogOut, Droplets, Plus, Minus, Activity, Flame, TrendingUp, Dumbbell, ChevronRight } from "lucide-react";
+import { Bell, Sun, Moon, LogOut, Droplets, Plus, Minus, Activity, Flame, TrendingUp, Dumbbell, ChevronRight, User } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
@@ -12,8 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 const DAY_MAP: Record<string, number> = {
   "Segunda": 1, "Terça": 2, "Quarta": 3, "Quinta": 4, "Sexta": 5, "Sábado": 6, "Domingo": 0,
@@ -202,43 +200,17 @@ const StudentDashboard = () => {
             <button onClick={toggleTheme} className="p-2 rounded-lg text-muted-foreground hover:bg-secondary">
               {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
-            <Sheet>
-              <SheetTrigger asChild>
-                <button className="relative p-2 rounded-lg text-muted-foreground hover:bg-secondary">
-                  <Bell className="h-4 w-4" />
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center font-bold">
-                      {unreadCount}
-                    </span>
-                  )}
-                </button>
-              </SheetTrigger>
-              <SheetContent>
-                <SheetHeader>
-                  <SheetTitle className="flex items-center justify-between">
-                    Notificações
-                    {unreadCount > 0 && (
-                      <Button variant="ghost" size="sm" onClick={markAllRead}>Marcar lidas</Button>
-                    )}
-                  </SheetTitle>
-                </SheetHeader>
-                <ScrollArea className="h-[calc(100vh-100px)] mt-4">
-                  {notifications.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-8">Nenhuma notificação</p>
-                  ) : (
-                    <div className="space-y-3">
-                      {notifications.map((n) => (
-                        <div key={n.id} className={`p-3 rounded-lg border ${n.read ? "bg-card" : "bg-primary/5 border-primary/20"}`}>
-                          <p className="text-sm font-medium">{n.title}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">{n.body}</p>
-                          <p className="text-[10px] text-muted-foreground mt-1">{format(new Date(n.created_at), "dd/MM HH:mm")}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </ScrollArea>
-              </SheetContent>
-            </Sheet>
+            <button onClick={() => navigate("/student-notifications")} className="relative p-2 rounded-lg text-muted-foreground hover:bg-secondary">
+              <Bell className="h-4 w-4" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center font-bold">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+            <button onClick={() => navigate("/profile")} className="p-2 rounded-lg text-muted-foreground hover:bg-secondary">
+              <User className="h-4 w-4" />
+            </button>
             <button onClick={signOut} className="p-2 rounded-lg text-muted-foreground hover:bg-secondary">
               <LogOut className="h-4 w-4" />
             </button>

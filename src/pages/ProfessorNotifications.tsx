@@ -69,26 +69,26 @@ const ProfessorNotifications = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-foreground px-6 py-4">
-        <div className="max-w-3xl mx-auto flex items-center gap-4">
-          <button onClick={() => navigate("/dashboard")} className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">
+      <header className="bg-foreground px-4 sm:px-6 py-3 sm:py-4">
+        <div className="max-w-3xl mx-auto flex items-center gap-3 sm:gap-4">
+          <button onClick={() => navigate("/dashboard")} className="text-primary-foreground/60 hover:text-primary-foreground transition-colors shrink-0">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div className="flex-1">
-            <h1 className="text-primary-foreground font-bold text-lg">Notificações</h1>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-primary-foreground font-bold text-base sm:text-lg">Notificações</h1>
             {unreadCount > 0 && (
               <p className="text-primary-foreground/50 text-xs">{unreadCount} não lida(s)</p>
             )}
           </div>
           {unreadCount > 0 && (
-            <Button variant="ghost" size="sm" onClick={markAllAsRead} className="text-primary-foreground/60 hover:text-primary-foreground hover:bg-primary-foreground/10">
-              <CheckCheck className="w-4 h-4 mr-1" /> Ler todas
+            <Button variant="ghost" size="sm" onClick={markAllAsRead} className="text-primary-foreground/60 hover:text-primary-foreground hover:bg-primary-foreground/10 text-xs sm:text-sm shrink-0">
+              <CheckCheck className="w-4 h-4 mr-1" /> <span className="hidden sm:inline">Ler todas</span><span className="sm:hidden">Ler</span>
             </Button>
           )}
         </div>
       </header>
 
-      <div className="max-w-3xl mx-auto p-4 space-y-4">
+      <div className="max-w-3xl mx-auto p-3 sm:p-4 space-y-3 sm:space-y-4">
         {/* Filter tabs */}
         <div className="flex gap-2">
           <button

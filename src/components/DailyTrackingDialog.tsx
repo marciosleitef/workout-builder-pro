@@ -135,7 +135,7 @@ function ScaleSelector({ scale, value, onChange }: { scale: typeof PRE_SCALES[0]
   );
 }
 
-type View = "main" | "daily-form" | "session-form" | "daily-detail" | "session-detail" | "history";
+type View = "main" | "daily-form" | "daily-detail" | "session-detail";
 
 export default function DailyTrackingDialog({ open, onOpenChange, student }: Props) {
   const { user } = useAuth();
@@ -152,9 +152,6 @@ export default function DailyTrackingDialog({ open, onOpenChange, student }: Pro
     hydration_level: "", sleep_hours: "", resting_bpm: "", notes: ""
   });
 
-  // Session form
-  const [feedbackType, setFeedbackType] = useState<"pre" | "post">("pre");
-  const [sessionForm, setSessionForm] = useState<Record<string, any>>({});
 
   useEffect(() => {
     if (open && student) {
@@ -207,43 +204,6 @@ export default function DailyTrackingDialog({ open, onOpenChange, student }: Pro
     }
   };
 
-  const saveSessionFeedback = async () => {
-    if (!student || !user) return;
-    const payload: any = {
-      student_id: student.id,
-      professor_id: user.id,
-      feedback_type: feedbackType,
-      session_date: new Date().toISOString().split("T")[0],
-    };
-
-    if (feedbackType === "pre") {
-      payload.fatigue_scale = sessionForm.fatigue_scale || null;
-      payload.sleep_quality_scale = sessionForm.sleep_quality_scale || null;
-      payload.muscle_soreness_scale = sessionForm.muscle_soreness_scale || null;
-      payload.stress_level_scale = sessionForm.stress_level_scale || null;
-      payload.mood_scale = sessionForm.mood_scale || null;
-      payload.recovery_perception_scale = sessionForm.recovery_perception_scale || null;
-      payload.urine_color_scale = sessionForm.urine_color_scale || null;
-      payload.checkin_time = new Date().toISOString();
-    } else {
-      payload.post_recovery_scale = sessionForm.post_recovery_scale || null;
-      payload.perceived_exertion_scale = sessionForm.perceived_exertion_scale || null;
-      payload.pain_scale_eva = sessionForm.pain_scale_eva || null;
-      payload.workout_bpm_avg = parseInt(sessionForm.workout_bpm_avg) || null;
-      payload.workout_bpm_max = parseInt(sessionForm.workout_bpm_max) || null;
-      payload.calories_burned = parseInt(sessionForm.calories_burned) || null;
-      payload.checkout_time = new Date().toISOString();
-    }
-
-    const { error } = await supabase.from("workout_session_feedback").insert(payload);
-    if (error) toast.error("Erro ao salvar feedback");
-    else {
-      toast.success(feedbackType === "pre" ? "Check-in registrado!" : "Check-out registrado!");
-      setSessionForm({});
-      fetchData();
-      setView("main");
-    }
-  };
 
   // Chart data
   const weightData = dailyRecords.filter(r => r.weight).map(r => ({
@@ -364,20 +324,6 @@ export default function DailyTrackingDialog({ open, onOpenChange, student }: Pro
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            onClick={() => { setFeedbackType("pre"); setSessionForm({}); setView("session-form"); }}
-            className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-accent text-accent-foreground text-sm font-bold hover:bg-accent/90 transition-colors"
-          >
-            <Clock className="w-4 h-4" /> Check-in
-          </button>
-          <button
-            onClick={() => { setFeedbackType("post"); setSessionForm({}); setView("session-form"); }}
-            className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-destructive text-destructive-foreground text-sm font-bold hover:bg-destructive/90 transition-colors"
-          >
-            <Flame className="w-4 h-4" /> Check-out
-          </button>
-        </div>
       </div>
 
       {/* Weight evolution chart */}

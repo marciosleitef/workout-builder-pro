@@ -251,6 +251,12 @@ const StudentHealth = () => {
     setBioRecords((data as any[]) || []);
   };
 
+  const fetchSessionRecords = async () => {
+    const { data } = await supabase.from("workout_session_feedback").select("*").eq("student_id", studentId!)
+      .order("session_date", { ascending: false }).limit(50);
+    setSessionRecords(data || []);
+  };
+
   const saveDailyRecord = async () => {
     if (!studentId || !student) return;
     setSaving(true);

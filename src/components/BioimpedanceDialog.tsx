@@ -273,7 +273,7 @@ const DiffBadge = ({ diff, inverse = false }: { diff: number | null; inverse?: b
   );
 };
 
-const BioimpedanceDialog = ({ open, onOpenChange, studentId, studentName }: Props) => {
+const BioimpedanceDialog = ({ open, onOpenChange, studentId, studentName, gender = "masculino" }: Props) => {
   const { user } = useAuth();
   const [records, setRecords] = useState<BioRecord[]>([]);
   const [loading, setLoading] = useState(false);

@@ -89,6 +89,64 @@ export type Database = {
         }
         Relationships: []
       }
+      workout_checkins: {
+        Row: {
+          checked_in_at: string
+          checked_in_by: string
+          created_at: string
+          id: string
+          journey_id: string
+          notes: string | null
+          professor_id: string
+          student_id: string
+          workout_id: string
+        }
+        Insert: {
+          checked_in_at?: string
+          checked_in_by: string
+          created_at?: string
+          id?: string
+          journey_id: string
+          notes?: string | null
+          professor_id: string
+          student_id: string
+          workout_id: string
+        }
+        Update: {
+          checked_in_at?: string
+          checked_in_by?: string
+          created_at?: string
+          id?: string
+          journey_id?: string
+          notes?: string | null
+          professor_id?: string
+          student_id?: string
+          workout_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_checkins_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "workout_journeys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workout_checkins_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workout_checkins_workout_id_fkey"
+            columns: ["workout_id"]
+            isOneToOne: false
+            referencedRelation: "workouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workout_journeys: {
         Row: {
           created_at: string

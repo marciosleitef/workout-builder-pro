@@ -139,11 +139,11 @@ const Challenges = () => {
     };
 
     if (editingChallenge) {
-      const { error } = await supabase.from("challenges").update(payload).eq("id", editingChallenge.id);
+      const { error } = await supabase.from("challenges" as any).update(payload).eq("id", editingChallenge.id);
       if (error) { toast.error("Erro ao atualizar desafio"); return; }
       toast.success("Desafio atualizado!");
     } else {
-      const { error } = await supabase.from("challenges").insert(payload);
+      const { error } = await supabase.from("challenges" as any).insert(payload);
       if (error) { toast.error("Erro ao criar desafio"); return; }
       toast.success("Desafio criado!");
     }
@@ -156,14 +156,14 @@ const Challenges = () => {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Excluir este desafio?")) return;
-    await supabase.from("challenges").delete().eq("id", id);
+    await supabase.from("challenges" as any).delete().eq("id", id);
     toast.success("Desafio excluído");
     fetchChallenges();
   };
 
   const toggleStatus = async (c: Challenge) => {
     const newStatus = c.status === "active" ? "draft" : "active";
-    await supabase.from("challenges").update({ status: newStatus }).eq("id", c.id);
+    await supabase.from("challenges" as any).update({ status: newStatus }).eq("id", c.id);
     toast.success(newStatus === "active" ? "Desafio ativado!" : "Desafio pausado");
     fetchChallenges();
   };

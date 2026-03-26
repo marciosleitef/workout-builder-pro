@@ -47,7 +47,7 @@ const ChallengePublic = () => {
   const fetchChallenge = async () => {
     setLoading(true);
     const { data: challengeData } = await supabase
-      .from("challenges")
+      .from("challenges" as any)
       .select("*")
       .eq("invite_code", inviteCode)
       .single();
@@ -60,7 +60,7 @@ const ChallengePublic = () => {
 
     // Fetch participants with student names
     const { data: parts } = await supabase
-      .from("challenge_participants")
+      .from("challenge_participants" as any)
       .select("id, student_id, total_points, joined_at")
       .eq("challenge_id", challengeData.id)
       .order("total_points", { ascending: false });
@@ -128,7 +128,7 @@ const ChallengePublic = () => {
 
     // Check if already enrolled
     const { data: existingPart } = await supabase
-      .from("challenge_participants")
+      .from("challenge_participants" as any)
       .select("id")
       .eq("challenge_id", challenge.id)
       .eq("student_id", studentId)
@@ -197,7 +197,7 @@ const ChallengePublic = () => {
 
     // Add participant
     const { error: partErr } = await supabase
-      .from("challenge_participants")
+      .from("challenge_participants" as any)
       .insert({
         challenge_id: challenge.id,
         student_id: studentId,

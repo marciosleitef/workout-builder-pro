@@ -42,6 +42,7 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   studentId: string;
   studentName: string;
+  gender?: string;
 }
 
 const FIELD_LABELS: { key: keyof BioRecord; label: string; unit: string }[] = [

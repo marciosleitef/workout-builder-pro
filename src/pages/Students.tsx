@@ -12,6 +12,7 @@ import JourneyWorkoutsDialog from "@/components/JourneyWorkoutsDialog";
 import JourneyEditDialog from "@/components/JourneyEditDialog";
 import PlansDialog from "@/components/PlansDialog";
 import BioimpedanceDialog from "@/components/BioimpedanceDialog";
+import DailyTrackingDialog from "@/components/DailyTrackingDialog";
 
 interface Student {
   id: string;
@@ -88,6 +89,8 @@ const Students = () => {
   const [showStudentDetail, setShowStudentDetail] = useState(false);
   const [detailStudent, setDetailStudent] = useState<Student | null>(null);
   const [showLoginInfo, setShowLoginInfo] = useState(false);
+  const [showDailyTracking, setShowDailyTracking] = useState(false);
+  const [dailyTrackingStudent, setDailyTrackingStudent] = useState<Student | null>(null);
 
   // Journey start dialog
   const [showStartJourney, setShowStartJourney] = useState(false);
@@ -347,7 +350,7 @@ const Students = () => {
                     {[
                       { icon: Play, label: "Iniciar", color: "hsl(220 60% 50%)", onClick: () => { setStartStudent(s); setSelectedStudent(s); setShowStartJourney(true); } },
                       { icon: User, label: "Bio", color: "hsl(150 55% 45%)", onClick: () => { setBioStudent(s); setShowBioDialog(true); } },
-                      { icon: TrendingUp, label: "Detalhes", color: "hsl(35 85% 50%)", onClick: () => openEdit(s) },
+                      { icon: TrendingUp, label: "Detalhes", color: "hsl(35 85% 50%)", onClick: () => { setDailyTrackingStudent(s); setShowDailyTracking(true); } },
                       { icon: Dumbbell, label: "Treinos", color: "hsl(82 85% 55%)", onClick: () => { setSelectedStudent(s); setShowWorkoutMenu(true); } },
                     ].map((a) => (
                       <button key={a.label} onClick={a.onClick} className="flex flex-col items-center gap-1 py-2 rounded-lg text-white text-[10px] font-medium hover:opacity-90 transition-opacity" style={{ backgroundColor: a.color }}>
@@ -671,6 +674,8 @@ const Students = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      <DailyTrackingDialog open={showDailyTracking} onOpenChange={setShowDailyTracking} student={dailyTrackingStudent} />
 
       {selectedStudent && (
         <>

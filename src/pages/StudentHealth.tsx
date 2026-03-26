@@ -222,6 +222,7 @@ const StudentHealth = () => {
   const [showDailyForm, setShowDailyForm] = useState(false);
   const [formData, setFormData] = useState<any>({});
   const [saving, setSaving] = useState(false);
+  const [sessionRecords, setSessionRecords] = useState<any[]>([]);
   const { scores } = useStudentScores(studentId ? [studentId] : []);
   const score = studentId ? scores[studentId] : undefined;
 

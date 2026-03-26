@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { UserCircle, Dumbbell, Calendar, LogOut, Sun, Moon, Plus, Link2, Users, Package, Trophy, Bell, DollarSign } from "lucide-react";
+import { UserCircle, Dumbbell, Calendar, LogOut, Sun, Moon, Plus, Link2, Users, Package, Trophy, Bell, DollarSign, FileText, User } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useTheme } from "@/hooks/useTheme";
@@ -136,6 +136,13 @@ const Dashboard = () => {
       stat: "Painel completo",
       route: "/financial",
     },
+    {
+      icon: FileText,
+      title: "Relatórios",
+      description: "Exporte dados de alunos, frequência e financeiro",
+      stat: "CSV",
+      route: "/reports",
+    },
   ];
 
   return (
@@ -152,6 +159,9 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <button onClick={() => navigate("/profile")} className="w-9 h-9 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:bg-primary-foreground/15 hover:text-primary-foreground transition-colors" title="Meu Perfil">
+              <User className="w-4 h-4" />
+            </button>
             <button onClick={() => navigate("/notifications")} className="relative w-9 h-9 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:bg-primary-foreground/15 hover:text-primary-foreground transition-colors" title="Notificações">
               <Bell className="w-4 h-4" />
               {unreadNotifCount > 0 && (

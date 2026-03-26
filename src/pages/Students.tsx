@@ -699,10 +699,24 @@ const Students = () => {
               </div>
 
               {/* Action buttons */}
-              <div className="flex gap-3 pt-2">
+              <div className="flex flex-col gap-2 pt-2">
+                {(detailStudent.whatsapp || detailStudent.phone) && (
+                  <button
+                    onClick={() => {
+                      const rawNumber = (detailStudent.whatsapp || detailStudent.phone || "").replace(/\D/g, "");
+                      const number = rawNumber.length <= 11 ? `55${rawNumber}` : rawNumber;
+                      const message = encodeURIComponent(`Oi, aqui é seu personal ${professorName || ""}`.trim());
+                      window.open(`https://wa.me/${number}?text=${message}`, "_blank");
+                    }}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[hsl(142,70%,40%)] text-white font-display font-bold text-sm hover:opacity-90 transition-opacity"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    Falar com o Aluno
+                  </button>
+                )}
                 <button
                   onClick={() => { setShowStudentDetail(false); openEdit(detailStudent); }}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-primary text-primary-foreground font-display font-bold text-sm hover:bg-primary/90 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-primary text-primary-foreground font-display font-bold text-sm hover:bg-primary/90 transition-colors"
                 >
                   <Edit className="w-4 h-4" />
                   Editar Informações

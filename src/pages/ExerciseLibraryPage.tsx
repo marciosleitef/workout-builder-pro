@@ -1,8 +1,7 @@
 import { useState, useMemo, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { exercises, PILARES, type Exercise } from "@/data/exercises";
+import { exercises, PILARES, type Exercise, type Pilar } from "@/data/exercises";
 import { Search, Plus, Dumbbell, Star, User, X, Upload, Loader2, ArrowLeft } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -19,14 +18,18 @@ const PILAR_SHORT: Record<string, string> = {
 
 type SpecialFilter = "favorites" | "custom" | null;
 
+interface CustomExercise extends Exercise {
+  isCustom?: boolean;
+}
+
 function loadFavorites(): Set<string> {
   try { const stored = localStorage.getItem("ps-favorites"); return stored ? new Set(JSON.parse(stored)) : new Set(); } catch { return new Set(); }
 }
 function saveFavorites(favs: Set<string>) { localStorage.setItem("ps-favorites", JSON.stringify([...favs])); }
-function loadCustomExercises(): Exercise[] {
+function loadCustomExercises(): CustomExercise[] {
   try { const stored = localStorage.getItem("ps-custom-exercises"); return stored ? JSON.parse(stored) : []; } catch { return []; }
 }
-function saveCustomExercises(list: Exercise[]) { localStorage.setItem("ps-custom-exercises", JSON.stringify(list)); }
+function saveCustomExercises(list: CustomExercise[]) { localStorage.setItem("ps-custom-exercises", JSON.stringify(list)); }
 
 const ExerciseLibraryPage = () => {
   const navigate = useNavigate();
@@ -34,10 +37,10 @@ const ExerciseLibraryPage = () => {
   const [activePilar, setActivePilar] = useState<string | null>(null);
   const [specialFilter, setSpecialFilter] = useState<SpecialFilter>(null);
   const [favorites, setFavorites] = useState<Set<string>>(loadFavorites);
-  const [customExercises, setCustomExercises] = useState<Exercise[]>(loadCustomExercises);
+  const [customExercises, setCustomExercises] = useState<CustomExercise[]>(loadCustomExercises);
   const [showNewExercise, setShowNewExercise] = useState(false);
   const [newExName, setNewExName] = useState("");
-  const [newExPilar, setNewExPilar] = useState(PILARES[0]);
+  const [newExPilar, setNewExPilar] = useState<string>(PILARES[0]);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
@@ -55,11 +58,11 @@ const ExerciseLibraryPage = () => {
   }, []);
 
   const filtered = useMemo(() => {
-    let list = allExercises;
+    let list: (Exercise | CustomExercise)[] = allExercises;
     if (specialFilter === "favorites") list = list.filter((e) => favorites.has(e.id));
     else if (specialFilter === "custom") list = customExercises;
     else if (activePilar) list = list.filter((e) => e.pilar === activePilar);
-    if (search) list = list.filter((e) => e.nome.toLowerCase().includes(search.toLowerCase()));
+    if (search) list = list.filter((e) => e.name.toLowerCase().includes(search.toLowerCase()));
     return list;
   }, [search, activePilar, specialFilter, favorites, allExercises, customExercises]);
 
@@ -77,7 +80,7 @@ const ExerciseLibraryPage = () => {
       }
       setUploading(false);
     }
-    const newEx: Exercise = { id: `custom-${Date.now()}`, nome: newExName.trim(), pilar: newExPilar, videoUrl: videoUrl || undefined, isCustom: true };
+    const newEx: CustomExercise = { id: `custom-${Date.now()}`, name: newExName.trim(), pilar: newExPilar, classe: "", videoUrl: videoUrl || undefined, isCustom: true };
     const updated = [...customExercises, newEx];
     setCustomExercises(updated);
     saveCustomExercises(updated);
@@ -139,7 +142,7 @@ const ExerciseLibraryPage = () => {
                   <Dumbbell className="w-5 h-5 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-display font-bold text-sm text-foreground truncate">{ex.nome}</p>
+                  <p className="font-display font-bold text-sm text-foreground truncate">{ex.name}</p>
                   <p className="text-[10px] text-muted-foreground">{PILAR_SHORT[ex.pilar] || ex.pilar}</p>
                 </div>
                 <button onClick={(e) => { e.stopPropagation(); toggleFav(ex.id); }} className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${favorites.has(ex.id) ? "text-yellow-500" : "text-muted-foreground hover:text-yellow-500"}`}>
@@ -154,7 +157,7 @@ const ExerciseLibraryPage = () => {
       {/* Exercise detail dialog */}
       <Dialog open={!!selectedExercise} onOpenChange={(o) => !o && setSelectedExercise(null)}>
         <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle className="font-display">{selectedExercise?.nome}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="font-display">{selectedExercise?.name}</DialogTitle></DialogHeader>
           {selectedExercise && (
             <div className="space-y-3 mt-2">
               <p className="text-sm text-muted-foreground"><span className="font-medium text-foreground">Pilar:</span> {selectedExercise.pilar}</p>

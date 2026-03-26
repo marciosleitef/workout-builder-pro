@@ -341,14 +341,41 @@ const Students = () => {
                      </div>
                    </button>
                   <div className="grid grid-cols-2 gap-3 mb-4">
-                    <div className="bg-secondary/50 rounded-lg p-2">
-                      <p className="text-[10px] text-muted-foreground uppercase font-medium">Saúde</p>
-                      <p className="text-lg font-display font-bold text-foreground">—</p>
-                    </div>
-                    <div className="bg-secondary/50 rounded-lg p-2">
-                      <p className="text-[10px] text-muted-foreground uppercase font-medium">Performance</p>
-                      <p className="text-lg font-display font-bold text-foreground">—</p>
-                    </div>
+                    {(() => {
+                      const sc = studentScores[s.id];
+                      const health = sc?.health ?? null;
+                      const perf = sc?.performance ?? null;
+                      const hColor = health != null ? (health >= 70 ? "hsl(var(--accent))" : health >= 40 ? "hsl(var(--primary))" : "hsl(var(--destructive))") : "hsl(var(--muted-foreground))";
+                      const pColor = perf != null ? (perf >= 70 ? "hsl(var(--accent))" : perf >= 40 ? "hsl(var(--primary))" : "hsl(var(--destructive))") : "hsl(var(--muted-foreground))";
+                      return (
+                        <>
+                          <div className="bg-secondary/50 rounded-lg p-2">
+                            <p className="text-[10px] text-muted-foreground uppercase font-medium mb-1">Saúde</p>
+                            <div className="flex items-end gap-1.5">
+                              <span className="text-lg font-display font-bold" style={{ color: hColor }}>{health != null ? `${health}%` : "—"}</span>
+                              {sc && sc.healthBonus > 0 && <span className="text-[9px] font-bold text-accent mb-0.5">+{sc.healthBonus}%</span>}
+                            </div>
+                            {health != null && (
+                              <div className="w-full h-1.5 bg-muted rounded-full mt-1 overflow-hidden">
+                                <div className="h-full rounded-full transition-all duration-500" style={{ width: `${health}%`, backgroundColor: hColor }} />
+                              </div>
+                            )}
+                          </div>
+                          <div className="bg-secondary/50 rounded-lg p-2">
+                            <p className="text-[10px] text-muted-foreground uppercase font-medium mb-1">Performance</p>
+                            <div className="flex items-end gap-1.5">
+                              <span className="text-lg font-display font-bold" style={{ color: pColor }}>{perf != null ? `${perf}%` : "—"}</span>
+                              {sc && sc.performanceBonus > 0 && <span className="text-[9px] font-bold text-accent mb-0.5">+{sc.performanceBonus}%</span>}
+                            </div>
+                            {perf != null && (
+                              <div className="w-full h-1.5 bg-muted rounded-full mt-1 overflow-hidden">
+                                <div className="h-full rounded-full transition-all duration-500" style={{ width: `${perf}%`, backgroundColor: pColor }} />
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
                   <div className="grid grid-cols-4 gap-2">
                     {[

@@ -634,7 +634,7 @@ export default function DailyTrackingDialog({ open, onOpenChange, student }: Pro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] min-h-0 flex flex-col overflow-hidden p-0 gap-0">
+      <DialogContent className="max-w-lg h-[90vh] max-h-[90vh] min-h-0 flex flex-col overflow-hidden p-0 gap-0">
         <DialogHeader className="p-4 pb-2 border-b border-border shrink-0">
           <div className="flex items-center gap-2">
             {view !== "main" && (
@@ -646,8 +646,8 @@ export default function DailyTrackingDialog({ open, onOpenChange, student }: Pro
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 min-h-0 px-4 py-3">
-          <div className="pb-20">
+        <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3">
+          <div className="pb-28">
             {loading ? (
               <div className="flex items-center justify-center h-40">
                 <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -661,7 +661,7 @@ export default function DailyTrackingDialog({ open, onOpenChange, student }: Pro
               </>
             )}
           </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );

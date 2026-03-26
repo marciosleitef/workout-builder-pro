@@ -8,6 +8,8 @@ import Dashboard from "./pages/Dashboard";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
+import StudentRegister from "./pages/StudentRegister";
+import ChangePassword from "./pages/ChangePassword";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +21,15 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/auth" element={<Auth />} />
+          <Route path="/register/:professorId" element={<StudentRegister />} />
+          <Route
+            path="/change-password"
+            element={
+              <ProtectedRoute skipPasswordCheck>
+                <ChangePassword />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/dashboard"
             element={

@@ -6,7 +6,7 @@ import { UserCircle, Dumbbell, Calendar, LogOut, Sun, Moon, Plus, Link2, Users, 
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useTheme } from "@/hooks/useTheme";
-import PlansDialog from "@/components/PlansDialog";
+
 
 function getInitials(name: string) {
   return name.split(" ").filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
@@ -22,9 +22,10 @@ const Dashboard = () => {
   const [showNewStudentMenu, setShowNewStudentMenu] = useState(false);
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [linkGroupId, setLinkGroupId] = useState("");
+  const [linkPlanId, setLinkPlanId] = useState("");
   const [groups, setGroups] = useState<{ id: string; name: string }[]>([]);
+  const [plans, setPlans] = useState<{ id: string; name: string }[]>([]);
   const [planCount, setPlanCount] = useState(0);
-  const [showPlansDialog, setShowPlansDialog] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -33,7 +34,13 @@ const Dashboard = () => {
     fetchGroupCount();
     fetchGroups();
     fetchPlanCount();
+    fetchPlans();
   }, [user]);
+
+  const fetchPlans = async () => {
+    const { data } = await supabase.from("plans").select("id, name").eq("professor_id", user?.id).order("name");
+    setPlans(data || []);
+  };
 
   const fetchGroups = async () => {
     const { data } = await supabase.from("student_groups").select("id, name").eq("professor_id", user?.id).order("name");
@@ -109,7 +116,7 @@ const Dashboard = () => {
       stat: `${planCount} plano(s)`,
       color: "hsl(30 80% 55%)",
       bgClass: "bg-[hsl(30,80%,55%)]/10",
-      action: () => setShowPlansDialog(true),
+      route: "/plans",
     },
   ];
 
@@ -152,10 +159,10 @@ const Dashboard = () => {
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {cards.map((card, idx) => (
+          {cards.map((card) => (
             <button
-              key={card.route || idx}
-              onClick={() => card.action ? card.action() : navigate(card.route!)}
+              key={card.route}
+              onClick={() => navigate(card.route)}
               className="rounded-2xl border border-border bg-card p-6 text-left hover:border-primary/30 hover:shadow-lg transition-all group"
             >
               <div className={`w-14 h-14 rounded-xl ${card.bgClass} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
@@ -178,7 +185,7 @@ const Dashboard = () => {
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Plus className="w-5 h-5 text-primary" /></div>
               <div className="text-left"><p className="font-display font-bold text-sm text-foreground">Cadastro Manual</p><p className="text-xs text-muted-foreground">Preencher os dados do aluno agora</p></div>
             </button>
-            <button onClick={() => { setShowNewStudentMenu(false); setLinkGroupId(""); setTimeout(() => setShowLinkDialog(true), 150); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors">
+            <button onClick={() => { setShowNewStudentMenu(false); setLinkGroupId(""); setLinkPlanId(""); setTimeout(() => setShowLinkDialog(true), 150); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Link2 className="w-5 h-5 text-primary" /></div>
               <div className="text-left"><p className="font-display font-bold text-sm text-foreground">Enviar Link de Cadastro</p><p className="text-xs text-muted-foreground">O aluno preenche seus próprios dados</p></div>
             </button>
@@ -201,10 +208,23 @@ const Dashboard = () => {
                 <p className="text-xs text-muted-foreground mt-1">Se selecionado, o grupo virá travado no formulário de cadastro.</p>
               </div>
             )}
+            {plans.length > 0 && (
+              <div>
+                <label className="text-sm font-medium text-foreground">Plano do aluno (opcional)</label>
+                <select value={linkPlanId} onChange={(e) => setLinkPlanId(e.target.value)} className="w-full mt-1 px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
+                  <option value="">Sem plano definido</option>
+                  {plans.map((p) => (<option key={p.id} value={p.id}>{p.name}</option>))}
+                </select>
+                <p className="text-xs text-muted-foreground mt-1">Se selecionado, o plano virá travado no formulário de cadastro.</p>
+              </div>
+            )}
             <button
               onClick={() => {
-                let link = `${window.location.origin}/register/${user?.id}`;
-                if (linkGroupId) link += `?group=${linkGroupId}`;
+                const params = new URLSearchParams();
+                if (linkGroupId) params.set("group", linkGroupId);
+                if (linkPlanId) params.set("plan", linkPlanId);
+                const qs = params.toString();
+                const link = `${window.location.origin}/register/${user?.id}${qs ? `?${qs}` : ""}`;
                 navigator.clipboard.writeText(link);
                 toast.success("Link de cadastro copiado!");
                 setShowLinkDialog(false);
@@ -216,8 +236,6 @@ const Dashboard = () => {
           </div>
         </DialogContent>
       </Dialog>
-
-      <PlansDialog open={showPlansDialog} onOpenChange={setShowPlansDialog} onPlansChanged={fetchPlanCount} />
     </div>
   );
 };

@@ -9,17 +9,25 @@ interface StudentGroup {
   name: string;
 }
 
+interface Plan {
+  id: string;
+  name: string;
+}
+
 const StudentRegister = () => {
   const { professorId } = useParams<{ professorId: string }>();
   const [searchParams] = useSearchParams();
   const presetGroupId = searchParams.get("group") || "";
+  const presetPlanId = searchParams.get("plan") || "";
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [gender, setGender] = useState("");
   const [groupId, setGroupId] = useState(presetGroupId);
+  const [planId, setPlanId] = useState(presetPlanId);
   const [groups, setGroups] = useState<StudentGroup[]>([]);
+  const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -31,6 +39,12 @@ const StudentRegister = () => {
         .eq("professor_id", professorId)
         .order("name")
         .then(({ data }) => setGroups((data as any[]) || []));
+      supabase
+        .from("plans")
+        .select("id, name")
+        .eq("professor_id", professorId)
+        .order("name")
+        .then(({ data }) => setPlans((data as any[]) || []));
     }
   }, [professorId]);
 
@@ -41,7 +55,7 @@ const StudentRegister = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke("register-student", {
-        body: { professorId, fullName, email, whatsapp, birthDate, gender, groupId },
+        body: { professorId, fullName, email, whatsapp, birthDate, gender, groupId, planId },
       });
 
       if (error) throw error;
@@ -119,6 +133,27 @@ const StudentRegister = () => {
                   <select value={groupId} onChange={(e) => setGroupId(e.target.value)} className="w-full mt-1 px-4 py-3 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
                     <option value="">Selecione</option>
                     {groups.map((g) => (<option key={g.id} value={g.id}>{g.name}</option>))}
+                  </select>
+                )}
+              </div>
+            )}
+            {plans.length > 0 && (
+              <div>
+                <label className="text-sm font-medium text-foreground">Plano</label>
+                {presetPlanId ? (
+                  <>
+                    <input
+                      type="text"
+                      value={plans.find((p) => p.id === presetPlanId)?.name || "Plano selecionado"}
+                      readOnly
+                      className="w-full mt-1 px-4 py-3 rounded-lg bg-secondary/50 border border-border text-foreground cursor-not-allowed opacity-70"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Plano definido pelo professor</p>
+                  </>
+                ) : (
+                  <select value={planId} onChange={(e) => setPlanId(e.target.value)} className="w-full mt-1 px-4 py-3 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    <option value="">Selecione</option>
+                    {plans.map((p) => (<option key={p.id} value={p.id}>{p.name}</option>))}
                   </select>
                 )}
               </div>

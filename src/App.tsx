@@ -9,6 +9,7 @@ import Students from "./pages/Students";
 import ExerciseLibraryPage from "./pages/ExerciseLibraryPage";
 import AttendanceCalendar from "./pages/AttendanceCalendar";
 import StudentGroups from "./pages/StudentGroups";
+import Plans from "./pages/Plans";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -71,6 +72,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <StudentGroups />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/plans"
+            element={
+              <ProtectedRoute>
+                <Plans />
               </ProtectedRoute>
             }
           />

@@ -164,6 +164,8 @@ const JourneyWorkoutsDialog = ({
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
   const [loading, setLoading] = useState(false);
   const [showOrientations, setShowOrientations] = useState(false);
+  const [executionData, setExecutionData] = useState<Record<string, Record<string, Record<string, string>>>>({});
+  // executionData[workoutId] = { [exerciseId]: { sets: "4", load: "20", ... } }
 
   // Workout session flow
   const [phase, setPhase] = useState<Phase>("workouts");
@@ -222,6 +224,27 @@ const JourneyWorkoutsDialog = ({
       const mapped = (data || []).map((w) => ({ ...w, exercises_data: (w.exercises_data as unknown as ExerciseGroupData[]) || [] }));
       setWorkouts(mapped);
       if (mapped.length > 0) setSelectedWorkout(mapped[0]);
+
+      // Fetch latest execution data for each workout
+      if (studentId && data && data.length > 0) {
+        const workoutIds = data.map(w => w.id);
+        const { data: checkins } = await supabase
+          .from("workout_checkins")
+          .select("workout_id, execution_data, checked_in_at")
+          .eq("student_id", studentId)
+          .in("workout_id", workoutIds)
+          .order("checked_in_at", { ascending: false });
+        
+        if (checkins) {
+          const execMap: Record<string, Record<string, Record<string, string>>> = {};
+          checkins.forEach((c: any) => {
+            if (c.execution_data && !execMap[c.workout_id]) {
+              execMap[c.workout_id] = c.execution_data;
+            }
+          });
+          setExecutionData(execMap);
+        }
+      }
     }
     setLoading(false);
   };

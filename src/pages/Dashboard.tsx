@@ -51,6 +51,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [showWorkoutMenu, setShowWorkoutMenu] = useState(false);
+  const [showNewStudentMenu, setShowNewStudentMenu] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [showJourneyWizard, setShowJourneyWizard] = useState(false);
   const [showWorkoutInfo, setShowWorkoutInfo] = useState(false);
@@ -200,26 +201,13 @@ const Dashboard = () => {
               className="w-full pl-12 pr-4 py-3 rounded-xl bg-card border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => {
-                const link = `${window.location.origin}/register/${user?.id}`;
-                navigator.clipboard.writeText(link);
-                toast.success("Link de cadastro copiado!");
-              }}
-              className="flex items-center gap-2 px-4 py-3 bg-card border border-border text-foreground rounded-xl font-display font-bold text-sm hover:bg-secondary transition-colors"
-            >
-              <Link2 className="w-4 h-4" />
-              Link Cadastro
-            </button>
-            <button
-              onClick={() => { setEditingStudent(null); setForm({ full_name: "", email: "", phone: "", plan: "PS Prime" }); setShowForm(true); }}
-              className="flex items-center gap-2 px-5 py-3 bg-primary text-primary-foreground rounded-xl font-display font-bold text-sm hover:bg-primary/90 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Novo Aluno
-            </button>
-          </div>
+          <button
+            onClick={() => setShowNewStudentMenu(true)}
+            className="flex items-center gap-2 px-5 py-3 bg-primary text-primary-foreground rounded-xl font-display font-bold text-sm hover:bg-primary/90 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Novo Aluno
+          </button>
         </div>
 
         {/* Student grid */}

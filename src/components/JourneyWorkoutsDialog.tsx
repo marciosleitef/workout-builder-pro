@@ -1,8 +1,14 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ArrowLeft, X, CalendarDays, Dumbbell, Info, ChevronDown, ChevronUp, Printer, Play, Link2 } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  ArrowLeft, CalendarDays, Dumbbell, Info, ChevronDown, ChevronUp,
+  Printer, Play, Link2, Clock, Flame, CheckCircle2, Activity,
+  Zap, Moon, Brain, Smile, TrendingUp, Droplets, Thermometer, Square
+} from "lucide-react";
 
 interface WorkoutExerciseData {
   id: string;
@@ -43,36 +49,122 @@ interface JourneyWorkoutsDialogProps {
   journeyName: string;
   journeyFormat: string;
   studentName: string;
+  studentId?: string;
 }
 
+// Scale definitions
+const PRE_SCALES = [
+  { key: "fatigue_scale", label: "Fadiga", icon: Zap, min: 1, max: 5,
+    labels: { 1: "Sempre Cansado", 2: "Mais Cansado que o normal", 3: "Normal", 4: "Descansado", 5: "Muito descansado" } },
+  { key: "sleep_quality_scale", label: "Qualidade do Sono", icon: Moon, min: 1, max: 5,
+    labels: { 1: "Insônia", 2: "Sono inquieto", 3: "Dificuldade de adormecer", 4: "Bom", 5: "Muito Tranquilo" } },
+  { key: "muscle_soreness_scale", label: "Dor Muscular Geral", icon: Activity, min: 1, max: 5,
+    labels: { 1: "Muito dolorido", 2: "Aumento de dores", 3: "Normal", 4: "Sentindo-me Bem", 5: "Sentindo-me ótimo(a)" } },
+  { key: "stress_level_scale", label: "Nível de Estresse", icon: Brain, min: 1, max: 5,
+    labels: { 1: "Altamente estressado", 2: "Estressado", 3: "Normal", 4: "Relaxado(a)", 5: "Muito Relaxado(a)" } },
+  { key: "mood_scale", label: "Humor", icon: Smile, min: 1, max: 5,
+    labels: { 1: "Muito aborrecido(a)", 2: "Menos interessado", 3: "Normal", 4: "Bom humor", 5: "Muito bom humor" } },
+  { key: "recovery_perception_scale", label: "Percepção de Recuperação", icon: TrendingUp, min: 0, max: 10,
+    labels: { 0: "Nenhuma", 1: "Muito Pouco", 2: "Pouco", 3: "Moderada", 4: "Boa", 5: "Muito boa", 6: "Avançada", 7: "Quase Completa", 8: "Estável", 9: "Consolidada", 10: "Recuperado" } },
+  { key: "urine_color_scale", label: "Cor de Urina", icon: Droplets, min: 1, max: 8,
+    labels: { 1: "Muito bem hidratado", 2: "Bem hidratado", 3: "Adequada", 4: "Aceitável", 5: "Leve desidratação", 6: "Moderada", 7: "Significativa", 8: "Grave" } },
+];
+
+const POST_SCALES = [
+  { key: "post_recovery_scale", label: "Percepção de Recuperação", icon: TrendingUp, min: 0, max: 10,
+    labels: { 0: "Nenhuma", 1: "Muito Pouco", 2: "Pouco", 3: "Moderada", 4: "Boa", 5: "Muito Boa", 6: "Avançada", 7: "Quase Completa", 8: "Estável", 9: "Consolidada", 10: "Recuperado" } },
+  { key: "perceived_exertion_scale", label: "Percepção de Esforço", icon: Flame, min: 0, max: 10,
+    labels: { 0: "Nada", 1: "Extremamente fraco", 2: "Muito fraco", 3: "Fraco", 4: "Moderado", 5: "Pouco forte", 6: "Forte", 7: "Muito forte", 8: "Pesado", 9: "Quase máximo", 10: "Máximo" } },
+  { key: "pain_scale_eva", label: "Escala de Dor (EVA)", icon: Thermometer, min: 0, max: 10,
+    labels: { 0: "Sem dor", 1: "Mínima", 2: "Leve", 3: "Leve a moderada", 4: "Moderada", 5: "Moderada contínua", 6: "Moderada a intensa", 7: "Intensa", 8: "Muito intensa", 9: "Quase insuportável", 10: "Insuportável" } },
+];
+
+const URINE_COLORS = ["#F5F5DC", "#FFFACD", "#FFEB3B", "#FFD54F", "#FFB74D", "#FF9800", "#E65100", "#BF360C"];
+
+function getScaleColor(value: number, max: number, inverted = false) {
+  const ratio = value / max;
+  const r = inverted ? ratio : 1 - ratio;
+  if (r < 0.3) return "hsl(var(--accent))";
+  if (r < 0.6) return "hsl(var(--primary))";
+  return "hsl(var(--destructive))";
+}
+
+function ScaleSelector({ scale, value, onChange }: { scale: typeof PRE_SCALES[0]; value: number | null; onChange: (v: number) => void }) {
+  const [expanded, setExpanded] = useState(false);
+  const Icon = scale.icon;
+  const isUrine = scale.key === "urine_color_scale";
+
+  return (
+    <div className="bg-card border border-border rounded-xl overflow-hidden">
+      <button onClick={() => setExpanded(!expanded)} className="w-full flex items-center gap-3 p-3 hover:bg-secondary/30 transition-colors">
+        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+          <Icon className="w-4 h-4 text-primary" />
+        </div>
+        <div className="flex-1 text-left">
+          <p className="text-sm font-medium text-foreground">{scale.label}</p>
+          {value !== null && <p className="text-xs text-muted-foreground">{value} — {(scale.labels as any)[value]}</p>}
+        </div>
+        {value !== null && (
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white"
+            style={{ backgroundColor: isUrine ? URINE_COLORS[value - 1] : getScaleColor(value, scale.max), color: isUrine && value < 4 ? "#333" : "white" }}>
+            {value}
+          </div>
+        )}
+        {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+      </button>
+      {expanded && (
+        <div className="px-3 pb-3 space-y-1 max-h-[200px] overflow-y-auto">
+          {Array.from({ length: scale.max - scale.min + 1 }, (_, i) => scale.min + i).map((v) => (
+            <button key={v} onClick={() => { onChange(v); setExpanded(false); }}
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm transition-colors ${value === v ? "bg-primary text-primary-foreground" : "hover:bg-secondary/50 text-foreground"}`}>
+              {isUrine && <div className="w-5 h-5 rounded-full border border-border shrink-0" style={{ backgroundColor: URINE_COLORS[v - 1] }} />}
+              <span className="font-medium">{v}</span>
+              <span className="text-xs opacity-80">{(scale.labels as any)[v]}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+type Phase = "workouts" | "checkin" | "active" | "checkout" | "metrics" | "done";
+
 const JourneyWorkoutsDialog = ({
-  open,
-  onOpenChange,
-  journeyId,
-  journeyName,
-  journeyFormat,
-  studentName,
+  open, onOpenChange, journeyId, journeyName, journeyFormat, studentName, studentId,
 }: JourneyWorkoutsDialogProps) => {
+  const { user } = useAuth();
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
   const [loading, setLoading] = useState(false);
   const [showOrientations, setShowOrientations] = useState(false);
+
+  // Workout session flow
+  const [phase, setPhase] = useState<Phase>("workouts");
+  const [checkinForm, setCheckinForm] = useState<Record<string, any>>({});
+  const [checkoutForm, setCheckoutForm] = useState<Record<string, any>>({});
+  const [metricsForm, setMetricsForm] = useState({ workout_bpm_avg: "", workout_bpm_max: "", calories_burned: "" });
+  const [startTime, setStartTime] = useState<Date | null>(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (open && journeyId) fetchWorkouts();
     if (!open) {
       setSelectedWorkout(null);
       setShowOrientations(false);
+      setPhase("workouts");
+      setCheckinForm({});
+      setCheckoutForm({});
+      setMetricsForm({ workout_bpm_avg: "", workout_bpm_max: "", calories_burned: "" });
+      setStartTime(null);
     }
   }, [open, journeyId]);
 
   const fetchWorkouts = async () => {
     setLoading(true);
     const { data, error } = await supabase
-      .from("workouts")
-      .select("id, name, day_label, orientations, sort_order, exercises_data")
-      .eq("journey_id", journeyId)
-      .order("sort_order", { ascending: true });
+      .from("workouts").select("id, name, day_label, orientations, sort_order, exercises_data")
+      .eq("journey_id", journeyId).order("sort_order", { ascending: true });
     if (error) toast.error("Erro ao carregar treinos");
     else {
       const mapped = (data || []).map((w) => ({ ...w, exercises_data: (w.exercises_data as unknown as ExerciseGroupData[]) || [] }));
@@ -82,11 +174,79 @@ const JourneyWorkoutsDialog = ({
     setLoading(false);
   };
 
-  const isWeekly = journeyFormat.toLowerCase() === "semanal";
+  const handleStartWorkout = () => {
+    if (!selectedWorkout) return;
+    setCheckinForm({});
+    setPhase("checkin");
+  };
 
+  const handleSubmitCheckin = async () => {
+    if (!user || !studentId || !selectedWorkout) return;
+    setSaving(true);
+    // Save pre-workout feedback
+    await supabase.from("workout_session_feedback").insert({
+      student_id: studentId,
+      professor_id: user.id,
+      feedback_type: "pre",
+      session_date: new Date().toISOString().split("T")[0],
+      checkin_time: new Date().toISOString(),
+      fatigue_scale: checkinForm.fatigue_scale || null,
+      sleep_quality_scale: checkinForm.sleep_quality_scale || null,
+      muscle_soreness_scale: checkinForm.muscle_soreness_scale || null,
+      stress_level_scale: checkinForm.stress_level_scale || null,
+      mood_scale: checkinForm.mood_scale || null,
+      recovery_perception_scale: checkinForm.recovery_perception_scale || null,
+      urine_color_scale: checkinForm.urine_color_scale || null,
+    } as any);
+
+    // Also register workout checkin
+    await supabase.from("workout_checkins").insert({
+      student_id: studentId,
+      professor_id: user.id,
+      journey_id: journeyId,
+      workout_id: selectedWorkout.id,
+      checked_in_by: user.id,
+    });
+
+    setSaving(false);
+    setStartTime(new Date());
+    toast.success("Check-in registrado! Bom treino! 💪");
+    setPhase("active");
+  };
+
+  const handleFinishWorkout = () => {
+    setCheckoutForm({});
+    setPhase("checkout");
+  };
+
+  const handleSubmitCheckout = () => {
+    setPhase("metrics");
+  };
+
+  const handleSubmitMetrics = async () => {
+    if (!user || !studentId) return;
+    setSaving(true);
+    await supabase.from("workout_session_feedback").insert({
+      student_id: studentId,
+      professor_id: user.id,
+      feedback_type: "post",
+      session_date: new Date().toISOString().split("T")[0],
+      checkout_time: new Date().toISOString(),
+      post_recovery_scale: checkoutForm.post_recovery_scale || null,
+      perceived_exertion_scale: checkoutForm.perceived_exertion_scale || null,
+      pain_scale_eva: checkoutForm.pain_scale_eva || null,
+      workout_bpm_avg: parseInt(metricsForm.workout_bpm_avg) || null,
+      workout_bpm_max: parseInt(metricsForm.workout_bpm_max) || null,
+      calories_burned: parseInt(metricsForm.calories_burned) || null,
+    } as any);
+    setSaving(false);
+    toast.success("Treino finalizado! Dados registrados ✅");
+    setPhase("done");
+  };
+
+  const isWeekly = journeyFormat.toLowerCase() === "semanal";
   const isBiSetData = (item: WorkoutExerciseData | BiSetData): item is BiSetData =>
     "type" in item && item.type === "biset";
-
   const groups = selectedWorkout?.exercises_data || [];
   const hasExercises = groups.some((g) => g.items.length > 0);
 
@@ -104,153 +264,304 @@ const JourneyWorkoutsDialog = ({
     </div>
   );
 
+  const elapsedMinutes = startTime ? Math.floor((Date.now() - startTime.getTime()) / 60000) : 0;
+
+  // ── CHECKIN PHASE ──
+  const renderCheckin = () => (
+    <div className="space-y-3">
+      <div className="bg-gradient-to-r from-[hsl(150,55%,45%)] to-[hsl(170,50%,45%)] rounded-xl p-4 text-white">
+        <div className="flex items-center gap-2 mb-1">
+          <Clock className="w-5 h-5" />
+          <h3 className="font-display font-bold">Pré-Treino (Check-in)</h3>
+        </div>
+        <p className="text-white/70 text-xs">Responda as escalas antes de iniciar o treino</p>
+      </div>
+      {PRE_SCALES.map((scale) => (
+        <ScaleSelector key={scale.key} scale={scale} value={checkinForm[scale.key] ?? null}
+          onChange={(v) => setCheckinForm({ ...checkinForm, [scale.key]: v })} />
+      ))}
+      <button onClick={handleSubmitCheckin} disabled={saving}
+        className="w-full py-3 rounded-xl bg-[hsl(150,55%,45%)] text-white font-display font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50">
+        {saving ? "Salvando..." : "Confirmar Check-in e Iniciar Treino"}
+      </button>
+    </div>
+  );
+
+  // ── ACTIVE PHASE ──
+  const renderActive = () => (
+    <div className="space-y-4">
+      <div className="bg-gradient-to-r from-[hsl(220,60%,50%)] to-[hsl(250,55%,50%)] rounded-xl p-6 text-white text-center">
+        <Activity className="w-10 h-10 mx-auto mb-2 animate-pulse" />
+        <h3 className="font-display font-bold text-lg">Treino em Andamento</h3>
+        <p className="text-white/70 text-sm">{selectedWorkout?.name}</p>
+        <div className="mt-3 bg-white/10 rounded-lg px-4 py-2 inline-block">
+          <p className="text-2xl font-display font-bold">{elapsedMinutes} min</p>
+          <p className="text-white/60 text-xs">tempo decorrido</p>
+        </div>
+      </div>
+
+      {/* Show exercises for reference */}
+      {hasExercises && (
+        <div className="space-y-3">
+          {groups.map((group) => (
+            <div key={group.id} className="rounded-xl border overflow-hidden" style={{ backgroundColor: group.color, borderColor: group.color.replace("0.15", "0.4") }}>
+              <div className="px-3 py-2">
+                <p className="text-xs font-display font-bold text-foreground uppercase tracking-wide">{group.name}</p>
+              </div>
+              <div className="bg-background/60 divide-y divide-border/50">
+                {group.items.map((item) =>
+                  isBiSetData(item) ? (
+                    <div key={item.id} className="border-l-2 border-primary/50">
+                      <div className="flex items-center gap-1.5 px-3 py-1 bg-primary/5">
+                        <Link2 className="w-3 h-3 text-primary" />
+                        <span className="text-[10px] font-display font-semibold text-primary">Bi-Set</span>
+                      </div>
+                      {item.exercises.map((ex) => renderExerciseItem(ex))}
+                    </div>
+                  ) : renderExerciseItem(item)
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <button onClick={handleFinishWorkout}
+        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-destructive text-destructive-foreground font-display font-bold text-sm hover:bg-destructive/90 transition-colors">
+        <Square className="w-4 h-4" />
+        Finalizar Treino
+      </button>
+    </div>
+  );
+
+  // ── CHECKOUT PHASE ──
+  const renderCheckout = () => (
+    <div className="space-y-3">
+      <div className="bg-gradient-to-r from-destructive to-[hsl(0,55%,45%)] rounded-xl p-4 text-white">
+        <div className="flex items-center gap-2 mb-1">
+          <Flame className="w-5 h-5" />
+          <h3 className="font-display font-bold">Pós-Treino (Check-out)</h3>
+        </div>
+        <p className="text-white/70 text-xs">Como foi o treino? Avalie suas sensações</p>
+      </div>
+      {POST_SCALES.map((scale) => (
+        <ScaleSelector key={scale.key} scale={scale} value={checkoutForm[scale.key] ?? null}
+          onChange={(v) => setCheckoutForm({ ...checkoutForm, [scale.key]: v })} />
+      ))}
+      <button onClick={handleSubmitCheckout}
+        className="w-full py-3 rounded-xl bg-destructive text-destructive-foreground font-display font-bold text-sm hover:opacity-90 transition-opacity">
+        Confirmar Check-out
+      </button>
+    </div>
+  );
+
+  // ── METRICS PHASE ──
+  const renderMetrics = () => (
+    <div className="space-y-4">
+      <div className="bg-gradient-to-r from-[hsl(35,85%,50%)] to-[hsl(25,80%,50%)] rounded-xl p-4 text-white">
+        <div className="flex items-center gap-2 mb-1">
+          <Activity className="w-5 h-5" />
+          <h3 className="font-display font-bold">Métricas do Treino</h3>
+        </div>
+        <p className="text-white/70 text-xs">Informe os dados do treino</p>
+      </div>
+      <div className="space-y-3">
+        {[
+          { key: "workout_bpm_avg", label: "BPM Médio", icon: "❤️", placeholder: "Ex: 135" },
+          { key: "workout_bpm_max", label: "BPM Máximo", icon: "💓", placeholder: "Ex: 175" },
+          { key: "calories_burned", label: "Calorias Gastas", icon: "🔥", placeholder: "Ex: 450" },
+        ].map((f) => (
+          <div key={f.key}>
+            <label className="text-sm font-medium text-foreground flex items-center gap-1">
+              <span>{f.icon}</span> {f.label}
+            </label>
+            <input type="number" placeholder={f.placeholder}
+              value={(metricsForm as any)[f.key]}
+              onChange={(e) => setMetricsForm({ ...metricsForm, [f.key]: e.target.value })}
+              className="w-full mt-1 px-3 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none" />
+          </div>
+        ))}
+      </div>
+      <button onClick={handleSubmitMetrics} disabled={saving}
+        className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm hover:bg-primary/90 transition-colors disabled:opacity-50">
+        {saving ? "Salvando..." : "Finalizar e Salvar"}
+      </button>
+    </div>
+  );
+
+  // ── DONE PHASE ──
+  const renderDone = () => (
+    <div className="text-center py-8 space-y-4">
+      <div className="w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center mx-auto">
+        <CheckCircle2 className="w-10 h-10 text-accent" />
+      </div>
+      <h3 className="font-display font-bold text-xl text-foreground">Treino Concluído! 🎉</h3>
+      <p className="text-sm text-muted-foreground">
+        {selectedWorkout?.name} • {elapsedMinutes} min
+      </p>
+      {(metricsForm.calories_burned || metricsForm.workout_bpm_avg) && (
+        <div className="flex justify-center gap-4">
+          {metricsForm.workout_bpm_avg && (
+            <div className="bg-secondary/30 rounded-xl px-4 py-2">
+              <p className="text-lg font-bold text-foreground">{metricsForm.workout_bpm_avg}</p>
+              <p className="text-[10px] text-muted-foreground">BPM Médio</p>
+            </div>
+          )}
+          {metricsForm.calories_burned && (
+            <div className="bg-secondary/30 rounded-xl px-4 py-2">
+              <p className="text-lg font-bold text-foreground">{metricsForm.calories_burned}</p>
+              <p className="text-[10px] text-muted-foreground">kcal</p>
+            </div>
+          )}
+        </div>
+      )}
+      <button onClick={() => { setPhase("workouts"); onOpenChange(false); }}
+        className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm hover:bg-primary/90 transition-colors">
+        Fechar
+      </button>
+    </div>
+  );
+
+  // ── WORKOUTS PHASE (original) ──
+  const renderWorkouts = () => (
+    <>
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : workouts.length === 0 ? (
+        <p className="text-center text-sm text-muted-foreground py-8">Nenhum treino criado nesta jornada</p>
+      ) : (
+        <div className="space-y-4">
+          {/* Workout selector */}
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <CalendarDays className="w-4 h-4 text-muted-foreground" />
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
+                {isWeekly ? "Selecione o Treino da Semana" : "Selecione o Treino"}
+              </span>
+            </div>
+            <div className="flex gap-2 overflow-x-auto scrollbar-thin pb-1">
+              {workouts.map((w, i) => {
+                const isSelected = selectedWorkout?.id === w.id;
+                return (
+                  <button key={w.id} onClick={() => { setSelectedWorkout(w); setShowOrientations(false); }}
+                    className={`shrink-0 rounded-xl p-3 min-w-[100px] text-left transition-all ${isSelected ? "bg-[hsl(250,55%,50%)] text-white shadow-lg shadow-[hsl(250,55%,50%)/0.3]" : "bg-secondary border border-border text-foreground hover:border-primary/30"}`}>
+                    <div className="flex items-center gap-1 mb-1">
+                      <div className={`w-2 h-2 rounded-full ${isSelected ? "bg-[hsl(150,60%,45%)]" : "bg-muted-foreground/40"}`} />
+                      <span className="text-xs font-bold">{i + 1}</span>
+                    </div>
+                    <p className="font-display font-bold text-sm truncate">{w.name}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                      <Dumbbell className={`w-3 h-3 ${isSelected ? "text-white/70" : "text-muted-foreground"}`} />
+                      <span className={`text-[10px] ${isSelected ? "text-white/70" : "text-muted-foreground"}`}>{w.day_label}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Selected workout details */}
+          {selectedWorkout && (
+            <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+              <h3 className="font-display font-bold text-lg text-foreground">{selectedWorkout.name}</h3>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1"><CalendarDays className="w-3.5 h-3.5" />{selectedWorkout.day_label}</span>
+              </div>
+              {selectedWorkout.orientations && (
+                <div>
+                  <button onClick={() => setShowOrientations(!showOrientations)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    <Info className="w-3.5 h-3.5" /><span>Orientações</span>
+                    {showOrientations ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  </button>
+                  {showOrientations && <p className="mt-2 text-sm text-primary/80 bg-primary/5 rounded-lg px-3 py-2">{selectedWorkout.orientations}</p>}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Exercises */}
+          {selectedWorkout && hasExercises ? (
+            <div className="space-y-3">
+              {groups.map((group) => (
+                <div key={group.id} className="rounded-xl border overflow-hidden" style={{ backgroundColor: group.color, borderColor: group.color.replace("0.15", "0.4") }}>
+                  <div className="px-3 py-2"><p className="text-xs font-display font-bold text-foreground uppercase tracking-wide">{group.name}</p></div>
+                  <div className="bg-background/60 divide-y divide-border/50">
+                    {group.items.map((item) =>
+                      isBiSetData(item) ? (
+                        <div key={item.id} className="border-l-2 border-primary/50">
+                          <div className="flex items-center gap-1.5 px-3 py-1 bg-primary/5">
+                            <Link2 className="w-3 h-3 text-primary" />
+                            <span className="text-[10px] font-display font-semibold text-primary">Bi-Set</span>
+                          </div>
+                          {item.exercises.map((ex) => renderExerciseItem(ex))}
+                        </div>
+                      ) : renderExerciseItem(item)
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : selectedWorkout ? (
+            <div className="rounded-xl border border-border bg-secondary/30 p-4 text-center">
+              <Dumbbell className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+              <p className="text-xs text-muted-foreground">Nenhum exercício adicionado a este treino</p>
+            </div>
+          ) : null}
+
+          {/* Action buttons */}
+          <div className="space-y-2">
+            <button className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[hsl(220,60%,50%)] text-white font-display font-bold text-sm hover:opacity-90 transition-opacity">
+              <Printer className="w-4 h-4" />Imprimir Treino
+            </button>
+            <button onClick={handleStartWorkout}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[hsl(150,60%,45%)] text-white font-display font-bold text-sm hover:opacity-90 transition-opacity">
+              <Play className="w-4 h-4" />Iniciar Treino
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+
+  const getHeaderTitle = () => {
+    switch (phase) {
+      case "checkin": return "Check-in Pré-Treino";
+      case "active": return "Treino em Andamento";
+      case "checkout": return "Check-out Pós-Treino";
+      case "metrics": return "Métricas do Treino";
+      case "done": return "Treino Concluído";
+      default: return journeyName;
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md p-0 overflow-hidden">
+    <Dialog open={open} onOpenChange={(v) => { if (phase === "active") return; onOpenChange(v); }}>
+      <DialogContent className="max-w-md p-0 overflow-hidden max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="bg-gradient-to-r from-[hsl(220,60%,45%)] to-[hsl(250,55%,50%)] px-4 py-4 text-white flex items-center gap-3">
+        <div className="bg-gradient-to-r from-[hsl(220,60%,45%)] to-[hsl(250,55%,50%)] px-4 py-4 text-white flex items-center gap-3 shrink-0">
           <button
-            onClick={() => onOpenChange(false)}
-            className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
-          >
+            onClick={() => { if (phase === "workouts") onOpenChange(false); else if (phase !== "active") setPhase("workouts"); }}
+            className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors">
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div className="flex-1 min-w-0">
-            <h2 className="font-display font-bold text-base truncate">{journeyName}</h2>
+            <h2 className="font-display font-bold text-base truncate">{getHeaderTitle()}</h2>
             <p className="text-white/60 text-xs">{studentName}</p>
           </div>
         </div>
 
-        <div className="px-4 py-4 max-h-[70vh] overflow-y-auto scrollbar-thin space-y-4">
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-            </div>
-          ) : workouts.length === 0 ? (
-            <p className="text-center text-sm text-muted-foreground py-8">Nenhum treino criado nesta jornada</p>
-          ) : (
-            <>
-              {/* Workout selector */}
-              <div className="rounded-xl border border-border bg-card p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <CalendarDays className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
-                    {isWeekly ? "Selecione o Treino da Semana" : "Selecione o Treino"}
-                  </span>
-                </div>
-                <div className="flex gap-2 overflow-x-auto scrollbar-thin pb-1">
-                  {workouts.map((w, i) => {
-                    const isSelected = selectedWorkout?.id === w.id;
-                    return (
-                      <button
-                        key={w.id}
-                        onClick={() => { setSelectedWorkout(w); setShowOrientations(false); }}
-                        className={`shrink-0 rounded-xl p-3 min-w-[100px] text-left transition-all ${
-                          isSelected
-                            ? "bg-[hsl(250,55%,50%)] text-white shadow-lg shadow-[hsl(250,55%,50%)/0.3]"
-                            : "bg-secondary border border-border text-foreground hover:border-primary/30"
-                        }`}
-                      >
-                        <div className="flex items-center gap-1 mb-1">
-                          <div className={`w-2 h-2 rounded-full ${isSelected ? "bg-[hsl(150,60%,45%)]" : "bg-muted-foreground/40"}`} />
-                          <span className="text-xs font-bold">{i + 1}</span>
-                        </div>
-                        <p className="font-display font-bold text-sm truncate">{w.name}</p>
-                        <div className="flex items-center gap-1 mt-1">
-                          <Dumbbell className={`w-3 h-3 ${isSelected ? "text-white/70" : "text-muted-foreground"}`} />
-                          <span className={`text-[10px] ${isSelected ? "text-white/70" : "text-muted-foreground"}`}>
-                            {w.day_label}
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Selected workout details */}
-              {selectedWorkout && (
-                <div className="rounded-xl border border-border bg-card p-4 space-y-3">
-                  <h3 className="font-display font-bold text-lg text-foreground">{selectedWorkout.name}</h3>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <CalendarDays className="w-3.5 h-3.5" />
-                      {selectedWorkout.day_label}
-                    </span>
-                  </div>
-
-                  {/* Orientations */}
-                  {selectedWorkout.orientations && (
-                    <div>
-                      <button
-                        onClick={() => setShowOrientations(!showOrientations)}
-                        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <Info className="w-3.5 h-3.5" />
-                        <span>Orientações</span>
-                        {showOrientations ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                      </button>
-                      {showOrientations && (
-                        <p className="mt-2 text-sm text-primary/80 bg-primary/5 rounded-lg px-3 py-2">
-                          {selectedWorkout.orientations}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Exercises */}
-              {selectedWorkout && hasExercises ? (
-                <div className="space-y-3">
-                  {groups.map((group) => (
-                    <div
-                      key={group.id}
-                      className="rounded-xl border overflow-hidden"
-                      style={{ backgroundColor: group.color, borderColor: group.color.replace("0.15", "0.4") }}
-                    >
-                      <div className="px-3 py-2">
-                        <p className="text-xs font-display font-bold text-foreground uppercase tracking-wide">{group.name}</p>
-                      </div>
-                      <div className="bg-background/60 divide-y divide-border/50">
-                        {group.items.map((item) =>
-                          isBiSetData(item) ? (
-                            <div key={item.id} className="border-l-2 border-primary/50">
-                              <div className="flex items-center gap-1.5 px-3 py-1 bg-primary/5">
-                                <Link2 className="w-3 h-3 text-primary" />
-                                <span className="text-[10px] font-display font-semibold text-primary">Bi-Set</span>
-                              </div>
-                              {item.exercises.map((ex) => renderExerciseItem(ex))}
-                            </div>
-                          ) : (
-                            renderExerciseItem(item)
-                          )
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : selectedWorkout ? (
-                <div className="rounded-xl border border-border bg-secondary/30 p-4 text-center">
-                  <Dumbbell className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
-                  <p className="text-xs text-muted-foreground">Nenhum exercício adicionado a este treino</p>
-                </div>
-              ) : null}
-
-              {/* Action buttons */}
-              <div className="space-y-2">
-                <button className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[hsl(220,60%,50%)] text-white font-display font-bold text-sm hover:opacity-90 transition-opacity">
-                  <Printer className="w-4 h-4" />
-                  Imprimir Treino
-                </button>
-                <button className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[hsl(150,60%,45%)] text-white font-display font-bold text-sm hover:opacity-90 transition-opacity">
-                  <Play className="w-4 h-4" />
-                  Iniciar Treino
-                </button>
-              </div>
-            </>
-          )}
-        </div>
+        <ScrollArea className="flex-1">
+          <div className="px-4 py-4 space-y-4">
+            {phase === "workouts" && renderWorkouts()}
+            {phase === "checkin" && renderCheckin()}
+            {phase === "active" && renderActive()}
+            {phase === "checkout" && renderCheckout()}
+            {phase === "metrics" && renderMetrics()}
+            {phase === "done" && renderDone()}
+          </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

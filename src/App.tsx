@@ -25,6 +25,8 @@ import StudentWorkouts from "./pages/StudentWorkouts";
 import StudentHistory from "./pages/StudentHistory";
 import StudentHealth from "./pages/StudentHealth";
 import StudentChallenges from "./pages/StudentChallenges";
+import StudentNotifications from "./pages/StudentNotifications";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -64,6 +66,8 @@ const App = () => (
           <Route path="/student-history" element={<ProtectedRoute><StudentHistory /></ProtectedRoute>} />
           <Route path="/student-health" element={<ProtectedRoute><StudentHealth /></ProtectedRoute>} />
           <Route path="/student-challenges" element={<ProtectedRoute><StudentChallenges /></ProtectedRoute>} />
+          <Route path="/student-notifications" element={<ProtectedRoute><StudentNotifications /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

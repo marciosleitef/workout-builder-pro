@@ -159,10 +159,10 @@ const Dashboard = () => {
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {cards.map((card, idx) => (
+          {cards.map((card) => (
             <button
-              key={card.route || idx}
-              onClick={() => card.action ? card.action() : navigate(card.route!)}
+              key={card.route}
+              onClick={() => navigate(card.route)}
               className="rounded-2xl border border-border bg-card p-6 text-left hover:border-primary/30 hover:shadow-lg transition-all group"
             >
               <div className={`w-14 h-14 rounded-xl ${card.bgClass} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
@@ -208,10 +208,23 @@ const Dashboard = () => {
                 <p className="text-xs text-muted-foreground mt-1">Se selecionado, o grupo virá travado no formulário de cadastro.</p>
               </div>
             )}
+            {plans.length > 0 && (
+              <div>
+                <label className="text-sm font-medium text-foreground">Plano do aluno (opcional)</label>
+                <select value={linkPlanId} onChange={(e) => setLinkPlanId(e.target.value)} className="w-full mt-1 px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
+                  <option value="">Sem plano definido</option>
+                  {plans.map((p) => (<option key={p.id} value={p.id}>{p.name}</option>))}
+                </select>
+                <p className="text-xs text-muted-foreground mt-1">Se selecionado, o plano virá travado no formulário de cadastro.</p>
+              </div>
+            )}
             <button
               onClick={() => {
-                let link = `${window.location.origin}/register/${user?.id}`;
-                if (linkGroupId) link += `?group=${linkGroupId}`;
+                const params = new URLSearchParams();
+                if (linkGroupId) params.set("group", linkGroupId);
+                if (linkPlanId) params.set("plan", linkPlanId);
+                const qs = params.toString();
+                const link = `${window.location.origin}/register/${user?.id}${qs ? `?${qs}` : ""}`;
                 navigator.clipboard.writeText(link);
                 toast.success("Link de cadastro copiado!");
                 setShowLinkDialog(false);
@@ -223,8 +236,6 @@ const Dashboard = () => {
           </div>
         </DialogContent>
       </Dialog>
-
-      <PlansDialog open={showPlansDialog} onOpenChange={setShowPlansDialog} onPlansChanged={fetchPlanCount} />
     </div>
   );
 };

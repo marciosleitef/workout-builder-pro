@@ -9,17 +9,25 @@ interface StudentGroup {
   name: string;
 }
 
+interface Plan {
+  id: string;
+  name: string;
+}
+
 const StudentRegister = () => {
   const { professorId } = useParams<{ professorId: string }>();
   const [searchParams] = useSearchParams();
   const presetGroupId = searchParams.get("group") || "";
+  const presetPlanId = searchParams.get("plan") || "";
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [gender, setGender] = useState("");
   const [groupId, setGroupId] = useState(presetGroupId);
+  const [planId, setPlanId] = useState(presetPlanId);
   const [groups, setGroups] = useState<StudentGroup[]>([]);
+  const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -31,6 +39,12 @@ const StudentRegister = () => {
         .eq("professor_id", professorId)
         .order("name")
         .then(({ data }) => setGroups((data as any[]) || []));
+      supabase
+        .from("plans")
+        .select("id, name")
+        .eq("professor_id", professorId)
+        .order("name")
+        .then(({ data }) => setPlans((data as any[]) || []));
     }
   }, [professorId]);
 
@@ -41,7 +55,7 @@ const StudentRegister = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke("register-student", {
-        body: { professorId, fullName, email, whatsapp, birthDate, gender, groupId },
+        body: { professorId, fullName, email, whatsapp, birthDate, gender, groupId, planId },
       });
 
       if (error) throw error;

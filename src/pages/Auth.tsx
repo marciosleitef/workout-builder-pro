@@ -17,9 +17,16 @@ const Auth = () => {
     setLoading(true);
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate("/dashboard");
+        // Detect role and redirect
+        const userId = authData.user?.id;
+        if (userId) {
+          const { data: studentData } = await supabase.from("students").select("id").eq("user_id", userId).limit(1).maybeSingle();
+          navigate(studentData ? "/student-dashboard" : "/dashboard");
+        } else {
+          navigate("/dashboard");
+        }
       } else {
         const { error } = await supabase.auth.signUp({
           email,

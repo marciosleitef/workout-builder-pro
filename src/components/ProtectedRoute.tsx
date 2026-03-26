@@ -4,10 +4,11 @@ import { useAuth } from "@/hooks/useAuth";
 interface ProtectedRouteProps {
   children: React.ReactNode;
   skipPasswordCheck?: boolean;
+  allowedRole?: "professor" | "student";
 }
 
-const ProtectedRoute = ({ children, skipPasswordCheck }: ProtectedRouteProps) => {
-  const { user, loading, mustChangePassword } = useAuth();
+const ProtectedRoute = ({ children, skipPasswordCheck, allowedRole }: ProtectedRouteProps) => {
+  const { user, loading, mustChangePassword, role } = useAuth();
 
   if (loading) {
     return (
@@ -23,6 +24,14 @@ const ProtectedRoute = ({ children, skipPasswordCheck }: ProtectedRouteProps) =>
 
   if (!skipPasswordCheck && mustChangePassword) {
     return <Navigate to="/change-password" replace />;
+  }
+
+  // Role-based redirection
+  if (role && allowedRole && role !== allowedRole) {
+    if (role === "student") {
+      return <Navigate to="/student-dashboard" replace />;
+    }
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;

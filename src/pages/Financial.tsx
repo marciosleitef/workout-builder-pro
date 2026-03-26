@@ -236,8 +236,8 @@ const Financial = () => {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="rounded-2xl border border-border bg-card overflow-hidden">
+        {/* List - Cards on mobile, Table on desktop */}
+        <div className="hidden md:block rounded-2xl border border-border bg-card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -283,6 +283,42 @@ const Financial = () => {
               </tbody>
             </table>
           </div>
+        </div>
+
+        {/* Mobile cards */}
+        <div className="md:hidden space-y-2">
+          {filtered.length === 0 && (
+            <div className="text-center py-10 text-muted-foreground text-sm">Nenhuma cobrança encontrada</div>
+          )}
+          {filtered.map(p => {
+            const daysLate = p.realStatus === "overdue" ? differenceInDays(today, parseISO(p.due_date)) : 0;
+            return (
+              <div key={p.id} className="rounded-xl border border-border bg-card p-3.5">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{p.students?.full_name || "—"}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Venc: {format(parseISO(p.due_date), "dd/MM/yyyy")}
+                      {daysLate > 0 && <span className="text-destructive ml-1">({daysLate}d atraso)</span>}
+                    </p>
+                  </div>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium shrink-0 ${statusColors[p.realStatus]}`}>{statusLabels[p.realStatus]}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <p className="text-base font-bold text-foreground">R$ {p.amount.toFixed(2)}</p>
+                  {p.realStatus !== "paid" ? (
+                    <button onClick={() => markPaid(p.id)} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-500/10 text-green-700 dark:text-green-400 text-xs font-medium hover:bg-green-500/20">
+                      <Check className="w-3 h-3" /> Confirmar
+                    </button>
+                  ) : (
+                    <button onClick={() => markUnpaid(p.id)} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-muted text-muted-foreground text-xs font-medium hover:bg-muted/80">
+                      <X className="w-3 h-3" /> Reverter
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

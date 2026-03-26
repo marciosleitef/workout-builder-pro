@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import Students from "./pages/Students";
 import ExerciseLibraryPage from "./pages/ExerciseLibraryPage";
 import AttendanceCalendar from "./pages/AttendanceCalendar";
+import StudentGroups from "./pages/StudentGroups";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -62,6 +63,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <AttendanceCalendar />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/groups"
+            element={
+              <ProtectedRoute>
+                <StudentGroups />
               </ProtectedRoute>
             }
           />

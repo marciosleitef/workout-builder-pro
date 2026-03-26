@@ -95,12 +95,12 @@ const AttendanceCalendar = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Top bar */}
-      <div className="bg-card border-b border-border px-6 py-4">
+      <div className="bg-foreground px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center gap-3">
-          <button onClick={() => navigate("/dashboard")} className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-foreground hover:bg-secondary/80 transition-colors">
+          <button onClick={() => navigate("/dashboard")} className="w-9 h-9 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:bg-primary-foreground/15 transition-colors">
             <ArrowLeft className="w-4 h-4" />
           </button>
-          <h1 className="font-display font-bold text-lg text-foreground">Calendário de Frequência</h1>
+          <h1 className="font-display font-bold text-lg text-primary-foreground">Calendário de Frequência</h1>
         </div>
       </div>
 

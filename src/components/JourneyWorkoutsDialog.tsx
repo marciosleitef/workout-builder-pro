@@ -463,11 +463,6 @@ const JourneyWorkoutsDialog = ({
       </div>
     );
   };
-          </div>
-        )}
-      </div>
-    );
-  };
 
   // Simple exercise item (no interaction)
   const renderExerciseItemSimple = (ex: WorkoutExerciseData) => renderExerciseItemFull(ex, false);

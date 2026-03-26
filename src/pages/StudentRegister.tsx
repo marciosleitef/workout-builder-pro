@@ -137,6 +137,27 @@ const StudentRegister = () => {
                 )}
               </div>
             )}
+            {plans.length > 0 && (
+              <div>
+                <label className="text-sm font-medium text-foreground">Plano</label>
+                {presetPlanId ? (
+                  <>
+                    <input
+                      type="text"
+                      value={plans.find((p) => p.id === presetPlanId)?.name || "Plano selecionado"}
+                      readOnly
+                      className="w-full mt-1 px-4 py-3 rounded-lg bg-secondary/50 border border-border text-foreground cursor-not-allowed opacity-70"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Plano definido pelo professor</p>
+                  </>
+                ) : (
+                  <select value={planId} onChange={(e) => setPlanId(e.target.value)} className="w-full mt-1 px-4 py-3 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    <option value="">Selecione</option>
+                    {plans.map((p) => (<option key={p.id} value={p.id}>{p.name}</option>))}
+                  </select>
+                )}
+              </div>
+            )}
             <div>
               <label className="text-sm font-medium text-foreground">Data de Nascimento</label>
               <input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} className="w-full mt-1 px-4 py-3 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />

@@ -349,20 +349,6 @@ const Students = () => {
                       const hColor = health != null ? (health >= 70 ? "hsl(var(--accent))" : health >= 40 ? "hsl(var(--primary))" : "hsl(var(--destructive))") : "hsl(var(--muted-foreground))";
                       const pColor = perf != null ? (perf >= 70 ? "hsl(var(--accent))" : perf >= 40 ? "hsl(var(--primary))" : "hsl(var(--destructive))") : "hsl(var(--muted-foreground))";
 
-                      const healthTooltip = sc ? [
-                        sc.bioScore != null ? `Bioimpedância: ${sc.bioScore}%` : null,
-                        sc.dailyScore != null ? `Reg. Diário: ${sc.dailyScore}%` : null,
-                        `Base: ${sc.healthBase}%`,
-                        ...sc.bonusDetails.filter(b => b.includes("BIA") || b.includes("Melhoria")),
-                      ].filter(Boolean).join("\n") : "";
-
-                      const perfTooltip = sc ? [
-                        `Presença: ${sc.presenceScore}%${sc.presenceScore > 0 ? " ✓" : ""}`,
-                        `Qualidade: ${sc.qualityScore}%`,
-                        `Base: ${sc.performanceBase}%`,
-                        ...sc.bonusDetails.filter(b => !b.includes("BIA") && !b.includes("Melhoria")),
-                      ].filter(Boolean).join("\n") : "";
-
                       return (
                         <>
                           <button onClick={() => setScoreDialog({ type: "health", studentId: s.id })} className="bg-secondary/50 rounded-lg p-2 text-left hover:bg-secondary/70 transition-colors">

@@ -29,6 +29,7 @@ const App = () => (
         <Routes>
           <Route path="/auth" element={<Auth />} />
           <Route path="/register/:professorId" element={<StudentRegister />} />
+          <Route path="/challenge/:inviteCode" element={<ChallengePublic />} />
           <Route
             path="/change-password"
             element={
@@ -82,6 +83,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Plans />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/challenges"
+            element={
+              <ProtectedRoute>
+                <Challenges />
               </ProtectedRoute>
             }
           />

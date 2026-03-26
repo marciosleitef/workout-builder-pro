@@ -269,7 +269,7 @@ const JourneyEditDialog = ({
           </div>
           <button
             onClick={() => onOpenChange(false)}
-            className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
+            className="w-8 h-8 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/15 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -451,7 +451,7 @@ const JourneyEditDialog = ({
                       <div className="flex items-center gap-1.5">
                         <button
                           onClick={() => handleEditWorkout(w)}
-                          className="w-8 h-8 rounded-full bg-[hsl(200,70%,50%)] flex items-center justify-center text-white hover:opacity-90 transition-opacity"
+                          className="w-8 h-8 rounded-full bg-foreground flex items-center justify-center text-white hover:opacity-90 transition-opacity"
                           title="Editar"
                         >
                           <Pencil className="w-3.5 h-3.5" />

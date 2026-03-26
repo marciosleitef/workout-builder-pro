@@ -460,10 +460,10 @@ const JourneyWorkoutsDialog = ({
       // All answered - show confirm
       return (
         <div className="space-y-4">
-          <div className="bg-gradient-to-r from-[hsl(150,55%,45%)] to-[hsl(170,50%,45%)] rounded-xl p-4 text-white text-center">
+          <div className="bg-foreground rounded-xl p-4 text-primary-foreground text-center">
             <CheckCircle2 className="w-8 h-8 mx-auto mb-2" />
             <h3 className="font-display font-bold">Check-in Completo!</h3>
-            <p className="text-white/70 text-xs mt-1">Todas as escalas foram respondidas</p>
+            <p className="text-primary-foreground/60 text-xs mt-1">Todas as escalas foram respondidas</p>
           </div>
           <div className="space-y-2">
             {PRE_SCALES.map((s) => (
@@ -509,10 +509,10 @@ const JourneyWorkoutsDialog = ({
   // ── ACTIVE PHASE ──
   const renderActive = () => (
     <div className="space-y-4">
-      <div className="bg-gradient-to-r from-[hsl(220,60%,50%)] to-[hsl(250,55%,50%)] rounded-xl p-4 text-white text-center">
+      <div className="bg-foreground rounded-xl p-4 text-primary-foreground text-center">
         <Activity className="w-8 h-8 mx-auto mb-2 animate-pulse" />
         <h3 className="font-display font-bold text-lg">Treino em Andamento</h3>
-        <p className="text-white/70 text-sm">{selectedWorkout?.name}</p>
+        <p className="text-primary-foreground/60 text-sm">{selectedWorkout?.name}</p>
         <div className="flex items-center justify-center gap-4 mt-3">
           <div className="bg-white/10 rounded-lg px-4 py-2">
             <p className="text-2xl font-display font-bold font-mono">{formatTime(elapsedSeconds)}</p>
@@ -595,12 +595,12 @@ const JourneyWorkoutsDialog = ({
   // ── METRICS PHASE ──
   const renderMetrics = () => (
     <div className="space-y-4">
-      <div className="bg-gradient-to-r from-[hsl(35,85%,50%)] to-[hsl(25,80%,50%)] rounded-xl p-4 text-white">
+      <div className="bg-foreground/90 rounded-xl p-4 text-primary-foreground">
         <div className="flex items-center gap-2 mb-1">
           <Activity className="w-5 h-5" />
           <h3 className="font-display font-bold">Métricas do Treino</h3>
         </div>
-        <p className="text-white/70 text-xs">Informe os dados do treino</p>
+        <p className="text-primary-foreground/60 text-xs">Informe os dados do treino</p>
       </div>
       <div className="space-y-3">
         {[
@@ -762,7 +762,7 @@ const JourneyWorkoutsDialog = ({
     <Dialog open={open} onOpenChange={(v) => { if (phase === "active") return; onOpenChange(v); }}>
       <DialogContent className="max-w-md p-0 max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-[hsl(220,60%,45%)] to-[hsl(250,55%,50%)] px-4 py-4 text-white flex items-center gap-3 shrink-0">
+        <div className="bg-foreground px-4 py-4 text-primary-foreground flex items-center gap-3 shrink-0">
           <button
             onClick={() => {
               if (phase === "workouts") onOpenChange(false);
@@ -770,7 +770,7 @@ const JourneyWorkoutsDialog = ({
               else if (phase === "checkout" && currentStep > 0) setCurrentStep(currentStep - 1);
               else if (phase !== "active") setPhase("workouts");
             }}
-            className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors">
+            className="w-8 h-8 rounded-lg bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/15 transition-colors">
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div className="flex-1 min-w-0">

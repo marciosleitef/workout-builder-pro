@@ -141,7 +141,7 @@ const NewJourneyWizard = ({ open, onOpenChange, studentId, studentName, onCreate
         ) : (
         <>
         {/* Header */}
-        <div className="bg-gradient-to-r from-[hsl(220,60%,45%)] to-[hsl(250,55%,50%)] px-6 py-5 text-white">
+        <div className="bg-foreground px-6 py-5 text-primary-foreground">
           <h2 className="font-display font-bold text-lg">Nova Jornada de Treino</h2>
           <div className="flex items-center justify-between mt-4">
             {STEPS.map((label, i) => (

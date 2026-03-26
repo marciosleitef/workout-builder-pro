@@ -256,16 +256,16 @@ const JourneyEditDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md p-0 overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-[hsl(220,60%,45%)] to-[hsl(250,55%,50%)] px-4 py-4 text-white flex items-center gap-3">
+        <div className="bg-foreground px-4 py-4 text-primary-foreground flex items-center gap-3">
           <button
             onClick={handleBack}
-            className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
+            className="w-8 h-8 rounded-lg bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/15 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div className="flex-1 min-w-0">
             <h2 className="font-display font-bold text-base">{getTitle()}</h2>
-            <p className="text-white/60 text-xs">{journey?.name} • {studentName}</p>
+            <p className="text-primary-foreground/50 text-xs">{journey?.name} • {studentName}</p>
           </div>
           <button
             onClick={() => onOpenChange(false)}

@@ -6,7 +6,7 @@ import { UserCircle, Dumbbell, Calendar, LogOut, Sun, Moon, Plus, Link2, Users, 
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useTheme } from "@/hooks/useTheme";
-import PlansDialog from "@/components/PlansDialog";
+
 
 function getInitials(name: string) {
   return name.split(" ").filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
@@ -22,9 +22,10 @@ const Dashboard = () => {
   const [showNewStudentMenu, setShowNewStudentMenu] = useState(false);
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [linkGroupId, setLinkGroupId] = useState("");
+  const [linkPlanId, setLinkPlanId] = useState("");
   const [groups, setGroups] = useState<{ id: string; name: string }[]>([]);
+  const [plans, setPlans] = useState<{ id: string; name: string }[]>([]);
   const [planCount, setPlanCount] = useState(0);
-  const [showPlansDialog, setShowPlansDialog] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -33,7 +34,13 @@ const Dashboard = () => {
     fetchGroupCount();
     fetchGroups();
     fetchPlanCount();
+    fetchPlans();
   }, [user]);
+
+  const fetchPlans = async () => {
+    const { data } = await supabase.from("plans").select("id, name").eq("professor_id", user?.id).order("name");
+    setPlans(data || []);
+  };
 
   const fetchGroups = async () => {
     const { data } = await supabase.from("student_groups").select("id, name").eq("professor_id", user?.id).order("name");
@@ -178,7 +185,7 @@ const Dashboard = () => {
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Plus className="w-5 h-5 text-primary" /></div>
               <div className="text-left"><p className="font-display font-bold text-sm text-foreground">Cadastro Manual</p><p className="text-xs text-muted-foreground">Preencher os dados do aluno agora</p></div>
             </button>
-            <button onClick={() => { setShowNewStudentMenu(false); setLinkGroupId(""); setTimeout(() => setShowLinkDialog(true), 150); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors">
+            <button onClick={() => { setShowNewStudentMenu(false); setLinkGroupId(""); setLinkPlanId(""); setTimeout(() => setShowLinkDialog(true), 150); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Link2 className="w-5 h-5 text-primary" /></div>
               <div className="text-left"><p className="font-display font-bold text-sm text-foreground">Enviar Link de Cadastro</p><p className="text-xs text-muted-foreground">O aluno preenche seus próprios dados</p></div>
             </button>

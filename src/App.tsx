@@ -10,6 +10,8 @@ import ExerciseLibraryPage from "./pages/ExerciseLibraryPage";
 import AttendanceCalendar from "./pages/AttendanceCalendar";
 import StudentGroups from "./pages/StudentGroups";
 import Plans from "./pages/Plans";
+import Challenges from "./pages/Challenges";
+import ChallengePublic from "./pages/ChallengePublic";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -27,6 +29,7 @@ const App = () => (
         <Routes>
           <Route path="/auth" element={<Auth />} />
           <Route path="/register/:professorId" element={<StudentRegister />} />
+          <Route path="/challenge/:inviteCode" element={<ChallengePublic />} />
           <Route
             path="/change-password"
             element={
@@ -80,6 +83,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Plans />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/challenges"
+            element={
+              <ProtectedRoute>
+                <Challenges />
               </ProtectedRoute>
             }
           />

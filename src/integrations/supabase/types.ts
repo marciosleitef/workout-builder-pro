@@ -14,6 +14,156 @@ export type Database = {
   }
   public: {
     Tables: {
+      challenge_participants: {
+        Row: {
+          challenge_id: string
+          id: string
+          joined_at: string
+          journey_id: string | null
+          student_id: string
+          total_points: number
+        }
+        Insert: {
+          challenge_id: string
+          id?: string
+          joined_at?: string
+          journey_id?: string | null
+          student_id: string
+          total_points?: number
+        }
+        Update: {
+          challenge_id?: string
+          id?: string
+          joined_at?: string
+          journey_id?: string | null
+          student_id?: string
+          total_points?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_participants_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenge_participants_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "workout_journeys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenge_participants_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenge_scores: {
+        Row: {
+          challenge_id: string
+          description: string | null
+          earned_at: string
+          id: string
+          participant_id: string
+          points: number
+          score_type: string
+        }
+        Insert: {
+          challenge_id: string
+          description?: string | null
+          earned_at?: string
+          id?: string
+          participant_id: string
+          points?: number
+          score_type: string
+        }
+        Update: {
+          challenge_id?: string
+          description?: string | null
+          earned_at?: string
+          id?: string
+          participant_id?: string
+          points?: number
+          score_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_scores_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenge_scores_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "challenge_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenges: {
+        Row: {
+          created_at: string
+          description: string | null
+          end_date: string
+          id: string
+          invite_code: string
+          name: string
+          points_per_checkin: number
+          points_streak_bonus: number
+          points_weekly_bonus: number
+          professor_id: string
+          source_journey_id: string | null
+          start_date: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          end_date?: string
+          id?: string
+          invite_code?: string
+          name: string
+          points_per_checkin?: number
+          points_streak_bonus?: number
+          points_weekly_bonus?: number
+          professor_id: string
+          source_journey_id?: string | null
+          start_date?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          end_date?: string
+          id?: string
+          invite_code?: string
+          name?: string
+          points_per_checkin?: number
+          points_streak_bonus?: number
+          points_weekly_bonus?: number
+          professor_id?: string
+          source_journey_id?: string | null
+          start_date?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenges_source_journey_id_fkey"
+            columns: ["source_journey_id"]
+            isOneToOne: false
+            referencedRelation: "workout_journeys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plans: {
         Row: {
           created_at: string

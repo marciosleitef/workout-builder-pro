@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { UserCircle, Dumbbell, Calendar, LogOut, Sun, Moon, Plus, Link2, Users, Package } from "lucide-react";
+import { UserCircle, Dumbbell, Calendar, LogOut, Sun, Moon, Plus, Link2, Users, Package, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useTheme } from "@/hooks/useTheme";
@@ -26,6 +26,7 @@ const Dashboard = () => {
   const [groups, setGroups] = useState<{ id: string; name: string }[]>([]);
   const [plans, setPlans] = useState<{ id: string; name: string }[]>([]);
   const [planCount, setPlanCount] = useState(0);
+  const [challengeCount, setChallengeCount] = useState(0);
 
   useEffect(() => {
     if (!user) return;
@@ -35,6 +36,7 @@ const Dashboard = () => {
     fetchGroups();
     fetchPlanCount();
     fetchPlans();
+    fetchChallengeCount();
   }, [user]);
 
   const fetchPlans = async () => {
@@ -65,6 +67,11 @@ const Dashboard = () => {
   const fetchPlanCount = async () => {
     const { count } = await supabase.from("plans").select("*", { count: "exact", head: true }).eq("professor_id", user?.id);
     setPlanCount(count || 0);
+  };
+
+  const fetchChallengeCount = async () => {
+    const { count } = await supabase.from("challenges" as any).select("*", { count: "exact", head: true }).eq("professor_id", user?.id);
+    setChallengeCount(count || 0);
   };
 
   const handleLogout = async () => {
@@ -107,6 +114,13 @@ const Dashboard = () => {
       description: "Gerencie planos, valores e periodicidade dos alunos",
       stat: `${planCount} plano(s)`,
       route: "/plans",
+    },
+    {
+      icon: Trophy,
+      title: "Desafios",
+      description: "Crie desafios com ranking e gamificação para engajar",
+      stat: `${challengeCount} desafio(s)`,
+      route: "/challenges",
     },
   ];
 

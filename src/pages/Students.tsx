@@ -330,9 +330,9 @@ const Students = () => {
                      <div className="flex-1 min-w-0">
                        <div className="flex items-center gap-2">
                          <p className="font-display font-bold text-foreground text-sm truncate">{s.full_name.toUpperCase()}</p>
-                         <span className={`shrink-0 px-1.5 py-0.5 rounded-full text-[9px] font-bold ${isInactive ? "bg-destructive/15 text-destructive" : "bg-accent/15 text-accent"}`}>
-                           {isInactive ? "INATIVO" : "ATIVO"}
-                         </span>
+                          <span className={`shrink-0 px-1.5 py-0.5 rounded-full text-[9px] font-bold ${isInactive ? "bg-destructive/15 text-destructive" : "bg-foreground/10 text-foreground"}`}>
+                            {isInactive ? "INATIVO" : "ATIVO"}
+                          </span>
                        </div>
                        <p className="text-xs text-muted-foreground">{getPlanName(s)}</p>
                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">

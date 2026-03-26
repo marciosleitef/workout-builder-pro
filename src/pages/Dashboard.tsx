@@ -152,10 +152,10 @@ const Dashboard = () => {
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {cards.map((card) => (
+          {cards.map((card, idx) => (
             <button
-              key={card.route}
-              onClick={() => navigate(card.route)}
+              key={card.route || idx}
+              onClick={() => card.action ? card.action() : navigate(card.route!)}
               className="rounded-2xl border border-border bg-card p-6 text-left hover:border-primary/30 hover:shadow-lg transition-all group"
             >
               <div className={`w-14 h-14 rounded-xl ${card.bgClass} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
@@ -216,6 +216,8 @@ const Dashboard = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <PlansDialog open={showPlansDialog} onOpenChange={setShowPlansDialog} onPlansChanged={fetchPlanCount} />
     </div>
   );
 };

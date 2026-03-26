@@ -485,56 +485,6 @@ export default function DailyTrackingDialog({ open, onOpenChange, student }: Pro
     </div>
   );
 
-  const renderSessionForm = () => {
-    const scales = feedbackType === "pre" ? PRE_SCALES : POST_SCALES;
-    return (
-      <div className="space-y-3">
-        <div className="flex items-center gap-2 mb-2">
-          <div className={`px-3 py-1.5 rounded-full text-xs font-bold ${feedbackType === "pre" ? "bg-accent/15 text-accent" : "bg-destructive/15 text-destructive"}`}>
-            {feedbackType === "pre" ? "PRÉ-TREINO (Check-in)" : "PÓS-TREINO (Check-out)"}
-          </div>
-        </div>
-
-        {scales.map((scale) => (
-          <ScaleSelector
-            key={scale.key}
-            scale={scale}
-            value={sessionForm[scale.key] ?? null}
-            onChange={(v) => setSessionForm({ ...sessionForm, [scale.key]: v })}
-          />
-        ))}
-
-        {feedbackType === "post" && (
-          <div className="space-y-3 mt-4">
-            <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
-              <Activity className="w-4 h-4" /> Métricas do Treino
-            </h4>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { key: "workout_bpm_avg", label: "BPM Médio", icon: "❤️" },
-                { key: "workout_bpm_max", label: "BPM Máx", icon: "💓" },
-                { key: "calories_burned", label: "Calorias", icon: "🔥" },
-              ].map((f) => (
-                <div key={f.key}>
-                  <label className="text-[10px] text-muted-foreground mb-1 block">{f.icon} {f.label}</label>
-                  <input
-                    type="number"
-                    value={sessionForm[f.key] || ""}
-                    onChange={(e) => setSessionForm({ ...sessionForm, [f.key]: e.target.value })}
-                    className="w-full px-2 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <button onClick={saveSessionFeedback} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-colors mt-4">
-          {feedbackType === "pre" ? "Registrar Check-in" : "Registrar Check-out"}
-        </button>
-      </div>
-    );
-  };
 
   const renderDailyDetail = () => {
     if (!selectedRecord) return null;
@@ -648,7 +598,6 @@ export default function DailyTrackingDialog({ open, onOpenChange, student }: Pro
   const getTitle = () => {
     switch (view) {
       case "daily-form": return "Novo Registro Diário";
-      case "session-form": return feedbackType === "pre" ? "Check-in Pré-Treino" : "Check-out Pós-Treino";
       case "daily-detail": return "Registro Diário";
       case "session-detail": return "Feedback de Sessão";
       default: return `Detalhes — ${student?.full_name}`;
@@ -678,7 +627,6 @@ export default function DailyTrackingDialog({ open, onOpenChange, student }: Pro
             <>
               {view === "main" && renderMain()}
               {view === "daily-form" && renderDailyForm()}
-              {view === "session-form" && renderSessionForm()}
               {view === "daily-detail" && renderDailyDetail()}
               {view === "session-detail" && renderSessionDetail()}
             </>

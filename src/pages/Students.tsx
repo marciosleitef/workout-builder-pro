@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Search, Plus, Play, User, TrendingUp, Dumbbell, Calendar, UserCircle, List, Link2, ArrowLeft, Package, Filter } from "lucide-react";
+import { Search, Plus, Play, User, TrendingUp, Dumbbell, Calendar, UserCircle, List, Link2, ArrowLeft, Package, Filter, Mail, Phone, Key, Eye, EyeOff, Copy, Edit } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import NewJourneyWizard from "@/components/NewJourneyWizard";
 import WorkoutInfoDialog from "@/components/WorkoutInfoDialog";
@@ -85,6 +85,9 @@ const Students = () => {
   const [showPlansDialog, setShowPlansDialog] = useState(false);
   const [showBioDialog, setShowBioDialog] = useState(false);
   const [bioStudent, setBioStudent] = useState<Student | null>(null);
+  const [showStudentDetail, setShowStudentDetail] = useState(false);
+  const [detailStudent, setDetailStudent] = useState<Student | null>(null);
+  const [showLoginInfo, setShowLoginInfo] = useState(false);
 
   // Journey start dialog
   const [showStartJourney, setShowStartJourney] = useState(false);
@@ -308,25 +311,28 @@ const Students = () => {
             {filtered.map((s, i) => {
               const isInactive = s.status === "inactive";
               return (
-                <div key={s.id} className={`rounded-xl border bg-card p-5 transition-colors ${isInactive ? "border-border/50 opacity-70" : "border-border hover:border-primary/30"}`}>
-                  <div className="flex items-start gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-display font-bold text-sm shrink-0" style={{ backgroundColor: isInactive ? "hsl(var(--muted-foreground))" : INITIALS_COLORS[i % INITIALS_COLORS.length] }}>
-                      {getInitials(s.full_name)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="font-display font-bold text-foreground text-sm truncate">{s.full_name.toUpperCase()}</p>
-                        <span className={`shrink-0 px-1.5 py-0.5 rounded-full text-[9px] font-bold ${isInactive ? "bg-destructive/15 text-destructive" : "bg-accent/15 text-accent"}`}>
-                          {isInactive ? "INATIVO" : "ATIVO"}
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">{getPlanName(s)}</p>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                        <Calendar className="w-3 h-3" />
-                        {s.registration_date ? new Date(s.registration_date).toLocaleDateString("pt-BR") : "Sem registro"}
-                      </p>
-                    </div>
-                  </div>
+                 <div key={s.id} className={`rounded-xl border bg-card p-5 transition-colors ${isInactive ? "border-border/50 opacity-70" : "border-border hover:border-primary/30"}`}>
+                   <button
+                     onClick={() => { setDetailStudent(s); setShowLoginInfo(false); setShowStudentDetail(true); }}
+                     className="flex items-start gap-3 mb-4 w-full text-left hover:opacity-80 transition-opacity"
+                   >
+                     <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-display font-bold text-sm shrink-0" style={{ backgroundColor: isInactive ? "hsl(var(--muted-foreground))" : INITIALS_COLORS[i % INITIALS_COLORS.length] }}>
+                       {getInitials(s.full_name)}
+                     </div>
+                     <div className="flex-1 min-w-0">
+                       <div className="flex items-center gap-2">
+                         <p className="font-display font-bold text-foreground text-sm truncate">{s.full_name.toUpperCase()}</p>
+                         <span className={`shrink-0 px-1.5 py-0.5 rounded-full text-[9px] font-bold ${isInactive ? "bg-destructive/15 text-destructive" : "bg-accent/15 text-accent"}`}>
+                           {isInactive ? "INATIVO" : "ATIVO"}
+                         </span>
+                       </div>
+                       <p className="text-xs text-muted-foreground">{getPlanName(s)}</p>
+                       <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                         <Calendar className="w-3 h-3" />
+                         {s.registration_date ? new Date(s.registration_date).toLocaleDateString("pt-BR") : "Sem registro"}
+                       </p>
+                     </div>
+                   </button>
                   <div className="grid grid-cols-2 gap-3 mb-4">
                     <div className="bg-secondary/50 rounded-lg p-2">
                       <p className="text-[10px] text-muted-foreground uppercase font-medium">Saúde</p>
@@ -539,7 +545,133 @@ const Students = () => {
         <BioimpedanceDialog open={showBioDialog} onOpenChange={setShowBioDialog} studentId={bioStudent.id} studentName={bioStudent.full_name} />
       )}
 
-      {/* Journey dialogs */}
+      {/* Student Detail dialog */}
+      <Dialog open={showStudentDetail} onOpenChange={setShowStudentDetail}>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle className="font-display">Informações do Aluno</DialogTitle></DialogHeader>
+          {detailStudent && (
+            <div className="space-y-4 mt-2">
+              {/* Avatar + Name */}
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center text-white font-display font-bold text-lg" style={{ backgroundColor: INITIALS_COLORS[students.indexOf(detailStudent) % INITIALS_COLORS.length] }}>
+                  {getInitials(detailStudent.full_name)}
+                </div>
+                <div>
+                  <p className="font-display font-bold text-foreground text-lg">{detailStudent.full_name}</p>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${detailStudent.status === "inactive" ? "bg-destructive/15 text-destructive" : "bg-accent/15 text-accent"}`}>
+                    {detailStudent.status === "inactive" ? "INATIVO" : "ATIVO"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Info rows */}
+              <div className="space-y-3 bg-secondary/50 rounded-xl p-4">
+                {detailStudent.email && (
+                  <div className="flex items-center gap-3">
+                    <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <div><p className="text-[10px] text-muted-foreground uppercase font-medium">E-mail</p><p className="text-sm text-foreground">{detailStudent.email}</p></div>
+                  </div>
+                )}
+                {detailStudent.whatsapp && (
+                  <div className="flex items-center gap-3">
+                    <Phone className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <div><p className="text-[10px] text-muted-foreground uppercase font-medium">WhatsApp</p><p className="text-sm text-foreground">{detailStudent.whatsapp}</p></div>
+                  </div>
+                )}
+                {detailStudent.phone && !detailStudent.whatsapp && (
+                  <div className="flex items-center gap-3">
+                    <Phone className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <div><p className="text-[10px] text-muted-foreground uppercase font-medium">Telefone</p><p className="text-sm text-foreground">{detailStudent.phone}</p></div>
+                  </div>
+                )}
+                {detailStudent.birth_date && (
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <div><p className="text-[10px] text-muted-foreground uppercase font-medium">Nascimento</p><p className="text-sm text-foreground">{new Date(detailStudent.birth_date).toLocaleDateString("pt-BR")}</p></div>
+                  </div>
+                )}
+                {detailStudent.gender && (
+                  <div className="flex items-center gap-3">
+                    <User className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <div><p className="text-[10px] text-muted-foreground uppercase font-medium">Gênero</p><p className="text-sm text-foreground capitalize">{detailStudent.gender}</p></div>
+                  </div>
+                )}
+                <div className="flex items-center gap-3">
+                  <Package className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <div><p className="text-[10px] text-muted-foreground uppercase font-medium">Plano</p><p className="text-sm text-foreground">{getPlanName(detailStudent)}</p></div>
+                </div>
+                {(detailStudent as any).payment_day && (
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <div><p className="text-[10px] text-muted-foreground uppercase font-medium">Dia do Pagamento</p><p className="text-sm text-foreground">Dia {(detailStudent as any).payment_day}</p></div>
+                  </div>
+                )}
+                {detailStudent.group_id && (
+                  <div className="flex items-center gap-3">
+                    <UserCircle className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <div><p className="text-[10px] text-muted-foreground uppercase font-medium">Grupo</p><p className="text-sm text-foreground">{groups.find(g => g.id === detailStudent.group_id)?.name || "—"}</p></div>
+                  </div>
+                )}
+                {detailStudent.registration_date && (
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <div><p className="text-[10px] text-muted-foreground uppercase font-medium">Data de Cadastro</p><p className="text-sm text-foreground">{new Date(detailStudent.registration_date).toLocaleDateString("pt-BR")}</p></div>
+                  </div>
+                )}
+              </div>
+
+              {/* Login info */}
+              <div>
+                <button
+                  onClick={() => setShowLoginInfo(!showLoginInfo)}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors"
+                >
+                  <Key className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium text-foreground flex-1 text-left">Dados de Acesso do Aluno</span>
+                  {showLoginInfo ? <EyeOff className="w-4 h-4 text-muted-foreground" /> : <Eye className="w-4 h-4 text-muted-foreground" />}
+                </button>
+                {showLoginInfo && (
+                  <div className="mt-2 p-4 rounded-xl bg-secondary/50 border border-border space-y-3">
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase font-medium mb-1">E-mail de login</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm text-foreground font-mono flex-1">{detailStudent.email || "Sem e-mail cadastrado"}</p>
+                        {detailStudent.email && (
+                          <button onClick={() => { navigator.clipboard.writeText(detailStudent.email!); toast.success("E-mail copiado!"); }} className="p-1.5 rounded-lg hover:bg-secondary transition-colors">
+                            <Copy className="w-3.5 h-3.5 text-muted-foreground" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase font-medium mb-1">Senha inicial</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm text-foreground font-mono flex-1">123456</p>
+                        <button onClick={() => { navigator.clipboard.writeText("123456"); toast.success("Senha copiada!"); }} className="p-1.5 rounded-lg hover:bg-secondary transition-colors">
+                          <Copy className="w-3.5 h-3.5 text-muted-foreground" />
+                        </button>
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground">O aluno será solicitado a trocar a senha no primeiro acesso.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => { setShowStudentDetail(false); openEdit(detailStudent); }}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-primary text-primary-foreground font-display font-bold text-sm hover:bg-primary/90 transition-colors"
+                >
+                  <Edit className="w-4 h-4" />
+                  Editar Informações
+                </button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {selectedStudent && (
         <>
           <NewJourneyWizard open={showJourneyWizard} onOpenChange={setShowJourneyWizard} studentId={selectedStudent.id} studentName={selectedStudent.full_name} onCreated={() => {}} onGoToWorkout={(journeyId, format) => { setActiveJourneyId(journeyId); setActiveJourneyFormat(format); setShowWorkoutInfo(true); }} />

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { ArrowLeft, Plus, Pencil, Trash2, Users, X, Check, UserPlus } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, Users, X, Check, UserPlus, Search } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -35,6 +35,7 @@ const StudentGroups = () => {
   const [manageGroup, setManageGroup] = useState<Group | null>(null);
   const [allStudents, setAllStudents] = useState<Student[]>([]);
   const [selectedStudentIds, setSelectedStudentIds] = useState<Set<string>>(new Set());
+  const [memberSearch, setMemberSearch] = useState("");
 
   useEffect(() => {
     if (user) fetchGroups();
@@ -108,6 +109,7 @@ const StudentGroups = () => {
 
   const openManageMembers = async (group: Group) => {
     setManageGroup(group);
+    setMemberSearch("");
     const { data } = await supabase
       .from("students")
       .select("id, full_name, group_id")
@@ -281,11 +283,20 @@ const StudentGroups = () => {
           <p className="text-xs text-muted-foreground mb-3">
             Marque os alunos que pertencem a este grupo. Alunos já em outro grupo serão transferidos.
           </p>
+          <div className="relative mb-3">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              value={memberSearch}
+              onChange={(e) => setMemberSearch(e.target.value)}
+              placeholder="Buscar aluno..."
+              className="pl-9 h-9"
+            />
+          </div>
           {allStudents.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-6">Nenhum aluno cadastrado.</p>
           ) : (
             <div className="space-y-1">
-              {allStudents.map((s) => {
+              {allStudents.filter((s) => s.full_name.toLowerCase().includes(memberSearch.toLowerCase())).map((s) => {
                 const isInOtherGroup = s.group_id && s.group_id !== manageGroup?.id;
                 const otherGroupName = isInOtherGroup ? groups.find((g) => g.id === s.group_id)?.name : null;
                 return (

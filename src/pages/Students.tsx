@@ -54,6 +54,8 @@ const Students = () => {
   const [showForm, setShowForm] = useState(false);
   const [showWorkoutMenu, setShowWorkoutMenu] = useState(false);
   const [showNewStudentMenu, setShowNewStudentMenu] = useState(false);
+  const [showLinkDialog, setShowLinkDialog] = useState(false);
+  const [linkGroupId, setLinkGroupId] = useState("");
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [showJourneyWizard, setShowJourneyWizard] = useState(false);
   const [showWorkoutInfo, setShowWorkoutInfo] = useState(false);
@@ -343,9 +345,40 @@ const Students = () => {
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Plus className="w-5 h-5 text-primary" /></div>
               <div className="text-left"><p className="font-display font-bold text-sm text-foreground">Cadastro Manual</p><p className="text-xs text-muted-foreground">Preencher os dados do aluno agora</p></div>
             </button>
-            <button onClick={() => { const link = `${window.location.origin}/register/${user?.id}`; navigator.clipboard.writeText(link); toast.success("Link de cadastro copiado!"); setShowNewStudentMenu(false); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors">
+            <button onClick={() => { setShowNewStudentMenu(false); setLinkGroupId(""); setShowLinkDialog(true); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Link2 className="w-5 h-5 text-primary" /></div>
               <div className="text-left"><p className="font-display font-bold text-sm text-foreground">Enviar Link de Cadastro</p><p className="text-xs text-muted-foreground">O aluno preenche seus próprios dados</p></div>
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Link with group selection */}
+      <Dialog open={showLinkDialog} onOpenChange={setShowLinkDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle className="font-display">Gerar Link de Cadastro</DialogTitle></DialogHeader>
+          <div className="space-y-4 mt-2">
+            {groups.length > 0 && (
+              <div>
+                <label className="text-sm font-medium text-foreground">Grupo do aluno (opcional)</label>
+                <select value={linkGroupId} onChange={(e) => setLinkGroupId(e.target.value)} className="w-full mt-1 px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
+                  <option value="">Sem grupo definido</option>
+                  {groups.map((g) => (<option key={g.id} value={g.id}>{g.name}</option>))}
+                </select>
+                <p className="text-xs text-muted-foreground mt-1">Se selecionado, o grupo virá travado no formulário de cadastro.</p>
+              </div>
+            )}
+            <button
+              onClick={() => {
+                let link = `${window.location.origin}/register/${user?.id}`;
+                if (linkGroupId) link += `?group=${linkGroupId}`;
+                navigator.clipboard.writeText(link);
+                toast.success("Link de cadastro copiado!");
+                setShowLinkDialog(false);
+              }}
+              className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-display font-bold text-sm hover:bg-primary/90 transition-colors"
+            >
+              Copiar Link
             </button>
           </div>
         </DialogContent>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { CheckCircle } from "lucide-react";
@@ -11,12 +11,14 @@ interface StudentGroup {
 
 const StudentRegister = () => {
   const { professorId } = useParams<{ professorId: string }>();
+  const [searchParams] = useSearchParams();
+  const presetGroupId = searchParams.get("group") || "";
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [gender, setGender] = useState("");
-  const [groupId, setGroupId] = useState("");
+  const [groupId, setGroupId] = useState(presetGroupId);
   const [groups, setGroups] = useState<StudentGroup[]>([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -103,10 +105,22 @@ const StudentRegister = () => {
             {groups.length > 0 && (
               <div>
                 <label className="text-sm font-medium text-foreground">Selecione um Grupo</label>
-                <select value={groupId} onChange={(e) => setGroupId(e.target.value)} className="w-full mt-1 px-4 py-3 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
-                  <option value="">Selecione</option>
-                  {groups.map((g) => (<option key={g.id} value={g.id}>{g.name}</option>))}
-                </select>
+                {presetGroupId ? (
+                  <>
+                    <input
+                      type="text"
+                      value={groups.find((g) => g.id === presetGroupId)?.name || "Grupo selecionado"}
+                      readOnly
+                      className="w-full mt-1 px-4 py-3 rounded-lg bg-secondary/50 border border-border text-foreground cursor-not-allowed opacity-70"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Grupo definido pelo professor</p>
+                  </>
+                ) : (
+                  <select value={groupId} onChange={(e) => setGroupId(e.target.value)} className="w-full mt-1 px-4 py-3 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    <option value="">Selecione</option>
+                    {groups.map((g) => (<option key={g.id} value={g.id}>{g.name}</option>))}
+                  </select>
+                )}
               </div>
             )}
             <div>

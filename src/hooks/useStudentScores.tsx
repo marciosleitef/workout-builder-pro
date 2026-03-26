@@ -244,6 +244,7 @@ export function useStudentScores(studentIds: string[]) {
       if (biosThisMonth.length > 0) {
         healthBonus += 2.5;
         badges.push("bia_month");
+        bonusDetails.push("Avaliação BIA no mês (+2.5%)");
       }
       // Improvement between last 2 BIAs
       if (studentBios.length >= 2) {
@@ -252,6 +253,7 @@ export function useStudentScores(studentIds: string[]) {
         if (prev != null && curr != null && curr > prev) {
           healthBonus += 2.5;
           badges.push("bia_improved");
+          bonusDetails.push("Melhoria na BIA (+2.5%)");
         }
       }
 

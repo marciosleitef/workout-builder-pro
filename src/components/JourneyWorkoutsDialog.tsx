@@ -760,7 +760,7 @@ const JourneyWorkoutsDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (phase === "active") return; onOpenChange(v); }}>
-      <DialogContent className="max-w-md p-0 overflow-hidden max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-md p-0 max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-[hsl(220,60%,45%)] to-[hsl(250,55%,50%)] px-4 py-4 text-white flex items-center gap-3 shrink-0">
           <button

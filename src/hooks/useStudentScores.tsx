@@ -180,7 +180,7 @@ export function useStudentScores(studentIds: string[]) {
     const monthStart = getMonthStart();
 
     // Fetch all data in parallel
-    const [bioRes, checkinsRes, feedbackRes, studentsRes] = await Promise.all([
+    const [bioRes, checkinsRes, feedbackRes, studentsRes, dailyRes] = await Promise.all([
       supabase.from("student_bioimpedance")
         .select("*")
         .in("student_id", studentIds)
@@ -196,6 +196,11 @@ export function useStudentScores(studentIds: string[]) {
       supabase.from("students")
         .select("id, gender")
         .in("id", studentIds),
+      supabase.from("student_daily_records")
+        .select("*")
+        .in("student_id", studentIds)
+        .order("recorded_at", { ascending: false })
+        .limit(100),
     ]);
 
     const bios = bioRes.data || [];

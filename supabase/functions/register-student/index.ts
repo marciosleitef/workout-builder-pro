@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { professorId, fullName, email, whatsapp, birthDate, gender, groupId } = await req.json();
+    const { professorId, fullName, email, whatsapp, birthDate, gender, groupId, planId } = await req.json();
 
     if (!professorId || !fullName || !email) {
       return new Response(JSON.stringify({ error: "Campos obrigatórios: professorId, fullName, email" }), {
@@ -67,6 +67,7 @@ Deno.serve(async (req) => {
       birth_date: birthDate || null,
       gender: gender || null,
       group_id: groupId || null,
+      plan_id: planId || null,
       user_id: userId,
       status: "active",
     });

@@ -428,7 +428,24 @@ export default function DailyTrackingDialog({ open, onOpenChange, student }: Pro
         </div>
       )}
 
-      {/* History list */}
+      {/* Post-workout evolution chart */}
+      {postSessionData.length > 1 && (
+        <div className="bg-secondary/20 rounded-xl p-3">
+          <p className="text-xs font-medium text-muted-foreground mb-2">Evolução Pós-Treino</p>
+          <ResponsiveContainer width="100%" height={150}>
+            <LineChart data={postSessionData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="date" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+              <YAxis domain={[0, 10]} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+              <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+              <Line type="monotone" dataKey="recuperacao" stroke="hsl(150, 55%, 45%)" name="Recuperação" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="esforco" stroke="hsl(35, 85%, 50%)" name="Esforço" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="dor" stroke="hsl(0, 65%, 55%)" name="Dor" strokeWidth={2} dot={false} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
       <div>
         <h3 className="text-sm font-bold text-foreground mb-2">Histórico Recente</h3>
         <div className="space-y-2">

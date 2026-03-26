@@ -774,7 +774,7 @@ const JourneyWorkoutsDialog = ({
           </div>
         </div>
 
-        <ScrollArea className="flex-1">
+        <ScrollArea className="flex-1 min-h-0">
           <div className="px-4 py-4 space-y-4">
             {phase === "workouts" && renderWorkouts()}
             {phase === "checkin" && renderCheckin()}

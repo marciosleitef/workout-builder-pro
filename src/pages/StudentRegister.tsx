@@ -1,16 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { CheckCircle } from "lucide-react";
 
+interface StudentGroup {
+  id: string;
+  name: string;
+}
+
 const StudentRegister = () => {
   const { professorId } = useParams<{ professorId: string }>();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [birthDate, setBirthDate] = useState("");
+  const [gender, setGender] = useState("");
+  const [groupId, setGroupId] = useState("");
+  const [groups, setGroups] = useState<StudentGroup[]>([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    if (professorId) {
+      supabase
+        .from("student_groups")
+        .select("id, name")
+        .eq("professor_id", professorId)
+        .order("name")
+        .then(({ data }) => setGroups((data as any[]) || []));
+    }
+  }, [professorId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,7 +39,7 @@ const StudentRegister = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke("register-student", {
-        body: { professorId, fullName, email, phone },
+        body: { professorId, fullName, email, whatsapp, birthDate, gender, groupId },
       });
 
       if (error) throw error;
@@ -74,46 +94,44 @@ const StudentRegister = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="text-sm font-medium text-foreground">Nome Completo *</label>
-              <input
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Seu nome completo"
-                required
-                className="w-full mt-1 px-4 py-3 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-              />
+              <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Seu nome completo" required className="w-full mt-1 px-4 py-3 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
             </div>
             <div>
-              <label className="text-sm font-medium text-foreground">Email *</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="seu@email.com"
-                required
-                className="w-full mt-1 px-4 py-3 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-              />
+              <label className="text-sm font-medium text-foreground">E-mail *</label>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" required className="w-full mt-1 px-4 py-3 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
+            </div>
+            {groups.length > 0 && (
+              <div>
+                <label className="text-sm font-medium text-foreground">Selecione um Grupo</label>
+                <select value={groupId} onChange={(e) => setGroupId(e.target.value)} className="w-full mt-1 px-4 py-3 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
+                  <option value="">Selecione</option>
+                  {groups.map((g) => (<option key={g.id} value={g.id}>{g.name}</option>))}
+                </select>
+              </div>
+            )}
+            <div>
+              <label className="text-sm font-medium text-foreground">Data de Nascimento</label>
+              <input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} className="w-full mt-1 px-4 py-3 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
             </div>
             <div>
-              <label className="text-sm font-medium text-foreground">Telefone</label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="(11) 99999-9999"
-                className="w-full mt-1 px-4 py-3 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-              />
+              <label className="text-sm font-medium text-foreground">WhatsApp</label>
+              <input type="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="(11) 99999-9999" className="w-full mt-1 px-4 py-3 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground">Gênero</label>
+              <select value={gender} onChange={(e) => setGender(e.target.value)} className="w-full mt-1 px-4 py-3 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
+                <option value="">Selecione</option>
+                <option value="masculino">Masculino</option>
+                <option value="feminino">Feminino</option>
+                <option value="outro">Outro</option>
+              </select>
             </div>
 
             <p className="text-xs text-muted-foreground">
               Após o cadastro, sua senha inicial será <strong className="text-foreground">123456</strong>. Você deverá trocá-la no primeiro acesso.
             </p>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-lg font-display font-bold text-sm text-primary-foreground bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity disabled:opacity-50"
-            >
+            <button type="submit" disabled={loading} className="w-full py-3 rounded-lg font-display font-bold text-sm text-primary-foreground bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity disabled:opacity-50">
               {loading ? "CADASTRANDO..." : "CADASTRAR"}
             </button>
           </form>

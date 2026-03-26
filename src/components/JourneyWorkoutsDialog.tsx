@@ -229,6 +229,7 @@ const JourneyWorkoutsDialog = ({
   const handleStartWorkout = () => {
     if (!selectedWorkout) return;
     setCheckinForm({});
+    setCurrentStep(0);
     setPhase("checkin");
   };
 

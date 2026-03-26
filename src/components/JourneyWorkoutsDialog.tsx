@@ -107,41 +107,35 @@ function getScaleColor(value: number, max: number, inverted = false) {
   return "hsl(var(--destructive))";
 }
 
-function ScaleSelector({ scale, value, onChange }: { scale: typeof PRE_SCALES[0]; value: number | null; onChange: (v: number) => void }) {
-  const [expanded, setExpanded] = useState(false);
+// Step-by-step scale question component
+function StepScaleQuestion({ scale, onSelect }: { scale: typeof PRE_SCALES[0]; onSelect: (v: number) => void }) {
   const Icon = scale.icon;
   const isUrine = scale.key === "urine_color_scale";
+  const options = Array.from({ length: scale.max - scale.min + 1 }, (_, i) => scale.min + i);
 
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden">
-      <button onClick={() => setExpanded(!expanded)} className="w-full flex items-center gap-3 p-3 hover:bg-secondary/30 transition-colors">
-        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-          <Icon className="w-4 h-4 text-primary" />
-        </div>
-        <div className="flex-1 text-left">
-          <p className="text-sm font-medium text-foreground">{scale.label}</p>
-          {value !== null && <p className="text-xs text-muted-foreground">{value} — {(scale.labels as any)[value]}</p>}
-        </div>
-        {value !== null && (
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white"
-            style={{ backgroundColor: isUrine ? URINE_COLORS[value - 1] : getScaleColor(value, scale.max), color: isUrine && value < 4 ? "#333" : "white" }}>
-            {value}
-          </div>
-        )}
-        {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
-      </button>
-      {expanded && (
-        <div className="px-3 pb-3 space-y-1 max-h-[200px] overflow-y-auto">
-          {Array.from({ length: scale.max - scale.min + 1 }, (_, i) => scale.min + i).map((v) => (
-            <button key={v} onClick={() => { onChange(v); setExpanded(false); }}
-              className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm transition-colors ${value === v ? "bg-primary text-primary-foreground" : "hover:bg-secondary/50 text-foreground"}`}>
-              {isUrine && <div className="w-5 h-5 rounded-full border border-border shrink-0" style={{ backgroundColor: URINE_COLORS[v - 1] }} />}
-              <span className="font-medium">{v}</span>
-              <span className="text-xs opacity-80">{(scale.labels as any)[v]}</span>
-            </button>
-          ))}
-        </div>
-      )}
+    <div className="flex flex-col items-center">
+      <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-3">
+        <Icon className="w-7 h-7 text-primary" />
+      </div>
+      <h3 className="font-display font-bold text-lg text-foreground text-center mb-1">{scale.label}</h3>
+      <p className="text-xs text-muted-foreground mb-4">Selecione o valor que melhor representa seu estado</p>
+      <div className="w-full space-y-1.5">
+        {options.map((v) => (
+          <button key={v} onClick={() => onSelect(v)}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm transition-all hover:bg-primary/10 hover:scale-[1.01] active:scale-[0.99] border border-border bg-card">
+            {isUrine ? (
+              <div className="w-7 h-7 rounded-full border border-border shrink-0 shadow-sm" style={{ backgroundColor: URINE_COLORS[v - 1] }} />
+            ) : (
+              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                style={{ backgroundColor: getScaleColor(v, scale.max), color: "white" }}>
+                {v}
+              </div>
+            )}
+            <span className="font-medium text-foreground">{(scale.labels as any)[v]}</span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

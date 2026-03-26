@@ -452,25 +452,59 @@ const JourneyWorkoutsDialog = ({
   };
 
   // ── CHECKIN PHASE ──
-  const renderCheckin = () => (
-    <div className="space-y-3">
-      <div className="bg-gradient-to-r from-[hsl(150,55%,45%)] to-[hsl(170,50%,45%)] rounded-xl p-4 text-white">
-        <div className="flex items-center gap-2 mb-1">
-          <Clock className="w-5 h-5" />
-          <h3 className="font-display font-bold">Pré-Treino (Check-in)</h3>
+  const renderCheckin = () => {
+    const totalSteps = PRE_SCALES.length;
+    const progress = (currentStep / totalSteps) * 100;
+
+    if (currentStep >= totalSteps) {
+      // All answered - show confirm
+      return (
+        <div className="space-y-4">
+          <div className="bg-gradient-to-r from-[hsl(150,55%,45%)] to-[hsl(170,50%,45%)] rounded-xl p-4 text-white text-center">
+            <CheckCircle2 className="w-8 h-8 mx-auto mb-2" />
+            <h3 className="font-display font-bold">Check-in Completo!</h3>
+            <p className="text-white/70 text-xs mt-1">Todas as escalas foram respondidas</p>
+          </div>
+          <div className="space-y-2">
+            {PRE_SCALES.map((s) => (
+              <div key={s.key} className="flex items-center justify-between bg-card border border-border rounded-lg px-3 py-2">
+                <span className="text-sm text-foreground">{s.label}</span>
+                <span className="text-sm font-bold text-primary">{checkinForm[s.key]} — {(s.labels as any)[checkinForm[s.key]]}</span>
+              </div>
+            ))}
+          </div>
+          <button onClick={handleSubmitCheckin} disabled={saving}
+            className="w-full py-3 rounded-xl bg-[hsl(150,55%,45%)] text-white font-display font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50">
+            {saving ? "Salvando..." : "Confirmar Check-in e Iniciar Treino"}
+          </button>
         </div>
-        <p className="text-white/70 text-xs">Responda as escalas antes de iniciar o treino</p>
+      );
+    }
+
+    const currentScale = PRE_SCALES[currentStep];
+    return (
+      <div className="space-y-3">
+        {/* Progress bar */}
+        <div className="space-y-1">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>Pergunta {currentStep + 1} de {totalSteps}</span>
+            <span>{Math.round(progress)}%</span>
+          </div>
+          <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
+            <div className="h-full bg-primary rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+          </div>
+        </div>
+
+        <StepScaleQuestion
+          scale={currentScale}
+          onSelect={(v) => {
+            setCheckinForm({ ...checkinForm, [currentScale.key]: v });
+            setCurrentStep(currentStep + 1);
+          }}
+        />
       </div>
-      {PRE_SCALES.map((scale) => (
-        <ScaleSelector key={scale.key} scale={scale} value={checkinForm[scale.key] ?? null}
-          onChange={(v) => setCheckinForm({ ...checkinForm, [scale.key]: v })} />
-      ))}
-      <button onClick={handleSubmitCheckin} disabled={saving}
-        className="w-full py-3 rounded-xl bg-[hsl(150,55%,45%)] text-white font-display font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50">
-        {saving ? "Salvando..." : "Confirmar Check-in e Iniciar Treino"}
-      </button>
-    </div>
-  );
+    );
+  };
 
   // ── ACTIVE PHASE ──
   const renderActive = () => (

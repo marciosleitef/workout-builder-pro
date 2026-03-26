@@ -256,20 +256,20 @@ const JourneyEditDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md p-0 overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-[hsl(220,60%,45%)] to-[hsl(250,55%,50%)] px-4 py-4 text-white flex items-center gap-3">
+        <div className="bg-foreground px-4 py-4 text-primary-foreground flex items-center gap-3">
           <button
             onClick={handleBack}
-            className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
+            className="w-8 h-8 rounded-lg bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/15 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div className="flex-1 min-w-0">
             <h2 className="font-display font-bold text-base">{getTitle()}</h2>
-            <p className="text-white/60 text-xs">{journey?.name} • {studentName}</p>
+            <p className="text-primary-foreground/50 text-xs">{journey?.name} • {studentName}</p>
           </div>
           <button
             onClick={() => onOpenChange(false)}
-            className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
+            className="w-8 h-8 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/15 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -295,8 +295,8 @@ const JourneyEditDialog = ({
                 onClick={handleEditWorkouts}
                 className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors"
               >
-                <div className="w-10 h-10 rounded-lg bg-[hsl(150,60%,45%)/0.1] flex items-center justify-center">
-                  <Dumbbell className="w-5 h-5 text-[hsl(150,60%,45%)]" />
+                <div className="w-10 h-10 rounded-lg bg-foreground/5 flex items-center justify-center">
+                  <Dumbbell className="w-5 h-5 text-foreground/70" />
                 </div>
                 <div className="text-left">
                   <p className="font-display font-bold text-sm text-foreground">Editar Treinos</p>
@@ -441,8 +441,8 @@ const JourneyEditDialog = ({
                       key={w.id}
                       className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card"
                     >
-                      <div className="w-10 h-10 rounded-lg bg-[hsl(250,55%,50%)/0.1] flex items-center justify-center">
-                        <Dumbbell className="w-5 h-5 text-[hsl(250,55%,50%)]" />
+                      <div className="w-10 h-10 rounded-lg bg-foreground/5 flex items-center justify-center">
+                        <Dumbbell className="w-5 h-5 text-foreground/70" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-display font-bold text-sm text-foreground truncate">{w.name}</p>
@@ -451,7 +451,7 @@ const JourneyEditDialog = ({
                       <div className="flex items-center gap-1.5">
                         <button
                           onClick={() => handleEditWorkout(w)}
-                          className="w-8 h-8 rounded-full bg-[hsl(200,70%,50%)] flex items-center justify-center text-white hover:opacity-90 transition-opacity"
+                          className="w-8 h-8 rounded-full bg-foreground flex items-center justify-center text-primary-foreground hover:opacity-90 transition-opacity"
                           title="Editar"
                         >
                           <Pencil className="w-3.5 h-3.5" />
@@ -489,8 +489,8 @@ const JourneyEditDialog = ({
           {mode === "workout-choice" && editingWorkout && (
             <div className="space-y-3">
               <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-[hsl(250,55%,50%)/0.1] flex items-center justify-center">
-                  <Dumbbell className="w-5 h-5 text-[hsl(250,55%,50%)]" />
+                <div className="w-10 h-10 rounded-lg bg-foreground/5 flex items-center justify-center">
+                  <Dumbbell className="w-5 h-5 text-foreground/70" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-display font-bold text-sm text-foreground truncate">{editingWorkout.name}</p>
@@ -513,8 +513,8 @@ const JourneyEditDialog = ({
                 onClick={handleEditWorkoutExercises}
                 className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors"
               >
-                <div className="w-10 h-10 rounded-lg bg-[hsl(150,60%,45%)/0.1] flex items-center justify-center">
-                  <Dumbbell className="w-5 h-5 text-[hsl(150,60%,45%)]" />
+                <div className="w-10 h-10 rounded-lg bg-foreground/5 flex items-center justify-center">
+                  <Dumbbell className="w-5 h-5 text-foreground/70" />
                 </div>
                 <div className="text-left">
                   <p className="font-display font-bold text-sm text-foreground">Editar Exercícios</p>

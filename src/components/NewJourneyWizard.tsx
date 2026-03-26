@@ -110,8 +110,8 @@ const NewJourneyWizard = ({ open, onOpenChange, studentId, studentName, onCreate
         {step === 5 ? (
           /* Success screen */
           <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
-            <div className="w-16 h-16 rounded-full bg-[hsl(150,60%,45%)] flex items-center justify-center mb-5">
-              <Check className="w-8 h-8 text-white" />
+            <div className="w-16 h-16 rounded-full bg-foreground flex items-center justify-center mb-5">
+              <Check className="w-8 h-8 text-primary-foreground" />
             </div>
             <h3 className="font-display font-bold text-xl text-foreground mb-2">Jornada Criada!</h3>
             <p className="text-sm text-muted-foreground mb-6">
@@ -125,7 +125,7 @@ const NewJourneyWizard = ({ open, onOpenChange, studentId, studentName, onCreate
                   }
                   handleClose();
                 }}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-[hsl(250,55%,50%)] text-white font-display font-bold text-sm hover:opacity-90 transition-opacity"
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-foreground text-background font-display font-bold text-sm hover:opacity-90 transition-opacity"
               >
                 <Dumbbell className="w-4 h-4" />
                 Sim, criar treinos
@@ -141,7 +141,7 @@ const NewJourneyWizard = ({ open, onOpenChange, studentId, studentName, onCreate
         ) : (
         <>
         {/* Header */}
-        <div className="bg-gradient-to-r from-[hsl(220,60%,45%)] to-[hsl(250,55%,50%)] px-6 py-5 text-white">
+        <div className="bg-foreground px-6 py-5 text-primary-foreground">
           <h2 className="font-display font-bold text-lg">Nova Jornada de Treino</h2>
           <div className="flex items-center justify-between mt-4">
             {STEPS.map((label, i) => (
@@ -168,7 +168,7 @@ const NewJourneyWizard = ({ open, onOpenChange, studentId, studentName, onCreate
                     {i + 1}
                   </div>
                 </div>
-                <span className="text-[9px] mt-1 text-white/70">{label}</span>
+                <span className="text-[9px] mt-1 text-primary-foreground/50">{label}</span>
               </div>
             ))}
           </div>
@@ -422,7 +422,7 @@ const NewJourneyWizard = ({ open, onOpenChange, studentId, studentName, onCreate
             <button
               onClick={() => setStep(step + 1)}
               disabled={!canNext()}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg bg-[hsl(250,55%,50%)] text-white font-display font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-40"
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg bg-foreground text-background font-display font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-40"
             >
               Próximo <ArrowRight className="w-4 h-4" />
             </button>
@@ -430,7 +430,7 @@ const NewJourneyWizard = ({ open, onOpenChange, studentId, studentName, onCreate
             <button
               onClick={handleCreate}
               disabled={saving}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg bg-[hsl(250,55%,50%)] text-white font-display font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-40"
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg bg-foreground text-background font-display font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-40"
             >
               <Check className="w-4 h-4" />
               {saving ? "Criando..." : "Criar Jornada"}

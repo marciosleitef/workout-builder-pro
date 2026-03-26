@@ -44,12 +44,12 @@ interface Plan {
 }
 
 const INITIALS_COLORS = [
-  "hsl(220 60% 50%)",
-  "hsl(150 55% 45%)",
-  "hsl(35 85% 50%)",
-  "hsl(280 55% 55%)",
-  "hsl(0 65% 55%)",
-  "hsl(180 55% 45%)",
+  "hsl(0 0% 15%)",
+  "hsl(0 0% 25%)",
+  "hsl(0 0% 35%)",
+  "hsl(0 0% 20%)",
+  "hsl(0 0% 30%)",
+  "hsl(0 0% 40%)",
 ];
 
 function getInitials(name: string) {
@@ -239,13 +239,13 @@ const Students = () => {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Top bar */}
-      <div className="bg-card border-b border-border px-6 py-4">
+      <div className="bg-foreground px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center gap-3">
-          <button onClick={() => navigate("/dashboard")} className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-foreground hover:bg-secondary/80 transition-colors">
+          <button onClick={() => navigate("/dashboard")} className="w-9 h-9 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:bg-primary-foreground/15 transition-colors">
             <ArrowLeft className="w-4 h-4" />
           </button>
-          <h1 className="font-display font-bold text-lg text-foreground flex-1">Meus Alunos</h1>
-          <button onClick={() => setShowPlansDialog(true)} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary text-foreground text-sm font-medium hover:bg-secondary/80 transition-colors">
+          <h1 className="font-display font-bold text-lg text-primary-foreground flex-1">Meus Alunos</h1>
+          <button onClick={() => setShowPlansDialog(true)} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary-foreground/10 text-primary-foreground/60 text-sm font-medium hover:bg-primary-foreground/15 transition-colors">
             <Package className="w-4 h-4" />
             Planos
           </button>
@@ -259,7 +259,7 @@ const Students = () => {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar atleta por nome..." className="w-full pl-12 pr-4 py-3 rounded-xl bg-card border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
           </div>
-          <button onClick={() => setShowNewStudentMenu(true)} className="flex items-center gap-2 px-5 py-3 bg-primary text-primary-foreground rounded-xl font-display font-bold text-sm hover:bg-primary/90 transition-colors shrink-0">
+          <button onClick={() => setShowNewStudentMenu(true)} className="flex items-center gap-2 px-5 py-3 bg-foreground text-background rounded-xl font-display font-bold text-sm hover:opacity-90 transition-opacity shrink-0">
             <Plus className="w-4 h-4" />
             Novo Aluno
           </button>
@@ -330,9 +330,9 @@ const Students = () => {
                      <div className="flex-1 min-w-0">
                        <div className="flex items-center gap-2">
                          <p className="font-display font-bold text-foreground text-sm truncate">{s.full_name.toUpperCase()}</p>
-                         <span className={`shrink-0 px-1.5 py-0.5 rounded-full text-[9px] font-bold ${isInactive ? "bg-destructive/15 text-destructive" : "bg-accent/15 text-accent"}`}>
-                           {isInactive ? "INATIVO" : "ATIVO"}
-                         </span>
+                          <span className={`shrink-0 px-1.5 py-0.5 rounded-full text-[9px] font-bold ${isInactive ? "bg-destructive/15 text-destructive" : "bg-foreground/10 text-foreground"}`}>
+                            {isInactive ? "INATIVO" : "ATIVO"}
+                          </span>
                        </div>
                        <p className="text-xs text-muted-foreground">{getPlanName(s)}</p>
                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
@@ -346,8 +346,8 @@ const Students = () => {
                       const sc = studentScores[s.id];
                       const health = sc?.health ?? null;
                       const perf = sc?.performance ?? null;
-                      const hColor = health != null ? (health >= 70 ? "hsl(var(--accent))" : health >= 40 ? "hsl(var(--primary))" : "hsl(var(--destructive))") : "hsl(var(--muted-foreground))";
-                      const pColor = perf != null ? (perf >= 70 ? "hsl(var(--accent))" : perf >= 40 ? "hsl(var(--primary))" : "hsl(var(--destructive))") : "hsl(var(--muted-foreground))";
+                       const hColor = health != null ? (health >= 70 ? "hsl(var(--success))" : health >= 40 ? "hsl(var(--warning))" : "hsl(var(--destructive))") : "hsl(var(--muted-foreground))";
+                       const pColor = perf != null ? (perf >= 70 ? "hsl(var(--success))" : perf >= 40 ? "hsl(var(--warning))" : "hsl(var(--destructive))") : "hsl(var(--muted-foreground))";
 
                       return (
                         <>
@@ -381,12 +381,12 @@ const Students = () => {
                   </div>
                   <div className="grid grid-cols-4 gap-2">
                     {[
-                      { icon: Play, label: "Iniciar", color: "hsl(220 60% 50%)", onClick: () => { setStartStudent(s); setSelectedStudent(s); setShowStartJourney(true); } },
-                      { icon: User, label: "Bio", color: "hsl(150 55% 45%)", onClick: () => { setBioStudent(s); setShowBioDialog(true); } },
-                      { icon: TrendingUp, label: "Detalhes", color: "hsl(35 85% 50%)", onClick: () => { setDailyTrackingStudent(s); setShowDailyTracking(true); } },
-                      { icon: Dumbbell, label: "Treinos", color: "hsl(82 85% 55%)", onClick: () => { setSelectedStudent(s); setShowWorkoutMenu(true); } },
+                      { icon: Play, label: "Iniciar", onClick: () => { setStartStudent(s); setSelectedStudent(s); setShowStartJourney(true); } },
+                      { icon: User, label: "Bio", onClick: () => { setBioStudent(s); setShowBioDialog(true); } },
+                      { icon: TrendingUp, label: "Detalhes", onClick: () => { setDailyTrackingStudent(s); setShowDailyTracking(true); } },
+                      { icon: Dumbbell, label: "Treinos", onClick: () => { setSelectedStudent(s); setShowWorkoutMenu(true); } },
                     ].map((a) => (
-                      <button key={a.label} onClick={a.onClick} className="flex flex-col items-center gap-1 py-2 rounded-lg text-white text-[10px] font-medium hover:opacity-90 transition-opacity" style={{ backgroundColor: a.color }}>
+                      <button key={a.label} onClick={a.onClick} className="flex flex-col items-center gap-1 py-2.5 rounded-lg bg-foreground text-background text-[10px] font-medium hover:opacity-90 transition-opacity">
                         <a.icon className="w-4 h-4" />
                         {a.label}
                       </button>
@@ -475,21 +475,21 @@ const Students = () => {
           <DialogHeader><DialogTitle className="font-display">Treinos</DialogTitle></DialogHeader>
           {selectedStudent && (
             <div className="space-y-3 mt-1">
-              <div className="rounded-xl p-4 text-white bg-gradient-to-r from-[hsl(220,60%,50%)] to-[hsl(170,50%,45%)]">
+              <div className="rounded-xl p-4 text-primary-foreground bg-foreground">
                 <div className="flex items-center gap-2">
                   <User className="w-5 h-5" />
                   <div>
                     <p className="font-display font-bold text-sm">Treino para: {selectedStudent.full_name.toUpperCase()}</p>
-                    <p className="text-white/70 text-xs">Categoria: {getPlanName(selectedStudent)}</p>
+                    <p className="text-primary-foreground/60 text-xs">Categoria: {getPlanName(selectedStudent)}</p>
                   </div>
                 </div>
               </div>
-              <button onClick={() => { setShowWorkoutMenu(false); setShowJourneyWizard(true); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Plus className="w-5 h-5 text-primary" /></div>
+              <button onClick={() => { setShowWorkoutMenu(false); setShowJourneyWizard(true); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-foreground/20 transition-colors">
+                <div className="w-10 h-10 rounded-lg bg-foreground/5 flex items-center justify-center"><Plus className="w-5 h-5 text-foreground/70" /></div>
                 <div className="text-left"><p className="font-display font-bold text-sm text-foreground">Novo Treino</p><p className="text-xs text-muted-foreground">Criar nova jornada ou treino</p></div>
               </button>
-              <button onClick={() => { setShowWorkoutMenu(false); setShowJourneyList(true); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><List className="w-5 h-5 text-primary" /></div>
+              <button onClick={() => { setShowWorkoutMenu(false); setShowJourneyList(true); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-foreground/20 transition-colors">
+                <div className="w-10 h-10 rounded-lg bg-foreground/5 flex items-center justify-center"><List className="w-5 h-5 text-foreground/70" /></div>
                 <div className="text-left"><p className="font-display font-bold text-sm text-foreground">Visualizar Treinos</p><p className="text-xs text-muted-foreground">Consultar jornadas e treinos</p></div>
               </button>
             </div>
@@ -503,21 +503,21 @@ const Students = () => {
           <DialogHeader><DialogTitle className="font-display">Iniciar Jornada</DialogTitle></DialogHeader>
           {startStudent && (
             <div className="space-y-3 mt-1">
-              <div className="rounded-xl p-4 text-white bg-gradient-to-r from-[hsl(220,60%,50%)] to-[hsl(170,50%,45%)]">
+              <div className="rounded-xl p-4 text-primary-foreground bg-foreground">
                 <div className="flex items-center gap-2">
                   <Play className="w-5 h-5" />
                   <div>
                     <p className="font-display font-bold text-sm">{startStudent.full_name.toUpperCase()}</p>
-                    <p className="text-white/70 text-xs">Selecione uma jornada para iniciar</p>
+                    <p className="text-primary-foreground/60 text-xs">Selecione uma jornada para iniciar</p>
                   </div>
                 </div>
               </div>
-              <button onClick={() => { setShowStartJourney(false); setShowJourneyList(true); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><List className="w-5 h-5 text-primary" /></div>
+              <button onClick={() => { setShowStartJourney(false); setShowJourneyList(true); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-foreground/20 transition-colors">
+                <div className="w-10 h-10 rounded-lg bg-foreground/5 flex items-center justify-center"><List className="w-5 h-5 text-foreground/70" /></div>
                 <div className="text-left"><p className="font-display font-bold text-sm text-foreground">Ver Jornadas</p><p className="text-xs text-muted-foreground">Escolher jornada já montada para iniciar</p></div>
               </button>
-              <button onClick={() => { setShowStartJourney(false); setShowJourneyWizard(true); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Plus className="w-5 h-5 text-primary" /></div>
+              <button onClick={() => { setShowStartJourney(false); setShowJourneyWizard(true); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-foreground/20 transition-colors">
+                <div className="w-10 h-10 rounded-lg bg-foreground/5 flex items-center justify-center"><Plus className="w-5 h-5 text-foreground/70" /></div>
                 <div className="text-left"><p className="font-display font-bold text-sm text-foreground">Nova Jornada</p><p className="text-xs text-muted-foreground">Criar e iniciar uma nova jornada</p></div>
               </button>
             </div>
@@ -530,12 +530,12 @@ const Students = () => {
         <DialogContent className="max-w-sm">
           <DialogHeader><DialogTitle className="font-display">Novo Aluno</DialogTitle></DialogHeader>
           <div className="space-y-3 mt-1">
-            <button onClick={() => { setShowNewStudentMenu(false); setEditingStudent(null); setForm({ full_name: "", email: "", phone: "", plan: "", plan_id: "", payment_day: "", birth_date: "", whatsapp: "", gender: "", group_id: "", status: "active" }); setShowForm(true); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Plus className="w-5 h-5 text-primary" /></div>
+            <button onClick={() => { setShowNewStudentMenu(false); setEditingStudent(null); setForm({ full_name: "", email: "", phone: "", plan: "", plan_id: "", payment_day: "", birth_date: "", whatsapp: "", gender: "", group_id: "", status: "active" }); setShowForm(true); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-foreground/20 transition-colors">
+              <div className="w-10 h-10 rounded-lg bg-foreground/5 flex items-center justify-center"><Plus className="w-5 h-5 text-foreground/70" /></div>
               <div className="text-left"><p className="font-display font-bold text-sm text-foreground">Cadastro Manual</p><p className="text-xs text-muted-foreground">Preencher os dados do aluno agora</p></div>
             </button>
-            <button onClick={() => { setShowNewStudentMenu(false); setLinkGroupId(""); setTimeout(() => setShowLinkDialog(true), 150); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Link2 className="w-5 h-5 text-primary" /></div>
+            <button onClick={() => { setShowNewStudentMenu(false); setLinkGroupId(""); setTimeout(() => setShowLinkDialog(true), 150); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-foreground/20 transition-colors">
+              <div className="w-10 h-10 rounded-lg bg-foreground/5 flex items-center justify-center"><Link2 className="w-5 h-5 text-foreground/70" /></div>
               <div className="text-left"><p className="font-display font-bold text-sm text-foreground">Enviar Link de Cadastro</p><p className="text-xs text-muted-foreground">O aluno preenche seus próprios dados</p></div>
             </button>
           </div>
@@ -594,7 +594,7 @@ const Students = () => {
                 </div>
                 <div>
                   <p className="font-display font-bold text-foreground text-lg">{detailStudent.full_name}</p>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${detailStudent.status === "inactive" ? "bg-destructive/15 text-destructive" : "bg-accent/15 text-accent"}`}>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${detailStudent.status === "inactive" ? "bg-destructive/15 text-destructive" : "bg-foreground/10 text-foreground"}`}>
                     {detailStudent.status === "inactive" ? "INATIVO" : "ATIVO"}
                   </span>
                 </div>
@@ -722,7 +722,7 @@ const Students = () => {
             const sc = studentScores[scoreDialog.studentId];
             if (!sc) return <p className="text-sm text-muted-foreground">Sem dados</p>;
             if (scoreDialog.type === "health") {
-              const color = sc.health >= 70 ? "hsl(var(--accent))" : sc.health >= 40 ? "hsl(var(--primary))" : "hsl(var(--destructive))";
+              const color = sc.health >= 70 ? "hsl(var(--success))" : sc.health >= 40 ? "hsl(var(--warning))" : "hsl(var(--destructive))";
               return (
                 <div className="space-y-3">
                   <div className="text-center">
@@ -758,7 +758,7 @@ const Students = () => {
                 </div>
               );
             } else {
-              const color = sc.performance >= 70 ? "hsl(var(--accent))" : sc.performance >= 40 ? "hsl(var(--primary))" : "hsl(var(--destructive))";
+              const color = sc.performance >= 70 ? "hsl(var(--success))" : sc.performance >= 40 ? "hsl(var(--warning))" : "hsl(var(--destructive))";
               return (
                 <div className="space-y-3">
                   <div className="text-center">

@@ -114,12 +114,12 @@ const Plans = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-gradient-to-r from-[hsl(220,60%,45%)] to-[hsl(250,55%,50%)] px-6 py-5">
+      <header className="bg-foreground px-6 py-5">
         <div className="max-w-3xl mx-auto flex items-center gap-3">
-          <button onClick={() => navigate("/dashboard")} className="text-white/70 hover:text-white transition-colors">
+          <button onClick={() => navigate("/dashboard")} className="text-primary-foreground/50 hover:text-primary-foreground transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-white font-display font-bold text-xl">Planos</h1>
+          <h1 className="text-primary-foreground font-display font-bold text-xl">Planos</h1>
         </div>
       </header>
 
@@ -188,8 +188,8 @@ const Plans = () => {
                 ) : (
                   <>
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-[hsl(30,80%,55%)]/10 flex items-center justify-center">
-                        <Package className="w-5 h-5 text-[hsl(30,80%,55%)]" />
+                      <div className="w-10 h-10 rounded-lg bg-foreground/5 flex items-center justify-center">
+                        <Package className="w-5 h-5 text-foreground/70" />
                       </div>
                       <div>
                         <p className="font-display font-bold text-foreground">{plan.name}</p>

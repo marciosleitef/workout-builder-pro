@@ -114,7 +114,7 @@ const JourneyListDialog = ({
                     <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => onEditJourney?.(j)}
-                        className="w-8 h-8 rounded-full bg-[hsl(200,70%,50%)] flex items-center justify-center text-white hover:opacity-90 transition-opacity"
+                        className="w-8 h-8 rounded-full bg-foreground flex items-center justify-center text-primary-foreground hover:opacity-90 transition-opacity"
                         title="Editar"
                       >
                         <Pencil className="w-3.5 h-3.5" />

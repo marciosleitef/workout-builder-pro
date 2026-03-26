@@ -6,7 +6,7 @@ import { UserCircle, Dumbbell, Calendar, LogOut, Sun, Moon, Plus, Link2, Users, 
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useTheme } from "@/hooks/useTheme";
-
+import logoPS from "@/assets/logo-ps.png";
 
 function getInitials(name: string) {
   return name.split(" ").filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
@@ -78,8 +78,6 @@ const Dashboard = () => {
       title: "Meus Alunos",
       description: "Gerencie seus alunos, crie jornadas e treinos",
       stat: `${studentCount} alunos`,
-      color: "hsl(220 60% 50%)",
-      bgClass: "bg-primary/10",
       route: "/students",
     },
     {
@@ -87,8 +85,6 @@ const Dashboard = () => {
       title: "Biblioteca de Exercícios",
       description: "Veja e organize seus exercícios por pilar",
       stat: "196+ exercícios",
-      color: "hsl(82 85% 55%)",
-      bgClass: "bg-accent/10",
       route: "/exercises",
     },
     {
@@ -96,8 +92,6 @@ const Dashboard = () => {
       title: "Calendário de Frequência",
       description: "Relatório de check-ins e presença dos alunos",
       stat: "Visão mensal",
-      color: "hsl(150 55% 45%)",
-      bgClass: "bg-[hsl(150,55%,45%)]/10",
       route: "/attendance",
     },
     {
@@ -105,8 +99,6 @@ const Dashboard = () => {
       title: "Grupos de Alunos",
       description: "Gerencie seus grupos: online, presencial, corrida...",
       stat: `${groupCount} grupo(s)`,
-      color: "hsl(280 60% 55%)",
-      bgClass: "bg-[hsl(280,60%,55%)]/10",
       route: "/groups",
     },
     {
@@ -114,8 +106,6 @@ const Dashboard = () => {
       title: "Planos",
       description: "Gerencie planos, valores e periodicidade dos alunos",
       stat: `${planCount} plano(s)`,
-      color: "hsl(30 80% 55%)",
-      bgClass: "bg-[hsl(30,80%,55%)]/10",
       route: "/plans",
     },
   ];
@@ -123,22 +113,21 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-gradient-to-r from-[hsl(220,60%,45%)] to-[hsl(250,55%,50%)] px-6 py-6">
+      <header className="bg-foreground px-6 py-5">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-white font-display font-bold text-base">
-              {getInitials(profileName || "U")}
-            </div>
+          <div className="flex items-center gap-4">
+            <img src={logoPS} alt="PS" className="h-9" />
+            <div className="h-8 w-px bg-primary-foreground/15" />
             <div>
-              <h1 className="text-white font-display font-bold text-xl">{profileName.toUpperCase() || "PROFESSOR"}</h1>
-              <p className="text-white/60 text-xs">{user?.email}</p>
+              <h1 className="text-primary-foreground font-display font-bold text-lg tracking-tight">{profileName.toUpperCase() || "PROFESSOR"}</h1>
+              <p className="text-primary-foreground/40 text-xs">{user?.email}</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <button onClick={toggleTheme} className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30 transition-colors" title={isDark ? "Tema Claro" : "Tema Escuro"}>
+          <div className="flex items-center gap-2">
+            <button onClick={toggleTheme} className="w-9 h-9 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/60 hover:bg-primary-foreground/15 hover:text-primary-foreground transition-colors" title={isDark ? "Tema Claro" : "Tema Escuro"}>
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
-            <button onClick={handleLogout} className="flex items-center gap-2 text-white/70 hover:text-white text-sm transition-colors">
+            <button onClick={handleLogout} className="flex items-center gap-2 px-3 py-2 rounded-lg text-primary-foreground/50 hover:text-primary-foreground hover:bg-primary-foreground/10 text-sm transition-colors">
               <LogOut className="w-4 h-4" />
               Sair
             </button>
@@ -152,23 +141,23 @@ const Dashboard = () => {
           <h2 className="font-display font-bold text-lg text-foreground">Painel Principal</h2>
           <button
             onClick={() => setShowNewStudentMenu(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl font-display font-bold text-sm hover:bg-primary/90 transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 bg-foreground text-background rounded-xl font-display font-bold text-sm hover:opacity-90 transition-opacity"
           >
             <Plus className="w-4 h-4" />
             Novo Aluno
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {cards.map((card) => (
             <button
               key={card.route}
               onClick={() => navigate(card.route)}
-              className="rounded-2xl border border-border bg-card p-6 text-left hover:border-primary/30 hover:shadow-lg transition-all group"
+              className="rounded-2xl border border-border bg-card p-6 text-left hover:border-foreground/20 card-elevated group"
             >
-              <div className={`w-14 h-14 rounded-xl ${card.bgClass} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                <card.icon className="w-7 h-7" style={{ color: card.color }} />
+              <div className="w-12 h-12 rounded-xl bg-foreground/5 flex items-center justify-center mb-4 group-hover:bg-foreground/10 transition-colors">
+                <card.icon className="w-6 h-6 text-foreground/70" />
               </div>
-              <h3 className="font-display font-bold text-foreground text-lg mb-1">{card.title}</h3>
+              <h3 className="font-display font-bold text-foreground text-base mb-1">{card.title}</h3>
               <p className="text-sm text-muted-foreground mb-3">{card.description}</p>
               <span className="text-xs font-medium px-3 py-1 rounded-full bg-secondary text-secondary-foreground">{card.stat}</span>
             </button>
@@ -181,12 +170,12 @@ const Dashboard = () => {
         <DialogContent className="max-w-sm">
           <DialogHeader><DialogTitle className="font-display">Novo Aluno</DialogTitle></DialogHeader>
           <div className="space-y-3 mt-1">
-            <button onClick={() => { setShowNewStudentMenu(false); navigate("/students?showForm=true"); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Plus className="w-5 h-5 text-primary" /></div>
+            <button onClick={() => { setShowNewStudentMenu(false); navigate("/students?showForm=true"); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-foreground/20 transition-colors">
+              <div className="w-10 h-10 rounded-lg bg-foreground/5 flex items-center justify-center"><Plus className="w-5 h-5 text-foreground/70" /></div>
               <div className="text-left"><p className="font-display font-bold text-sm text-foreground">Cadastro Manual</p><p className="text-xs text-muted-foreground">Preencher os dados do aluno agora</p></div>
             </button>
-            <button onClick={() => { setShowNewStudentMenu(false); setLinkGroupId(""); setLinkPlanId(""); setTimeout(() => setShowLinkDialog(true), 150); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Link2 className="w-5 h-5 text-primary" /></div>
+            <button onClick={() => { setShowNewStudentMenu(false); setLinkGroupId(""); setLinkPlanId(""); setTimeout(() => setShowLinkDialog(true), 150); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-foreground/20 transition-colors">
+              <div className="w-10 h-10 rounded-lg bg-foreground/5 flex items-center justify-center"><Link2 className="w-5 h-5 text-foreground/70" /></div>
               <div className="text-left"><p className="font-display font-bold text-sm text-foreground">Enviar Link de Cadastro</p><p className="text-xs text-muted-foreground">O aluno preenche seus próprios dados</p></div>
             </button>
           </div>
@@ -201,7 +190,7 @@ const Dashboard = () => {
             {groups.length > 0 && (
               <div>
                 <label className="text-sm font-medium text-foreground">Grupo do aluno (opcional)</label>
-                <select value={linkGroupId} onChange={(e) => setLinkGroupId(e.target.value)} className="w-full mt-1 px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
+                <select value={linkGroupId} onChange={(e) => setLinkGroupId(e.target.value)} className="w-full mt-1 px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-ring/50">
                   <option value="">Sem grupo definido</option>
                   {groups.map((g) => (<option key={g.id} value={g.id}>{g.name}</option>))}
                 </select>
@@ -211,7 +200,7 @@ const Dashboard = () => {
             {plans.length > 0 && (
               <div>
                 <label className="text-sm font-medium text-foreground">Plano do aluno (opcional)</label>
-                <select value={linkPlanId} onChange={(e) => setLinkPlanId(e.target.value)} className="w-full mt-1 px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
+                <select value={linkPlanId} onChange={(e) => setLinkPlanId(e.target.value)} className="w-full mt-1 px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-ring/50">
                   <option value="">Sem plano definido</option>
                   {plans.map((p) => (<option key={p.id} value={p.id}>{p.name}</option>))}
                 </select>
@@ -229,7 +218,7 @@ const Dashboard = () => {
                 toast.success("Link de cadastro copiado!");
                 setShowLinkDialog(false);
               }}
-              className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-display font-bold text-sm hover:bg-primary/90 transition-colors"
+              className="w-full py-3 rounded-lg bg-foreground text-background font-display font-bold text-sm hover:opacity-90 transition-opacity"
             >
               Copiar Link
             </button>

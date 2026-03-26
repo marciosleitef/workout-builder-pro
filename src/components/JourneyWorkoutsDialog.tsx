@@ -146,7 +146,7 @@ function VideoPlayer({ url, onClose }: { url: string; onClose: () => void }) {
     <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center" onClick={onClose}>
       <div className="w-full max-w-lg mx-4" onClick={(e) => e.stopPropagation()}>
         <video src={url} controls autoPlay className="w-full rounded-xl" />
-        <button onClick={onClose} className="mt-3 w-full py-2 rounded-xl bg-white/20 text-white text-sm font-bold hover:bg-white/30 transition-colors">
+        <button onClick={onClose} className="mt-3 w-full py-2 rounded-xl bg-primary-foreground/10 text-primary-foreground text-sm font-bold hover:bg-primary-foreground/15 transition-colors">
           Fechar
         </button>
       </div>
@@ -349,7 +349,7 @@ const JourneyWorkoutsDialog = ({
           {isActive && (
             <button onClick={() => toggleExerciseComplete(ex.id)}
               className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isCompleted ? "bg-accent border-accent" : "border-muted-foreground/40 hover:border-primary"}`}>
-              {isCompleted && <Check className="w-3.5 h-3.5 text-white" />}
+              {isCompleted && <Check className="w-3.5 h-3.5 text-primary-foreground" />}
             </button>
           )}
           <Dumbbell className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
@@ -460,10 +460,10 @@ const JourneyWorkoutsDialog = ({
       // All answered - show confirm
       return (
         <div className="space-y-4">
-          <div className="bg-gradient-to-r from-[hsl(150,55%,45%)] to-[hsl(170,50%,45%)] rounded-xl p-4 text-white text-center">
+          <div className="bg-foreground rounded-xl p-4 text-primary-foreground text-center">
             <CheckCircle2 className="w-8 h-8 mx-auto mb-2" />
             <h3 className="font-display font-bold">Check-in Completo!</h3>
-            <p className="text-white/70 text-xs mt-1">Todas as escalas foram respondidas</p>
+            <p className="text-primary-foreground/60 text-xs mt-1">Todas as escalas foram respondidas</p>
           </div>
           <div className="space-y-2">
             {PRE_SCALES.map((s) => (
@@ -474,7 +474,7 @@ const JourneyWorkoutsDialog = ({
             ))}
           </div>
           <button onClick={handleSubmitCheckin} disabled={saving}
-            className="w-full py-3 rounded-xl bg-[hsl(150,55%,45%)] text-white font-display font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50">
+            className="w-full py-3 rounded-xl bg-foreground text-background font-display font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50">
             {saving ? "Salvando..." : "Confirmar Check-in e Iniciar Treino"}
           </button>
         </div>
@@ -509,18 +509,18 @@ const JourneyWorkoutsDialog = ({
   // ── ACTIVE PHASE ──
   const renderActive = () => (
     <div className="space-y-4">
-      <div className="bg-gradient-to-r from-[hsl(220,60%,50%)] to-[hsl(250,55%,50%)] rounded-xl p-4 text-white text-center">
+      <div className="bg-foreground rounded-xl p-4 text-primary-foreground text-center">
         <Activity className="w-8 h-8 mx-auto mb-2 animate-pulse" />
         <h3 className="font-display font-bold text-lg">Treino em Andamento</h3>
-        <p className="text-white/70 text-sm">{selectedWorkout?.name}</p>
+        <p className="text-primary-foreground/60 text-sm">{selectedWorkout?.name}</p>
         <div className="flex items-center justify-center gap-4 mt-3">
-          <div className="bg-white/10 rounded-lg px-4 py-2">
+          <div className="bg-primary-foreground/5 rounded-lg px-4 py-2">
             <p className="text-2xl font-display font-bold font-mono">{formatTime(elapsedSeconds)}</p>
-            <p className="text-white/60 text-[10px]">tempo</p>
+            <p className="text-primary-foreground/40 text-[10px]">tempo</p>
           </div>
-          <div className="bg-white/10 rounded-lg px-4 py-2">
+          <div className="bg-primary-foreground/5 rounded-lg px-4 py-2">
             <p className="text-2xl font-display font-bold">{completedCount}/{totalExCount}</p>
-            <p className="text-white/60 text-[10px]">exercícios</p>
+            <p className="text-primary-foreground/40 text-[10px]">exercícios</p>
           </div>
         </div>
       </div>
@@ -548,7 +548,7 @@ const JourneyWorkoutsDialog = ({
     if (currentStep >= totalSteps) {
       return (
         <div className="space-y-4">
-          <div className="bg-gradient-to-r from-destructive to-[hsl(0,55%,45%)] rounded-xl p-4 text-white text-center">
+          <div className="bg-gradient-to-r from-destructive to-[hsl(0,55%,45%)] rounded-xl p-4 text-primary-foreground text-center">
             <CheckCircle2 className="w-8 h-8 mx-auto mb-2" />
             <h3 className="font-display font-bold">Check-out Completo!</h3>
           </div>
@@ -595,12 +595,12 @@ const JourneyWorkoutsDialog = ({
   // ── METRICS PHASE ──
   const renderMetrics = () => (
     <div className="space-y-4">
-      <div className="bg-gradient-to-r from-[hsl(35,85%,50%)] to-[hsl(25,80%,50%)] rounded-xl p-4 text-white">
+      <div className="bg-foreground/90 rounded-xl p-4 text-primary-foreground">
         <div className="flex items-center gap-2 mb-1">
           <Activity className="w-5 h-5" />
           <h3 className="font-display font-bold">Métricas do Treino</h3>
         </div>
-        <p className="text-white/70 text-xs">Informe os dados do treino</p>
+        <p className="text-primary-foreground/60 text-xs">Informe os dados do treino</p>
       </div>
       <div className="space-y-3">
         {[
@@ -685,15 +685,15 @@ const JourneyWorkoutsDialog = ({
                 const isSelected = selectedWorkout?.id === w.id;
                 return (
                   <button key={w.id} onClick={() => { setSelectedWorkout(w); setShowOrientations(false); setExpandedGroups(new Set()); setExpandedExercise(null); }}
-                    className={`shrink-0 rounded-xl p-3 min-w-[100px] text-left transition-all ${isSelected ? "bg-[hsl(250,55%,50%)] text-white shadow-lg shadow-[hsl(250,55%,50%)/0.3]" : "bg-secondary border border-border text-foreground hover:border-primary/30"}`}>
+                    className={`shrink-0 rounded-xl p-3 min-w-[100px] text-left transition-all ${isSelected ? "bg-foreground text-background shadow-lg shadow-foreground/20" : "bg-secondary border border-border text-foreground hover:border-primary/30"}`}>
                     <div className="flex items-center gap-1 mb-1">
-                      <div className={`w-2 h-2 rounded-full ${isSelected ? "bg-[hsl(150,60%,45%)]" : "bg-muted-foreground/40"}`} />
+                      <div className={`w-2 h-2 rounded-full ${isSelected ? "bg-foreground" : "bg-muted-foreground/40"}`} />
                       <span className="text-xs font-bold">{i + 1}</span>
                     </div>
                     <p className="font-display font-bold text-sm truncate">{w.name}</p>
                     <div className="flex items-center gap-1 mt-1">
-                      <Dumbbell className={`w-3 h-3 ${isSelected ? "text-white/70" : "text-muted-foreground"}`} />
-                      <span className={`text-[10px] ${isSelected ? "text-white/70" : "text-muted-foreground"}`}>{w.day_label}</span>
+                      <Dumbbell className={`w-3 h-3 ${isSelected ? "text-primary-foreground/50" : "text-muted-foreground"}`} />
+                      <span className={`text-[10px] ${isSelected ? "text-primary-foreground/50" : "text-muted-foreground"}`}>{w.day_label}</span>
                     </div>
                   </button>
                 );
@@ -734,11 +734,11 @@ const JourneyWorkoutsDialog = ({
 
           {/* Action buttons */}
           <div className="space-y-2">
-            <button className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[hsl(220,60%,50%)] text-white font-display font-bold text-sm hover:opacity-90 transition-opacity">
+            <button className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-foreground text-primary-foreground font-display font-bold text-sm hover:opacity-90 transition-opacity">
               <Printer className="w-4 h-4" />Imprimir Treino
             </button>
             <button onClick={handleStartWorkout}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[hsl(150,60%,45%)] text-white font-display font-bold text-sm hover:opacity-90 transition-opacity">
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-foreground text-primary-foreground font-display font-bold text-sm hover:opacity-90 transition-opacity">
               <Play className="w-4 h-4" />Iniciar Treino
             </button>
           </div>
@@ -762,7 +762,7 @@ const JourneyWorkoutsDialog = ({
     <Dialog open={open} onOpenChange={(v) => { if (phase === "active") return; onOpenChange(v); }}>
       <DialogContent className="max-w-md p-0 max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-[hsl(220,60%,45%)] to-[hsl(250,55%,50%)] px-4 py-4 text-white flex items-center gap-3 shrink-0">
+        <div className="bg-foreground px-4 py-4 text-primary-foreground flex items-center gap-3 shrink-0">
           <button
             onClick={() => {
               if (phase === "workouts") onOpenChange(false);
@@ -770,12 +770,12 @@ const JourneyWorkoutsDialog = ({
               else if (phase === "checkout" && currentStep > 0) setCurrentStep(currentStep - 1);
               else if (phase !== "active") setPhase("workouts");
             }}
-            className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors">
+            className="w-8 h-8 rounded-lg bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/15 transition-colors">
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div className="flex-1 min-w-0">
             <h2 className="font-display font-bold text-base truncate">{getHeaderTitle()}</h2>
-            <p className="text-white/60 text-xs">{studentName}</p>
+            <p className="text-primary-foreground/40 text-xs">{studentName}</p>
           </div>
         </div>
 

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import logoPS from "@/assets/logo-ps.png";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -39,67 +40,40 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      {/* Decorative blobs */}
-      <div className="fixed top-[-10%] left-[-5%] w-72 h-72 rounded-full bg-primary/5 blur-3xl" />
-      <div className="fixed bottom-[-10%] right-[-5%] w-96 h-96 rounded-full bg-accent/5 blur-3xl" />
-
+    <div className="min-h-screen bg-foreground flex items-center justify-center p-4">
       <div className="w-full max-w-md relative z-10">
-        {/* Logo area */}
-        <div className="text-center mb-8">
-          <h1 className="font-display text-3xl font-bold gradient-text mb-1">Método PS</h1>
-          <p className="text-lg font-display text-foreground font-semibold">Evolua Além</p>
-          <p className="text-sm text-muted-foreground">Gestão Inteligente de Performance</p>
+        {/* Logo */}
+        <div className="text-center mb-10">
+          <img src={logoPS} alt="PS Logo" className="h-16 mx-auto mb-4 invert-0" />
+          <p className="text-sm text-primary-foreground/50 font-display tracking-[0.2em] uppercase">
+            Gestão Inteligente de Performance
+          </p>
         </div>
 
         {/* Pillars */}
         <div className="grid grid-cols-3 gap-3 mb-8">
           {[
-            { label: "SAÚDE", sub: "Bem-estar", color: "hsl(150 60% 40%)" },
-            { label: "EQUILÍBRIO", sub: "Harmonia", color: "hsl(35 90% 55%)" },
-            { label: "PERFORMANCE", sub: "Evolução", color: "hsl(0 70% 55%)" },
+            { label: "SAÚDE", sub: "Bem-estar" },
+            { label: "EQUILÍBRIO", sub: "Harmonia" },
+            { label: "PERFORMANCE", sub: "Evolução" },
           ].map((p) => (
             <div
               key={p.label}
-              className="rounded-xl border border-border bg-card p-4 text-center"
-              style={{ borderTopColor: p.color, borderTopWidth: 2 }}
+              className="rounded-xl border border-primary-foreground/10 bg-primary-foreground/5 p-4 text-center backdrop-blur-sm"
             >
-              <div
-                className="w-8 h-8 rounded-full mx-auto mb-2"
-                style={{ backgroundColor: p.color }}
-              />
-              <p className="text-xs font-display font-bold text-foreground">{p.label}</p>
-              <p className="text-[10px] text-muted-foreground">{p.sub}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Categories */}
-        <div className="grid grid-cols-4 gap-2 mb-8">
-          {[
-            { label: "TRAINING", color: "hsl(220 25% 25%)" },
-            { label: "FOOD", color: "hsl(30 85% 55%)" },
-            { label: "EDUCATION", color: "hsl(200 70% 50%)" },
-            { label: "HEALTH", color: "hsl(0 70% 55%)" },
-          ].map((c) => (
-            <div key={c.label} className="rounded-lg border border-border bg-card p-3 text-center">
-              <div
-                className="w-6 h-6 rounded-full mx-auto mb-1.5"
-                style={{ backgroundColor: c.color }}
-              />
-              <p className="text-[10px] font-display font-semibold text-muted-foreground">{c.label}</p>
+              <p className="text-xs font-display font-bold text-primary-foreground">{p.label}</p>
+              <p className="text-[10px] text-primary-foreground/40">{p.sub}</p>
             </div>
           ))}
         </div>
 
         {/* Form card */}
-        <div className="rounded-2xl border border-border bg-card p-6">
+        <div className="rounded-2xl border border-primary-foreground/10 bg-primary-foreground/5 backdrop-blur-sm p-6">
           <div className="text-center mb-6">
-            <div className="w-10 h-0.5 bg-muted-foreground/30 mx-auto mb-4 rounded" />
-            <h2 className="font-display text-xl font-bold text-foreground">
+            <h2 className="font-display text-xl font-bold text-primary-foreground">
               {isLogin ? "Acesse sua conta" : "Crie sua conta"}
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-primary-foreground/40">
               {isLogin ? "Continue sua jornada de evolução" : "Comece sua jornada agora"}
             </p>
           </div>
@@ -107,40 +81,40 @@ const Auth = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div>
-                <label className="text-sm font-medium text-foreground">Nome Completo</label>
+                <label className="text-sm font-medium text-primary-foreground/70">Nome Completo</label>
                 <input
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Seu nome completo"
                   required
-                  className="w-full mt-1 px-4 py-3 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="w-full mt-1 px-4 py-3 rounded-lg bg-primary-foreground/10 border border-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/30 focus:outline-none focus:ring-2 focus:ring-primary-foreground/20"
                 />
               </div>
             )}
             <div>
-              <label className="text-sm font-medium text-foreground">Email ou Usuário</label>
+              <label className="text-sm font-medium text-primary-foreground/70">Email ou Usuário</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu@email.com"
                 required
-                className="w-full mt-1 px-4 py-3 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="w-full mt-1 px-4 py-3 rounded-lg bg-primary-foreground/10 border border-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/30 focus:outline-none focus:ring-2 focus:ring-primary-foreground/20"
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-foreground">Senha</label>
+              <label className="text-sm font-medium text-primary-foreground/70">Senha</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="w-full mt-1 px-4 py-3 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="w-full mt-1 px-4 py-3 rounded-lg bg-primary-foreground/10 border border-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/30 focus:outline-none focus:ring-2 focus:ring-primary-foreground/20"
               />
               {isLogin && (
-                <p className="text-xs text-primary text-right mt-1.5 cursor-pointer hover:underline">
+                <p className="text-xs text-primary-foreground/40 text-right mt-1.5 cursor-pointer hover:text-primary-foreground/60 transition-colors">
                   Esqueceu a senha?
                 </p>
               )}
@@ -149,21 +123,30 @@ const Auth = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-lg font-display font-bold text-sm text-primary-foreground bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity disabled:opacity-50"
+              className="w-full py-3 rounded-lg font-display font-bold text-sm text-foreground bg-primary-foreground hover:bg-primary-foreground/90 transition-all disabled:opacity-50"
             >
               {loading ? "Aguarde..." : isLogin ? "ENTRAR" : "CRIAR CONTA"}
             </button>
           </form>
 
-          <p className="text-center text-sm text-muted-foreground mt-4">
+          <p className="text-center text-sm text-primary-foreground/40 mt-4">
             {isLogin ? "Novo no Método PS? " : "Já tem conta? "}
             <button
               onClick={() => setIsLogin(!isLogin)}
-              className="text-primary font-medium hover:underline"
+              className="text-primary-foreground font-medium hover:underline"
             >
               {isLogin ? "Criar conta" : "Entrar"}
             </button>
           </p>
+        </div>
+
+        {/* Categories */}
+        <div className="grid grid-cols-4 gap-2 mt-6">
+          {["TREINO", "ALIMENTAÇÃO", "EDUCAÇÃO", "SAÚDE"].map((c) => (
+            <div key={c} className="rounded-lg border border-primary-foreground/10 bg-primary-foreground/5 p-2.5 text-center">
+              <p className="text-[9px] font-display font-semibold text-primary-foreground/40 tracking-wider">{c}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>

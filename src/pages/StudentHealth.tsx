@@ -680,6 +680,162 @@ const StudentHealth = () => {
         </Card>
       )}
 
+      {/* Session Analytics */}
+      {totalSessions > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Activity className="h-4 w-4 text-primary" /> Indicadores de Treino
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-[10px] text-muted-foreground">Média de {totalSessions} sessão(ões)</p>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="bg-secondary/30 rounded-lg p-2 text-center">
+                <p className="text-lg">❤️‍🔥</p>
+                <p className="text-xs font-bold text-foreground">{avgBpm ?? "—"} bpm</p>
+                <p className="text-[9px] text-muted-foreground">BPM Médio</p>
+              </div>
+              <div className="bg-secondary/30 rounded-lg p-2 text-center">
+                <p className="text-lg">🔥</p>
+                <p className="text-xs font-bold text-foreground">{avgCalories ?? "—"} kcal</p>
+                <p className="text-[9px] text-muted-foreground">Calorias</p>
+              </div>
+              <div className="bg-secondary/30 rounded-lg p-2 text-center">
+                <p className="text-lg">💓</p>
+                <p className="text-xs font-bold text-foreground">{avgBpmMax ?? "—"} bpm</p>
+                <p className="text-[9px] text-muted-foreground">BPM Máximo</p>
+              </div>
+              <div className="bg-secondary/30 rounded-lg p-2 text-center">
+                <p className="text-lg">⏱️</p>
+                <p className="text-xs font-bold text-foreground">{avgDuration ?? "—"} min</p>
+                <p className="text-[9px] text-muted-foreground">Tempo de Treino</p>
+              </div>
+            </div>
+
+            {/* Pre-workout radar */}
+            {preRadarData.length > 0 && (
+              <div className="bg-secondary/20 rounded-xl p-3">
+                <p className="text-xs font-medium text-muted-foreground mb-2">Perfil Pré-Treino (média)</p>
+                <div className="h-44">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart data={preRadarData} outerRadius="70%">
+                      <PolarGrid stroke="hsl(var(--border))" />
+                      <PolarAngleAxis dataKey="metric" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
+                      <PolarRadiusAxis domain={[0, 5]} tick={false} axisLine={false} />
+                      <Radar name="Média" dataKey="value" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.3} />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+
+            {/* Post-workout radar */}
+            {postRadarData.length > 0 && (
+              <div className="bg-secondary/20 rounded-xl p-3">
+                <p className="text-xs font-medium text-muted-foreground mb-2">Perfil Pós-Treino (média)</p>
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  {[
+                    { label: "Recuperação", value: avgFn(allPost, "post_recovery_scale"), max: 10, icon: "💪" },
+                    { label: "Esforço (PSE)", value: avgFn(allPost, "perceived_exertion_scale"), max: 10, icon: "🔥" },
+                    { label: "Dor (EVA)", value: avgFn(allPost, "pain_scale_eva"), max: 10, icon: "⚡" },
+                  ].map((m) => (
+                    <div key={m.label} className="bg-secondary/30 rounded-lg p-2 text-center">
+                      <p className="text-lg mb-0.5">{m.icon}</p>
+                      <p className="text-xs font-bold text-foreground">{m.value ?? "—"}/{m.max}</p>
+                      <p className="text-[9px] text-muted-foreground">{m.label}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="h-44">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart data={postRadarData} outerRadius="70%">
+                      <PolarGrid stroke="hsl(var(--border))" />
+                      <PolarAngleAxis dataKey="metric" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
+                      <PolarRadiusAxis domain={[0, 10]} tick={false} axisLine={false} />
+                      <Radar name="Média" dataKey="value" stroke="hsl(var(--destructive))" fill="hsl(var(--destructive))" fillOpacity={0.3} />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Weight evolution chart */}
+      {weightChartData.length > 1 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Evolução do Peso</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-44">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={weightChartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} />
+                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} domain={['dataMin - 2', 'dataMax + 2']} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area type="monotone" dataKey="peso" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.2} name="Peso (kg)" strokeWidth={2} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Pre-workout evolution */}
+      {preSessionChartData.length > 1 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Evolução Pré-Treino</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-44">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={preSessionChartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} />
+                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                  <YAxis domain={[0, 5]} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend wrapperStyle={{ fontSize: 10 }} />
+                  <Line type="monotone" dataKey="fadiga" stroke="hsl(35, 85%, 50%)" name="Fadiga" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="sono" stroke="hsl(220, 60%, 50%)" name="Sono" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="humor" stroke="hsl(150, 55%, 45%)" name="Humor" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="estresse" stroke="hsl(0, 65%, 55%)" name="Estresse" strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Post-workout evolution */}
+      {postSessionChartData.length > 1 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Evolução Pós-Treino</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-44">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={postSessionChartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} />
+                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                  <YAxis domain={[0, 10]} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend wrapperStyle={{ fontSize: 10 }} />
+                  <Line type="monotone" dataKey="recuperacao" stroke="hsl(150, 55%, 45%)" name="Recuperação" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="esforco" stroke="hsl(35, 85%, 50%)" name="Esforço" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="dor" stroke="hsl(0, 65%, 55%)" name="Dor" strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Empty state for bio */}
       {bioRecords.length === 0 && (
         <Card>

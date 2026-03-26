@@ -42,6 +42,7 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   studentId: string;
   studentName: string;
+  gender?: string;
 }
 
 const FIELD_LABELS: { key: keyof BioRecord; label: string; unit: string }[] = [
@@ -74,183 +75,349 @@ const NUMERIC_KEYS = FIELD_LABELS.map(f => f.key);
 
 type View = "main" | "form" | "detail" | "compare";
 
-/* ── Realistic Human Body SVG ── */
-const HumanBody = ({ record, size = "md" }: { record: BioRecord; size?: "sm" | "md" }) => {
+/* ── Anatomical Human Body SVG ── */
+const HumanBody = ({ record, size = "md", gender = "masculino" }: { record: BioRecord; size?: "sm" | "md"; gender?: string }) => {
   const fatPct = record.body_fat_pct ?? 25;
   const musclePct = record.muscle_mass_pct ?? 30;
-  const leanPct = record.lean_mass_pct ?? 65;
+  const isFemale = gender === "feminino";
 
-  // Body width scales with fat percentage (thinner = lower fat)
-  const bodyScale = 0.85 + (fatPct / 100) * 0.4; // 0.85 to 1.25
-  const w = size === "sm" ? "w-20" : "w-28";
-  const h = size === "sm" ? "h-48" : "h-64";
+  // Dynamic proportions based on body composition
+  const fatScale = Math.min(1.2, 0.88 + (fatPct / 100) * 0.6);
+  const muscleDefinition = Math.max(0, Math.min(1, (musclePct - 20) / 30));
+  const w = size === "sm" ? "w-24" : "w-32";
+  const h = size === "sm" ? "h-52" : "h-72";
 
-  // Colors: skin base with overlays for fat/muscle
-  const skinBase = "hsl(25, 40%, 75%)";
-  const fatOverlay = fatPct > 30 ? "hsl(0, 55%, 60%)" : fatPct > 22 ? "hsl(35, 65%, 58%)" : "hsl(140, 45%, 50%)";
-  const muscleOverlay = musclePct > 35 ? "hsl(140, 55%, 42%)" : musclePct > 25 ? "hsl(170, 45%, 48%)" : "hsl(200, 40%, 55%)";
-  const fatOpacity = 0.3 + (fatPct / 100) * 0.5;
+  // Anatomical color palette
+  const skinLight = "hsl(28, 38%, 82%)";
+  const skinMid = "hsl(25, 35%, 72%)";
+  const skinShadow = "hsl(22, 30%, 62%)";
+  const skinOutline = "hsl(20, 25%, 52%)";
+  const fatColor = fatPct > 30 ? "hsl(5, 50%, 58%)" : fatPct > 22 ? "hsl(30, 55%, 56%)" : "hsl(145, 40%, 48%)";
+  const muscleColor = musclePct > 35 ? "hsl(145, 50%, 40%)" : musclePct > 25 ? "hsl(170, 40%, 46%)" : "hsl(200, 35%, 52%)";
+  const fatOp = 0.15 + (fatPct / 100) * 0.45;
+  const muscleOp = 0.1 + muscleDefinition * 0.35;
+
+  const uid = `body-${record.id}`;
+
+  // Hip width differs by gender
+  const hipW = isFemale ? 1.15 : 0.95;
+  // Shoulder width differs
+  const shoulderW = isFemale ? 0.92 : 1.08;
+  // Waist differs
+  const waistW = isFemale ? 0.82 : 0.95;
 
   return (
     <div className="flex flex-col items-center">
-      <svg viewBox="0 0 200 420" className={`${w} ${h}`} xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 240 480" className={`${w} ${h}`} xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <radialGradient id={`skin-${record.id}`} cx="50%" cy="40%" r="60%">
-            <stop offset="0%" stopColor="hsl(25, 45%, 80%)" />
-            <stop offset="100%" stopColor={skinBase} />
+          <radialGradient id={`${uid}-skin`} cx="50%" cy="35%" r="55%">
+            <stop offset="0%" stopColor={skinLight} />
+            <stop offset="70%" stopColor={skinMid} />
+            <stop offset="100%" stopColor={skinShadow} />
           </radialGradient>
-          <radialGradient id={`torso-${record.id}`} cx="50%" cy="50%" r="65%">
-            <stop offset="0%" stopColor={fatOverlay} stopOpacity={fatOpacity * 0.6} />
-            <stop offset="100%" stopColor={fatOverlay} stopOpacity={fatOpacity} />
+          <radialGradient id={`${uid}-fat`} cx="50%" cy="50%" r="60%">
+            <stop offset="0%" stopColor={fatColor} stopOpacity={fatOp * 0.5} />
+            <stop offset="100%" stopColor={fatColor} stopOpacity={fatOp} />
           </radialGradient>
-          <linearGradient id={`muscle-${record.id}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={muscleOverlay} stopOpacity="0.4" />
-            <stop offset="100%" stopColor={muscleOverlay} stopOpacity="0.7" />
+          <linearGradient id={`${uid}-musc`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={muscleColor} stopOpacity={muscleOp * 0.5} />
+            <stop offset="100%" stopColor={muscleColor} stopOpacity={muscleOp} />
+          </linearGradient>
+          <linearGradient id={`${uid}-depth`} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor={skinShadow} stopOpacity="0.2" />
+            <stop offset="50%" stopColor={skinShadow} stopOpacity="0" />
+            <stop offset="100%" stopColor={skinShadow} stopOpacity="0.15" />
           </linearGradient>
         </defs>
 
-        <g transform={`translate(${100 - 100 * bodyScale}, 0) scale(${bodyScale}, 1)`}>
-          {/* Head */}
-          <ellipse cx="100" cy="38" rx="26" ry="30" fill={`url(#skin-${record.id})`} stroke="hsl(25, 30%, 60%)" strokeWidth="0.8" />
+        <g transform={`translate(${120 - 120 * fatScale}, 0) scale(${fatScale}, 1)`}>
+          {/* ── HEAD ── */}
+          <ellipse cx="120" cy="42" rx="28" ry="33" fill={`url(#${uid}-skin)`} stroke={skinOutline} strokeWidth="0.7" />
+          {/* Face features */}
+          <ellipse cx="110" cy="38" rx="3" ry="2" fill={skinShadow} opacity="0.4" />
+          <ellipse cx="130" cy="38" rx="3" ry="2" fill={skinShadow} opacity="0.4" />
+          <ellipse cx="120" cy="47" rx="4" ry="2.5" fill={skinShadow} opacity="0.2" />
+          <path d="M114 54 Q120 58 126 54" fill="none" stroke={skinShadow} strokeWidth="0.6" opacity="0.4" />
           {/* Ears */}
-          <ellipse cx="74" cy="38" rx="5" ry="8" fill={skinBase} stroke="hsl(25, 30%, 60%)" strokeWidth="0.5" />
-          <ellipse cx="126" cy="38" rx="5" ry="8" fill={skinBase} stroke="hsl(25, 30%, 60%)" strokeWidth="0.5" />
+          <ellipse cx="92" cy="42" rx="5" ry="9" fill={skinMid} stroke={skinOutline} strokeWidth="0.5" />
+          <ellipse cx="148" cy="42" rx="5" ry="9" fill={skinMid} stroke={skinOutline} strokeWidth="0.5" />
+          {isFemale && (
+            <>
+              {/* Hair suggestion for female */}
+              <path d="M92 28 Q90 15 100 8 Q110 2 120 2 Q130 2 140 8 Q150 15 148 28"
+                fill="none" stroke={skinOutline} strokeWidth="1.5" opacity="0.4" />
+              <path d="M90 30 Q88 45 86 58" fill="none" stroke={skinOutline} strokeWidth="1" opacity="0.25" />
+              <path d="M150 30 Q152 45 154 58" fill="none" stroke={skinOutline} strokeWidth="1" opacity="0.25" />
+            </>
+          )}
 
-          {/* Neck */}
-          <path d="M88 65 Q88 60 88 58 L112 58 Q112 60 112 65 L115 78 L85 78 Z"
-            fill={`url(#skin-${record.id})`} stroke="hsl(25, 30%, 60%)" strokeWidth="0.5" />
+          {/* ── NECK ── */}
+          <path d={`M${108} 72 L${108} 64 Q${108} 60 ${110} 58 L${130} 58 Q${132} 60 ${132} 64 L${132} 72 
+                    L${135} 85 L${105} 85 Z`}
+            fill={`url(#${uid}-skin)`} stroke={skinOutline} strokeWidth="0.5" />
+          {/* Neck muscle lines */}
+          <path d="M112 64 L108 78" fill="none" stroke={skinShadow} strokeWidth="0.3" opacity={muscleDefinition * 0.5} />
+          <path d="M128 64 L132 78" fill="none" stroke={skinShadow} strokeWidth="0.3" opacity={muscleDefinition * 0.5} />
 
-          {/* Shoulders + Torso */}
-          <path d="M85 78 Q60 80 48 90 L40 100 L38 130
-                   Q36 160 42 180 L48 195
-                   Q55 210 70 215 L80 218 Q90 220 100 220
-                   Q110 220 120 218 L130 215 Q145 210 152 195
-                   L158 180 Q164 160 162 130
-                   L160 100 L152 90 Q140 80 115 78 Z"
-            fill={`url(#skin-${record.id})`} stroke="hsl(25, 30%, 60%)" strokeWidth="0.8" />
-          {/* Fat overlay on torso */}
-          <path d="M85 78 Q60 80 48 90 L40 100 L38 130
-                   Q36 160 42 180 L48 195
-                   Q55 210 70 215 L80 218 Q90 220 100 220
-                   Q110 220 120 218 L130 215 Q145 210 152 195
-                   L158 180 Q164 160 162 130
-                   L160 100 L152 90 Q140 80 115 78 Z"
-            fill={`url(#torso-${record.id})`} />
+          {/* ── SHOULDERS + TORSO ── */}
+          <path d={`
+            M105 85
+            Q${120 - 40 * shoulderW} 86 ${120 - 52 * shoulderW} 98
+            L${120 - 55 * shoulderW} 108
+            Q${120 - 56 * shoulderW} 115 ${120 - 50 * shoulderW} 128
+            L${120 - 42 * waistW} 165
+            Q${120 - 38 * waistW} 180 ${120 - 35 * waistW} 190
+            Q${120 - 40 * hipW} 210 ${120 - 45 * hipW} 225
+            L${120 - 42 * hipW} 238
+            Q${120 - 20 * hipW} 245 120 248
+            Q${120 + 20 * hipW} 245 ${120 + 42 * hipW} 238
+            L${120 + 45 * hipW} 225
+            Q${120 + 40 * hipW} 210 ${120 + 35 * waistW} 190
+            Q${120 + 38 * waistW} 180 ${120 + 42 * waistW} 165
+            L${120 + 50 * shoulderW} 128
+            Q${120 + 56 * shoulderW} 115 ${120 + 55 * shoulderW} 108
+            L${120 + 52 * shoulderW} 98
+            Q${120 + 40 * shoulderW} 86 135 85
+            Z
+          `} fill={`url(#${uid}-skin)`} stroke={skinOutline} strokeWidth="0.8" />
 
-          {/* Chest definition lines */}
-          <path d="M72 110 Q85 118 100 115 Q115 118 128 110" fill="none" stroke="hsl(25, 30%, 60%)" strokeWidth="0.4" opacity="0.5" />
-          {/* Abs line */}
-          <line x1="100" y1="130" x2="100" y2="200" stroke="hsl(25, 30%, 60%)" strokeWidth="0.3" opacity="0.3" />
+          {/* Depth shading on torso */}
+          <path d={`
+            M105 85 Q${120 - 40 * shoulderW} 86 ${120 - 52 * shoulderW} 98
+            L${120 - 55 * shoulderW} 108 Q${120 - 56 * shoulderW} 115 ${120 - 50 * shoulderW} 128
+            L${120 - 42 * waistW} 165 Q${120 - 38 * waistW} 180 ${120 - 35 * waistW} 190
+            Q${120 - 40 * hipW} 210 ${120 - 45 * hipW} 225 L${120 - 42 * hipW} 238
+            Q${120 - 20 * hipW} 245 120 248
+            Q${120 + 20 * hipW} 245 ${120 + 42 * hipW} 238
+            L${120 + 45 * hipW} 225 Q${120 + 40 * hipW} 210 ${120 + 35 * waistW} 190
+            Q${120 + 38 * waistW} 180 ${120 + 42 * waistW} 165
+            L${120 + 50 * shoulderW} 128 Q${120 + 56 * shoulderW} 115 ${120 + 55 * shoulderW} 108
+            L${120 + 52 * shoulderW} 98 Q${120 + 40 * shoulderW} 86 135 85 Z
+          `} fill={`url(#${uid}-fat)`} />
 
-          {/* Left Arm */}
-          <path d="M48 90 Q38 92 32 100
-                   L22 140 Q18 155 20 165 L22 175
-                   Q24 180 28 180 L34 178
-                   Q38 176 38 170 L40 140
-                   Q42 120 40 100 Z"
-            fill={`url(#skin-${record.id})`} stroke="hsl(25, 30%, 60%)" strokeWidth="0.6" />
-          <path d="M48 90 Q38 92 32 100 L22 140 Q18 155 20 165 L22 175 Q24 180 28 180 L34 178 Q38 176 38 170 L40 140 Q42 120 40 100 Z"
-            fill={`url(#muscle-${record.id})`} />
-          {/* Left Hand */}
-          <ellipse cx="26" cy="185" rx="8" ry="10" fill={skinBase} stroke="hsl(25, 30%, 60%)" strokeWidth="0.4" />
+          {/* Anatomical detail lines */}
+          {isFemale ? (
+            <>
+              {/* Bust line */}
+              <path d={`M${120 - 30 * shoulderW} 115 Q100 125 120 122 Q140 125 ${120 + 30 * shoulderW} 115`}
+                fill="none" stroke={skinShadow} strokeWidth="0.5" opacity="0.35" />
+              <path d={`M${120 - 25 * shoulderW} 118 Q105 128 120 126`}
+                fill="none" stroke={skinShadow} strokeWidth="0.3" opacity="0.2" />
+              <path d={`M${120 + 25 * shoulderW} 118 Q135 128 120 126`}
+                fill="none" stroke={skinShadow} strokeWidth="0.3" opacity="0.2" />
+            </>
+          ) : (
+            <>
+              {/* Pectoral lines */}
+              <path d={`M${120 - 35 * shoulderW} 112 Q105 122 120 118 Q135 122 ${120 + 35 * shoulderW} 112`}
+                fill="none" stroke={skinShadow} strokeWidth="0.4" opacity={0.2 + muscleDefinition * 0.3} />
+              {/* Abs definition */}
+              <line x1="120" y1="135" x2="120" y2="200" stroke={skinShadow} strokeWidth="0.3" opacity={muscleDefinition * 0.4} />
+              {muscleDefinition > 0.3 && (
+                <>
+                  <path d="M108 148 L132 148" fill="none" stroke={skinShadow} strokeWidth="0.25" opacity={muscleDefinition * 0.3} />
+                  <path d="M110 165 L130 165" fill="none" stroke={skinShadow} strokeWidth="0.25" opacity={muscleDefinition * 0.3} />
+                  <path d="M112 182 L128 182" fill="none" stroke={skinShadow} strokeWidth="0.25" opacity={muscleDefinition * 0.3} />
+                </>
+              )}
+            </>
+          )}
 
-          {/* Right Arm */}
-          <path d="M152 90 Q162 92 168 100
-                   L178 140 Q182 155 180 165 L178 175
-                   Q176 180 172 180 L166 178
-                   Q162 176 162 170 L160 140
-                   Q158 120 160 100 Z"
-            fill={`url(#skin-${record.id})`} stroke="hsl(25, 30%, 60%)" strokeWidth="0.6" />
-          <path d="M152 90 Q162 92 168 100 L178 140 Q182 155 180 165 L178 175 Q176 180 172 180 L166 178 Q162 176 162 170 L160 140 Q158 120 160 100 Z"
-            fill={`url(#muscle-${record.id})`} />
-          {/* Right Hand */}
-          <ellipse cx="174" cy="185" rx="8" ry="10" fill={skinBase} stroke="hsl(25, 30%, 60%)" strokeWidth="0.4" />
+          {/* Navel */}
+          <ellipse cx="120" cy="195" rx="2.5" ry="3" fill={skinShadow} opacity="0.3" />
 
-          {/* Hips / Pelvis */}
-          <path d="M70 215 Q65 225 60 240
-                   L58 250 Q60 255 70 255
-                   L100 258 L130 255 Q140 255 142 250
-                   L140 240 Q135 225 130 215 Z"
-            fill={`url(#skin-${record.id})`} stroke="hsl(25, 30%, 60%)" strokeWidth="0.5" />
-          <path d="M70 215 Q65 225 60 240 L58 250 Q60 255 70 255 L100 258 L130 255 Q140 255 142 250 L140 240 Q135 225 130 215 Z"
-            fill={`url(#torso-${record.id})`} opacity="0.6" />
+          {/* ── LEFT ARM ── */}
+          <path d={`
+            M${120 - 52 * shoulderW} 98
+            Q${120 - 62 * shoulderW} 100 ${120 - 66 * shoulderW} 112
+            L${120 - 72 * shoulderW} 150
+            Q${120 - 75 * shoulderW} 168 ${120 - 74 * shoulderW} 180
+            L${120 - 72 * shoulderW} 195
+            Q${120 - 70 * shoulderW} 202 ${120 - 66 * shoulderW} 202
+            L${120 - 60 * shoulderW} 200
+            Q${120 - 56 * shoulderW} 198 ${120 - 56 * shoulderW} 192
+            L${120 - 55 * shoulderW} 165
+            Q${120 - 54 * shoulderW} 140 ${120 - 52 * shoulderW} 118
+            Z
+          `} fill={`url(#${uid}-skin)`} stroke={skinOutline} strokeWidth="0.6" />
+          <path d={`
+            M${120 - 52 * shoulderW} 98 Q${120 - 62 * shoulderW} 100 ${120 - 66 * shoulderW} 112
+            L${120 - 72 * shoulderW} 150 Q${120 - 75 * shoulderW} 168 ${120 - 74 * shoulderW} 180
+            L${120 - 72 * shoulderW} 195 Q${120 - 70 * shoulderW} 202 ${120 - 66 * shoulderW} 202
+            L${120 - 60 * shoulderW} 200 Q${120 - 56 * shoulderW} 198 ${120 - 56 * shoulderW} 192
+            L${120 - 55 * shoulderW} 165 Q${120 - 54 * shoulderW} 140 ${120 - 52 * shoulderW} 118 Z
+          `} fill={`url(#${uid}-musc)`} />
+          {/* Deltoid cap */}
+          <ellipse cx={120 - 55 * shoulderW} cy="100" rx="8" ry="12"
+            fill={skinMid} stroke={skinOutline} strokeWidth="0.4" opacity="0.5" />
+          {/* Left hand */}
+          <path d={`M${120 - 72 * shoulderW} 198 Q${120 - 76 * shoulderW} 205 ${120 - 74 * shoulderW} 214
+                    Q${120 - 72 * shoulderW} 220 ${120 - 66 * shoulderW} 218
+                    L${120 - 60 * shoulderW} 210 Q${120 - 58 * shoulderW} 204 ${120 - 60 * shoulderW} 200`}
+            fill={skinMid} stroke={skinOutline} strokeWidth="0.4" />
+
+          {/* ── RIGHT ARM ── */}
+          <path d={`
+            M${120 + 52 * shoulderW} 98
+            Q${120 + 62 * shoulderW} 100 ${120 + 66 * shoulderW} 112
+            L${120 + 72 * shoulderW} 150
+            Q${120 + 75 * shoulderW} 168 ${120 + 74 * shoulderW} 180
+            L${120 + 72 * shoulderW} 195
+            Q${120 + 70 * shoulderW} 202 ${120 + 66 * shoulderW} 202
+            L${120 + 60 * shoulderW} 200
+            Q${120 + 56 * shoulderW} 198 ${120 + 56 * shoulderW} 192
+            L${120 + 55 * shoulderW} 165
+            Q${120 + 54 * shoulderW} 140 ${120 + 52 * shoulderW} 118
+            Z
+          `} fill={`url(#${uid}-skin)`} stroke={skinOutline} strokeWidth="0.6" />
+          <path d={`
+            M${120 + 52 * shoulderW} 98 Q${120 + 62 * shoulderW} 100 ${120 + 66 * shoulderW} 112
+            L${120 + 72 * shoulderW} 150 Q${120 + 75 * shoulderW} 168 ${120 + 74 * shoulderW} 180
+            L${120 + 72 * shoulderW} 195 Q${120 + 70 * shoulderW} 202 ${120 + 66 * shoulderW} 202
+            L${120 + 60 * shoulderW} 200 Q${120 + 56 * shoulderW} 198 ${120 + 56 * shoulderW} 192
+            L${120 + 55 * shoulderW} 165 Q${120 + 54 * shoulderW} 140 ${120 + 52 * shoulderW} 118 Z
+          `} fill={`url(#${uid}-musc)`} />
+          <ellipse cx={120 + 55 * shoulderW} cy="100" rx="8" ry="12"
+            fill={skinMid} stroke={skinOutline} strokeWidth="0.4" opacity="0.5" />
+          {/* Right hand */}
+          <path d={`M${120 + 72 * shoulderW} 198 Q${120 + 76 * shoulderW} 205 ${120 + 74 * shoulderW} 214
+                    Q${120 + 72 * shoulderW} 220 ${120 + 66 * shoulderW} 218
+                    L${120 + 60 * shoulderW} 210 Q${120 + 58 * shoulderW} 204 ${120 + 60 * shoulderW} 200`}
+            fill={skinMid} stroke={skinOutline} strokeWidth="0.4" />
         </g>
 
-        {/* Legs (less affected by bodyScale) */}
-        <g transform={`translate(${(1 - bodyScale) * 15}, 0)`}>
+        {/* ── LEGS (separate group, less affected by fat scale) ── */}
+        <g>
           {/* Left Thigh */}
-          <path d="M62 255 Q55 260 52 280
-                   L48 320 Q47 335 50 340
-                   L54 342 Q60 342 64 340 L68 335
-                   Q72 320 70 280 L68 260 Z"
-            fill={`url(#skin-${record.id})`} stroke="hsl(25, 30%, 60%)" strokeWidth="0.6" />
-          <path d="M62 255 Q55 260 52 280 L48 320 Q47 335 50 340 L54 342 Q60 342 64 340 L68 335 Q72 320 70 280 L68 260 Z"
-            fill={`url(#muscle-${record.id})`} />
+          <path d={`
+            M${120 - 32 * hipW} 242
+            Q${120 - 38 * hipW} 250 ${120 - 40 * hipW} 270
+            L${120 - 42 * hipW} 310
+            Q${120 - 42 * hipW} 330 ${120 - 38 * hipW} 340
+            L${120 - 32 * hipW} 342
+            Q${120 - 24 * hipW} 340 ${120 - 22 * hipW} 335
+            L${120 - 18 * hipW} 310
+            Q${120 - 16 * hipW} 280 ${120 - 18 * hipW} 252
+            Z
+          `} fill={`url(#${uid}-skin)`} stroke={skinOutline} strokeWidth="0.6" />
+          <path d={`
+            M${120 - 32 * hipW} 242 Q${120 - 38 * hipW} 250 ${120 - 40 * hipW} 270
+            L${120 - 42 * hipW} 310 Q${120 - 42 * hipW} 330 ${120 - 38 * hipW} 340
+            L${120 - 32 * hipW} 342 Q${120 - 24 * hipW} 340 ${120 - 22 * hipW} 335
+            L${120 - 18 * hipW} 310 Q${120 - 16 * hipW} 280 ${120 - 18 * hipW} 252 Z
+          `} fill={`url(#${uid}-musc)`} />
+          {/* Knee */}
+          <ellipse cx={120 - 30 * hipW} cy="342" rx={10 * hipW} ry="5" fill={skinShadow} opacity="0.15" />
 
           {/* Left Calf */}
-          <path d="M50 340 Q46 345 45 360
-                   L44 385 Q44 395 48 398
-                   L56 400 Q62 398 64 395
-                   L65 385 L66 360
-                   Q66 345 64 340 Z"
-            fill={`url(#skin-${record.id})`} stroke="hsl(25, 30%, 60%)" strokeWidth="0.5" />
+          <path d={`
+            M${120 - 38 * hipW} 342
+            Q${120 - 40 * hipW} 350 ${120 - 38 * hipW} 370
+            L${120 - 36 * hipW} 400
+            Q${120 - 35 * hipW} 415 ${120 - 32 * hipW} 420
+            L${120 - 26 * hipW} 422
+            Q${120 - 22 * hipW} 420 ${120 - 22 * hipW} 415
+            L${120 - 20 * hipW} 400
+            Q${120 - 18 * hipW} 375 ${120 - 22 * hipW} 342
+            Z
+          `} fill={`url(#${uid}-skin)`} stroke={skinOutline} strokeWidth="0.5" />
 
           {/* Left Foot */}
-          <path d="M44 398 L40 405 Q38 412 44 414 L60 414 Q66 412 66 405 L64 398 Z"
-            fill={skinBase} stroke="hsl(25, 30%, 60%)" strokeWidth="0.4" />
+          <path d={`
+            M${120 - 36 * hipW} 420
+            L${120 - 40 * hipW} 430
+            Q${120 - 42 * hipW} 438 ${120 - 36 * hipW} 440
+            L${120 - 20 * hipW} 440
+            Q${120 - 16 * hipW} 438 ${120 - 18 * hipW} 430
+            L${120 - 22 * hipW} 420
+            Z
+          `} fill={skinMid} stroke={skinOutline} strokeWidth="0.4" />
 
           {/* Right Thigh */}
-          <path d="M132 255 Q125 260 122 280
-                   L118 320 Q117 335 120 340
-                   L124 342 Q130 342 134 340 L138 335
-                   Q142 320 140 280 L138 260 Z"
-            fill={`url(#skin-${record.id})`} stroke="hsl(25, 30%, 60%)" strokeWidth="0.6" />
-          <path d="M132 255 Q125 260 122 280 L118 320 Q117 335 120 340 L124 342 Q130 342 134 340 L138 335 Q142 320 140 280 L138 260 Z"
-            fill={`url(#muscle-${record.id})`} />
+          <path d={`
+            M${120 + 32 * hipW} 242
+            Q${120 + 38 * hipW} 250 ${120 + 40 * hipW} 270
+            L${120 + 42 * hipW} 310
+            Q${120 + 42 * hipW} 330 ${120 + 38 * hipW} 340
+            L${120 + 32 * hipW} 342
+            Q${120 + 24 * hipW} 340 ${120 + 22 * hipW} 335
+            L${120 + 18 * hipW} 310
+            Q${120 + 16 * hipW} 280 ${120 + 18 * hipW} 252
+            Z
+          `} fill={`url(#${uid}-skin)`} stroke={skinOutline} strokeWidth="0.6" />
+          <path d={`
+            M${120 + 32 * hipW} 242 Q${120 + 38 * hipW} 250 ${120 + 40 * hipW} 270
+            L${120 + 42 * hipW} 310 Q${120 + 42 * hipW} 330 ${120 + 38 * hipW} 340
+            L${120 + 32 * hipW} 342 Q${120 + 24 * hipW} 340 ${120 + 22 * hipW} 335
+            L${120 + 18 * hipW} 310 Q${120 + 16 * hipW} 280 ${120 + 18 * hipW} 252 Z
+          `} fill={`url(#${uid}-musc)`} />
+          <ellipse cx={120 + 30 * hipW} cy="342" rx={10 * hipW} ry="5" fill={skinShadow} opacity="0.15" />
 
           {/* Right Calf */}
-          <path d="M120 340 Q116 345 115 360
-                   L114 385 Q114 395 118 398
-                   L126 400 Q132 398 134 395
-                   L135 385 L136 360
-                   Q136 345 134 340 Z"
-            fill={`url(#skin-${record.id})`} stroke="hsl(25, 30%, 60%)" strokeWidth="0.5" />
+          <path d={`
+            M${120 + 38 * hipW} 342
+            Q${120 + 40 * hipW} 350 ${120 + 38 * hipW} 370
+            L${120 + 36 * hipW} 400
+            Q${120 + 35 * hipW} 415 ${120 + 32 * hipW} 420
+            L${120 + 26 * hipW} 422
+            Q${120 + 22 * hipW} 420 ${120 + 22 * hipW} 415
+            L${120 + 20 * hipW} 400
+            Q${120 + 18 * hipW} 375 ${120 + 22 * hipW} 342
+            Z
+          `} fill={`url(#${uid}-skin)`} stroke={skinOutline} strokeWidth="0.5" />
 
           {/* Right Foot */}
-          <path d="M114 398 L110 405 Q108 412 114 414 L130 414 Q136 412 136 405 L134 398 Z"
-            fill={skinBase} stroke="hsl(25, 30%, 60%)" strokeWidth="0.4" />
+          <path d={`
+            M${120 + 36 * hipW} 420
+            L${120 + 40 * hipW} 430
+            Q${120 + 42 * hipW} 438 ${120 + 36 * hipW} 440
+            L${120 + 20 * hipW} 440
+            Q${120 + 16 * hipW} 438 ${120 + 18 * hipW} 430
+            L${120 + 22 * hipW} 420
+            Z
+          `} fill={skinMid} stroke={skinOutline} strokeWidth="0.4" />
         </g>
 
-        {/* Metric labels on body */}
+        {/* ── METRIC LABELS (only on md size) ── */}
         {size === "md" && (
           <>
-            {/* Fat indicator on belly */}
             {record.body_fat_pct != null && (
               <g>
-                <rect x="2" y="148" width="36" height="16" rx="4" fill={fatOverlay} opacity="0.9" />
-                <text x="20" y="159" textAnchor="middle" fontSize="8" fontWeight="bold" fill="white">
+                <rect x="1" y="168" width="42" height="18" rx="5" fill={fatColor} opacity="0.9" />
+                <text x="22" y="180" textAnchor="middle" fontSize="9" fontWeight="bold" fill="white" fontFamily="system-ui">
                   {record.body_fat_pct}%
                 </text>
-                <line x1="38" y1="156" x2="55" y2="156" stroke={fatOverlay} strokeWidth="0.8" strokeDasharray="2 1" />
+                <line x1="43" y1="177" x2="62" y2="177" stroke={fatColor} strokeWidth="1" strokeDasharray="2 2" />
+                <text x="22" y="197" textAnchor="middle" fontSize="7" fill={skinOutline} opacity="0.7">gordura</text>
               </g>
             )}
-            {/* Muscle indicator on arm */}
             {record.muscle_mass != null && (
               <g>
-                <rect x="162" y="118" width="36" height="16" rx="4" fill={muscleOverlay} opacity="0.9" />
-                <text x="180" y="129" textAnchor="middle" fontSize="7" fontWeight="bold" fill="white">
+                <rect x="196" y="128" width="42" height="18" rx="5" fill={muscleColor} opacity="0.9" />
+                <text x="217" y="140" textAnchor="middle" fontSize="9" fontWeight="bold" fill="white" fontFamily="system-ui">
                   {record.muscle_mass}kg
                 </text>
-                <line x1="162" y1="126" x2="150" y2="130" stroke={muscleOverlay} strokeWidth="0.8" strokeDasharray="2 1" />
+                <line x1="196" y1="137" x2="178" y2="140" stroke={muscleColor} strokeWidth="1" strokeDasharray="2 2" />
+                <text x="217" y="157" textAnchor="middle" fontSize="7" fill={skinOutline} opacity="0.7">músculo</text>
               </g>
             )}
-            {/* Weight on top */}
             {record.weight != null && (
               <g>
-                <rect x="162" y="78" width="36" height="16" rx="4" fill="hsl(220, 60%, 50%)" opacity="0.9" />
-                <text x="180" y="89" textAnchor="middle" fontSize="7" fontWeight="bold" fill="white">
+                <rect x="196" y="82" width="42" height="18" rx="5" fill="hsl(220, 55%, 48%)" opacity="0.9" />
+                <text x="217" y="94" textAnchor="middle" fontSize="9" fontWeight="bold" fill="white" fontFamily="system-ui">
                   {record.weight}kg
                 </text>
+                <text x="217" y="111" textAnchor="middle" fontSize="7" fill={skinOutline} opacity="0.7">peso</text>
+              </g>
+            )}
+            {record.lean_mass != null && (
+              <g>
+                <rect x="1" y="288" width="42" height="18" rx="5" fill="hsl(200, 45%, 48%)" opacity="0.9" />
+                <text x="22" y="300" textAnchor="middle" fontSize="9" fontWeight="bold" fill="white" fontFamily="system-ui">
+                  {record.lean_mass}kg
+                </text>
+                <line x1="43" y1="297" x2="62" y2="290" stroke="hsl(200, 45%, 48%)" strokeWidth="1" strokeDasharray="2 2" />
+                <text x="22" y="317" textAnchor="middle" fontSize="7" fill={skinOutline} opacity="0.7">magra</text>
               </g>
             )}
           </>
@@ -272,7 +439,7 @@ const DiffBadge = ({ diff, inverse = false }: { diff: number | null; inverse?: b
   );
 };
 
-const BioimpedanceDialog = ({ open, onOpenChange, studentId, studentName }: Props) => {
+const BioimpedanceDialog = ({ open, onOpenChange, studentId, studentName, gender = "masculino" }: Props) => {
   const { user } = useAuth();
   const [records, setRecords] = useState<BioRecord[]>([]);
   const [loading, setLoading] = useState(false);
@@ -485,7 +652,7 @@ const BioimpedanceDialog = ({ open, onOpenChange, studentId, studentName }: Prop
         </div>
 
         <div className="flex justify-center py-2">
-          <HumanBody record={selectedRecord} size="md" />
+          <HumanBody record={selectedRecord} size="md" gender={gender} />
         </div>
 
         <div className="grid grid-cols-2 gap-2">
@@ -552,12 +719,12 @@ const BioimpedanceDialog = ({ open, onOpenChange, studentId, studentName }: Prop
               <div className="text-center">
                 <p className="text-[10px] text-muted-foreground font-bold uppercase mb-1">{formatDate(oldest.measured_at)}</p>
                 <p className="text-[9px] text-muted-foreground mb-2">Início</p>
-                <HumanBody record={oldest} size="sm" />
+                <HumanBody record={oldest} size="sm" gender={gender} />
               </div>
               <div className="text-center">
                 <p className="text-[10px] text-primary font-bold uppercase mb-1">{formatDate(latest.measured_at)}</p>
                 <p className="text-[9px] text-primary mb-2">Atual</p>
-                <HumanBody record={latest} size="sm" />
+                <HumanBody record={latest} size="sm" gender={gender} />
               </div>
             </div>
           </div>

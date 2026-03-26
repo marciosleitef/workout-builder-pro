@@ -19,12 +19,21 @@ const Dashboard = () => {
   const [studentCount, setStudentCount] = useState(0);
   const [groupCount, setGroupCount] = useState(0);
   const [showNewStudentMenu, setShowNewStudentMenu] = useState(false);
+  const [showLinkDialog, setShowLinkDialog] = useState(false);
+  const [linkGroupId, setLinkGroupId] = useState("");
+  const [groups, setGroups] = useState<{ id: string; name: string }[]>([]);
 
   useEffect(() => {
     fetchProfile();
     fetchStudentCount();
     fetchGroupCount();
+    fetchGroups();
   }, []);
+
+  const fetchGroups = async () => {
+    const { data } = await supabase.from("student_groups").select("id, name").eq("professor_id", user?.id).order("name");
+    setGroups(data || []);
+  };
 
   const fetchProfile = async () => {
     const { data } = await supabase.from("profiles").select("full_name").eq("user_id", user?.id).single();
@@ -150,9 +159,40 @@ const Dashboard = () => {
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Plus className="w-5 h-5 text-primary" /></div>
               <div className="text-left"><p className="font-display font-bold text-sm text-foreground">Cadastro Manual</p><p className="text-xs text-muted-foreground">Preencher os dados do aluno agora</p></div>
             </button>
-            <button onClick={() => { const link = `${window.location.origin}/register/${user?.id}`; navigator.clipboard.writeText(link); toast.success("Link de cadastro copiado!"); setShowNewStudentMenu(false); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors">
+            <button onClick={() => { setShowNewStudentMenu(false); setLinkGroupId(""); setTimeout(() => setShowLinkDialog(true), 150); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Link2 className="w-5 h-5 text-primary" /></div>
               <div className="text-left"><p className="font-display font-bold text-sm text-foreground">Enviar Link de Cadastro</p><p className="text-xs text-muted-foreground">O aluno preenche seus próprios dados</p></div>
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Link with group selection */}
+      <Dialog open={showLinkDialog} onOpenChange={setShowLinkDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle className="font-display">Gerar Link de Cadastro</DialogTitle></DialogHeader>
+          <div className="space-y-4 mt-2">
+            {groups.length > 0 && (
+              <div>
+                <label className="text-sm font-medium text-foreground">Grupo do aluno (opcional)</label>
+                <select value={linkGroupId} onChange={(e) => setLinkGroupId(e.target.value)} className="w-full mt-1 px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
+                  <option value="">Sem grupo definido</option>
+                  {groups.map((g) => (<option key={g.id} value={g.id}>{g.name}</option>))}
+                </select>
+                <p className="text-xs text-muted-foreground mt-1">Se selecionado, o grupo virá travado no formulário de cadastro.</p>
+              </div>
+            )}
+            <button
+              onClick={() => {
+                let link = `${window.location.origin}/register/${user?.id}`;
+                if (linkGroupId) link += `?group=${linkGroupId}`;
+                navigator.clipboard.writeText(link);
+                toast.success("Link de cadastro copiado!");
+                setShowLinkDialog(false);
+              }}
+              className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-display font-bold text-sm hover:bg-primary/90 transition-colors"
+            >
+              Copiar Link
             </button>
           </div>
         </DialogContent>

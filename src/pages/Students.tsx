@@ -542,7 +542,7 @@ const Students = () => {
 
       {/* Bio dialog */}
       {bioStudent && (
-        <BioimpedanceDialog open={showBioDialog} onOpenChange={setShowBioDialog} studentId={bioStudent.id} studentName={bioStudent.full_name} />
+        <BioimpedanceDialog open={showBioDialog} onOpenChange={setShowBioDialog} studentId={bioStudent.id} studentName={bioStudent.full_name} gender={bioStudent.gender || "masculino"} />
       )}
 
       {/* Student Detail dialog */}

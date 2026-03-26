@@ -308,13 +308,13 @@ export function useStudentScores(studentIds: string[]) {
         if (diffDays === 1) { currentStreak++; maxStreak = Math.max(maxStreak, currentStreak); }
         else currentStreak = 1;
       }
-      if (maxStreak >= 5) { performanceBonus += 5; badges.push("streak_5"); }
-      else if (maxStreak >= 3) { performanceBonus += 2.5; badges.push("streak_3"); }
+      if (maxStreak >= 5) { performanceBonus += 5; badges.push("streak_5"); bonusDetails.push("Streak 5+ dias (+5%)"); }
+      else if (maxStreak >= 3) { performanceBonus += 2.5; badges.push("streak_3"); bonusDetails.push("Streak 3+ dias (+2.5%)"); }
 
       const health = Math.min(100, healthBase + healthBonus);
       const performance = Math.min(100, performanceBase + performanceBonus);
 
-      result[sid] = { health, performance, healthBase, performanceBase, healthBonus, performanceBonus, badges };
+      result[sid] = { health, performance, healthBase, performanceBase, healthBonus, performanceBonus, badges, bioScore: bioScore ?? null, dailyScore: dailyScore ?? null, presenceScore, qualityScore: Math.round(qualityScore), bonusDetails };
     }
 
     setScores(result);

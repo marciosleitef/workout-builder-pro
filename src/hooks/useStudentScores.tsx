@@ -267,7 +267,7 @@ export function useStudentScores(studentIds: string[]) {
       const presenceScore = hasTrainedThisMonth ? 50 : 0; // 50% just for showing up
 
       // Training quality (other 50%): from session feedback indicators
-      const postFeedbacks = studentFeedbacks.filter((f: any) => f.feedback_type === "post-workout");
+      const postFeedbacks = studentFeedbacks.filter((f: any) => f.feedback_type === "post");
       let qualityScore = 0;
       if (postFeedbacks.length > 0) {
         const avgRecovery = avg(postFeedbacks, "post_recovery_scale", 10);

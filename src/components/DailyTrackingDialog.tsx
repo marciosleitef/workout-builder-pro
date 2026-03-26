@@ -265,6 +265,19 @@ export default function DailyTrackingDialog({ open, onOpenChange, student }: Pro
     { metric: "Recuperação", value: (avg(allPre, "recovery_perception_scale") || 0) / 2, max: 5 },
   ] : [];
 
+  const postRadarData = allPost.length > 0 ? [
+    { metric: "Recuperação", value: avg(allPost, "post_recovery_scale") || 0, max: 10 },
+    { metric: "Esforço (PSE)", value: avg(allPost, "perceived_exertion_scale") || 0, max: 10 },
+    { metric: "Dor (EVA)", value: avg(allPost, "pain_scale_eva") || 0, max: 10 },
+  ] : [];
+
+  const postSessionData = sessionRecords.filter(r => r.feedback_type === "post").map(r => ({
+    date: format(new Date(r.session_date), "dd/MM", { locale: ptBR }),
+    recuperacao: r.post_recovery_scale,
+    esforco: r.perceived_exertion_scale,
+    dor: r.pain_scale_eva,
+  })).reverse();
+
   const renderMain = () => (
     <div className="space-y-4">
       {/* Latest daily metrics summary */}

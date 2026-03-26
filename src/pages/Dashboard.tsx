@@ -51,6 +51,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [showWorkoutMenu, setShowWorkoutMenu] = useState(false);
+  const [showNewStudentMenu, setShowNewStudentMenu] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [showJourneyWizard, setShowJourneyWizard] = useState(false);
   const [showWorkoutInfo, setShowWorkoutInfo] = useState(false);
@@ -200,26 +201,13 @@ const Dashboard = () => {
               className="w-full pl-12 pr-4 py-3 rounded-xl bg-card border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => {
-                const link = `${window.location.origin}/register/${user?.id}`;
-                navigator.clipboard.writeText(link);
-                toast.success("Link de cadastro copiado!");
-              }}
-              className="flex items-center gap-2 px-4 py-3 bg-card border border-border text-foreground rounded-xl font-display font-bold text-sm hover:bg-secondary transition-colors"
-            >
-              <Link2 className="w-4 h-4" />
-              Link Cadastro
-            </button>
-            <button
-              onClick={() => { setEditingStudent(null); setForm({ full_name: "", email: "", phone: "", plan: "PS Prime" }); setShowForm(true); }}
-              className="flex items-center gap-2 px-5 py-3 bg-primary text-primary-foreground rounded-xl font-display font-bold text-sm hover:bg-primary/90 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Novo Aluno
-            </button>
-          </div>
+          <button
+            onClick={() => setShowNewStudentMenu(true)}
+            className="flex items-center gap-2 px-5 py-3 bg-primary text-primary-foreground rounded-xl font-display font-bold text-sm hover:bg-primary/90 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Novo Aluno
+          </button>
         </div>
 
         {/* Student grid */}
@@ -442,6 +430,52 @@ const Dashboard = () => {
               </button>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* New student menu */}
+      <Dialog open={showNewStudentMenu} onOpenChange={setShowNewStudentMenu}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display">Novo Aluno</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 mt-1">
+            <button
+              onClick={() => {
+                setShowNewStudentMenu(false);
+                setEditingStudent(null);
+                setForm({ full_name: "", email: "", phone: "", plan: "PS Prime" });
+                setShowForm(true);
+              }}
+              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors"
+            >
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Plus className="w-5 h-5 text-primary" />
+              </div>
+              <div className="text-left">
+                <p className="font-display font-bold text-sm text-foreground">Cadastro Manual</p>
+                <p className="text-xs text-muted-foreground">Preencher os dados do aluno agora</p>
+              </div>
+            </button>
+
+            <button
+              onClick={() => {
+                const link = `${window.location.origin}/register/${user?.id}`;
+                navigator.clipboard.writeText(link);
+                toast.success("Link de cadastro copiado!");
+                setShowNewStudentMenu(false);
+              }}
+              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors"
+            >
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Link2 className="w-5 h-5 text-primary" />
+              </div>
+              <div className="text-left">
+                <p className="font-display font-bold text-sm text-foreground">Enviar Link de Cadastro</p>
+                <p className="text-xs text-muted-foreground">O aluno preenche seus próprios dados</p>
+              </div>
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
 

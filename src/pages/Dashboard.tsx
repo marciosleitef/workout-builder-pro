@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { UserCircle, Dumbbell, Calendar, LogOut, Sun, Moon } from "lucide-react";
+import { UserCircle, Dumbbell, Calendar, LogOut, Sun, Moon, Plus, Link2 } from "lucide-react";
+import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useTheme } from "@/hooks/useTheme";
 
 function getInitials(name: string) {
@@ -15,6 +17,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [profileName, setProfileName] = useState("");
   const [studentCount, setStudentCount] = useState(0);
+  const [showNewStudentMenu, setShowNewStudentMenu] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -94,7 +97,16 @@ const Dashboard = () => {
 
       {/* Cards */}
       <div className="max-w-7xl mx-auto p-6">
-        <h2 className="font-display font-bold text-lg text-foreground mb-6">Painel Principal</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="font-display font-bold text-lg text-foreground">Painel Principal</h2>
+          <button
+            onClick={() => setShowNewStudentMenu(true)}
+            className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl font-display font-bold text-sm hover:bg-primary/90 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Novo Aluno
+          </button>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {cards.map((card) => (
             <button
@@ -112,6 +124,23 @@ const Dashboard = () => {
           ))}
         </div>
       </div>
+
+      {/* New student menu */}
+      <Dialog open={showNewStudentMenu} onOpenChange={setShowNewStudentMenu}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle className="font-display">Novo Aluno</DialogTitle></DialogHeader>
+          <div className="space-y-3 mt-1">
+            <button onClick={() => { setShowNewStudentMenu(false); navigate("/students?showForm=true"); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Plus className="w-5 h-5 text-primary" /></div>
+              <div className="text-left"><p className="font-display font-bold text-sm text-foreground">Cadastro Manual</p><p className="text-xs text-muted-foreground">Preencher os dados do aluno agora</p></div>
+            </button>
+            <button onClick={() => { const link = `${window.location.origin}/register/${user?.id}`; navigator.clipboard.writeText(link); toast.success("Link de cadastro copiado!"); setShowNewStudentMenu(false); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Link2 className="w-5 h-5 text-primary" /></div>
+              <div className="text-left"><p className="font-display font-bold text-sm text-foreground">Enviar Link de Cadastro</p><p className="text-xs text-muted-foreground">O aluno preenche seus próprios dados</p></div>
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

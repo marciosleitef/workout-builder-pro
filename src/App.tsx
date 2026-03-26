@@ -12,6 +12,7 @@ import StudentGroups from "./pages/StudentGroups";
 import Plans from "./pages/Plans";
 import Challenges from "./pages/Challenges";
 import ChallengePublic from "./pages/ChallengePublic";
+import ChallengeDashboard from "./pages/ChallengeDashboard";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -91,6 +92,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Challenges />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/challenge-dashboard/:challengeId"
+            element={
+              <ProtectedRoute>
+                <ChallengeDashboard />
               </ProtectedRoute>
             }
           />

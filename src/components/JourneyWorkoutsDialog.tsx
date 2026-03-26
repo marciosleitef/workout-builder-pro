@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import {
   ArrowLeft, CalendarDays, Dumbbell, Info, ChevronDown, ChevronUp,
   Printer, Play, Link2, Clock, Flame, CheckCircle2, Activity,
@@ -779,8 +779,8 @@ const JourneyWorkoutsDialog = ({
           </div>
         </div>
 
-        <ScrollArea className="flex-1 min-h-0">
-          <div className="px-4 py-4 space-y-4">
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <div className="px-4 py-4 space-y-4 pb-24">
             {phase === "workouts" && renderWorkouts()}
             {phase === "checkin" && renderCheckin()}
             {phase === "active" && renderActive()}
@@ -788,7 +788,7 @@ const JourneyWorkoutsDialog = ({
             {phase === "metrics" && renderMetrics()}
             {phase === "done" && renderDone()}
           </div>
-        </ScrollArea>
+        </div>
 
         {/* Video overlay */}
         {videoUrl && <VideoPlayer url={videoUrl} onClose={() => setVideoUrl(null)} />}

@@ -6,6 +6,7 @@ import { UserCircle, Dumbbell, Calendar, LogOut, Sun, Moon, Plus, Link2, Users, 
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useTheme } from "@/hooks/useTheme";
+import PlansDialog from "@/components/PlansDialog";
 
 function getInitials(name: string) {
   return name.split(" ").filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();

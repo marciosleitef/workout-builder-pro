@@ -92,6 +92,7 @@ const Students = () => {
   const [showLoginInfo, setShowLoginInfo] = useState(false);
   const [showDailyTracking, setShowDailyTracking] = useState(false);
   const [dailyTrackingStudent, setDailyTrackingStudent] = useState<Student | null>(null);
+  const [scoreDialog, setScoreDialog] = useState<{ type: "health" | "performance"; studentId: string } | null>(null);
 
   // Journey start dialog
   const [showStartJourney, setShowStartJourney] = useState(false);

@@ -51,6 +51,7 @@ const Challenges = () => {
   const [sourceJourneyId, setSourceJourneyId] = useState("");
   const [pointsCheckin, setPointsCheckin] = useState(10);
   const [pointsWeekly, setPointsWeekly] = useState(25);
+  const [pointsStreak, setPointsStreak] = useState(5);
   const [journeyMode, setJourneyMode] = useState<"existing" | "new">("existing");
   const [newJourneyName, setNewJourneyName] = useState("");
   const [newJourneyObjective, setNewJourneyObjective] = useState("SAÚDE - T1");

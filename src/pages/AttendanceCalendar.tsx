@@ -152,7 +152,7 @@ const AttendanceCalendar = () => {
                       key={key}
                       onClick={() => setSelectedDate(isSelected ? null : day)}
                       className={`aspect-square rounded-xl flex flex-col items-center justify-center text-sm font-medium transition-all relative
-                        ${hasCheckins ? "bg-[hsl(150,55%,45%)]/15 text-[hsl(150,55%,45%)] hover:bg-[hsl(150,55%,45%)]/25" : "text-foreground hover:bg-secondary"}
+                        ${hasCheckins ? "bg-foreground/10 text-foreground hover:bg-foreground/15" : "text-foreground hover:bg-secondary"}
                         ${isSelected ? "ring-2 ring-primary shadow-md" : ""}
                         ${isToday ? "font-bold" : ""}
                       `}
@@ -170,7 +170,7 @@ const AttendanceCalendar = () => {
             {/* Legend */}
             <div className="flex items-center gap-4 mt-4 justify-center">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <div className="w-4 h-4 rounded bg-[hsl(150,55%,45%)]/20" />
+                <div className="w-4 h-4 rounded bg-foreground/10" />
                 <span>Dias com treinos</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -203,7 +203,7 @@ const AttendanceCalendar = () => {
                     <div className="space-y-3">
                       {selectedDateCheckins.map((c) => (
                         <div key={c.id} className="flex items-start gap-3 p-3 rounded-xl bg-secondary/50">
-                          <CheckCircle2 className="w-5 h-5 text-[hsl(150,55%,45%)] mt-0.5 shrink-0" />
+                          <CheckCircle2 className="w-5 h-5 text-foreground mt-0.5 shrink-0" />
                           <div className="flex-1 min-w-0">
                             <p className="font-display font-bold text-sm text-foreground">{c.student_name}</p>
                             <p className="text-xs text-muted-foreground">{c.journey_name} → {c.workout_name}</p>

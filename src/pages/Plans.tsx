@@ -188,8 +188,8 @@ const Plans = () => {
                 ) : (
                   <>
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-[hsl(30,80%,55%)]/10 flex items-center justify-center">
-                        <Package className="w-5 h-5 text-[hsl(30,80%,55%)]" />
+                      <div className="w-10 h-10 rounded-lg bg-foreground/5 flex items-center justify-center">
+                        <Package className="w-5 h-5 text-foreground/70" />
                       </div>
                       <div>
                         <p className="font-display font-bold text-foreground">{plan.name}</p>

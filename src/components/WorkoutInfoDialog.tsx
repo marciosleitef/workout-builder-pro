@@ -105,7 +105,7 @@ const WorkoutInfoDialog = ({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-md p-0 overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-[hsl(220,60%,45%)] to-[hsl(250,55%,50%)] px-6 py-4 text-white">
+        <div className="bg-foreground px-6 py-4 text-primary-foreground">
           <h2 className="font-display font-bold text-lg">Informações do Treino</h2>
         </div>
 
@@ -174,7 +174,7 @@ const WorkoutInfoDialog = ({
           <button
             onClick={handleAdvance}
             disabled={saving || !dayLabel || !name.trim() || availableOptions.length === 0}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-[hsl(250,55%,50%)] text-white font-display font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-40"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-foreground text-background font-display font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-40"
           >
             <ArrowRight className="w-4 h-4" />
             {saving ? "Criando..." : "Avançar para Exercícios"}

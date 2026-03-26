@@ -589,11 +589,13 @@ export default function DailyTrackingDialog({ open, onOpenChange, student }: Pro
           </div>
         )}
 
-        {r.checkin_time && (
-          <p className="text-xs text-muted-foreground">Check-in: {format(new Date(r.checkin_time), "HH:mm")}</p>
-        )}
-        {r.checkout_time && (
-          <p className="text-xs text-muted-foreground">Check-out: {format(new Date(r.checkout_time), "HH:mm")}</p>
+        {r.checkin_time && r.checkout_time && (
+          <div className="bg-secondary/30 rounded-xl p-3 text-center">
+            <p className="text-[10px] text-muted-foreground">Tempo de Treino</p>
+            <p className="text-lg font-bold text-foreground">
+              {Math.round((new Date(r.checkout_time).getTime() - new Date(r.checkin_time).getTime()) / 60000)} min
+            </p>
+          </div>
         )}
       </div>
     );

@@ -109,7 +109,7 @@ const Dashboard = () => {
       stat: `${planCount} plano(s)`,
       color: "hsl(30 80% 55%)",
       bgClass: "bg-[hsl(30,80%,55%)]/10",
-      action: () => setShowPlansDialog(true),
+      route: "/plans",
     },
   ];
 

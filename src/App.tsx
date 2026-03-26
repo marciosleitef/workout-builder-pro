@@ -75,6 +75,14 @@ const App = () => (
             }
           />
           <Route
+            path="/plans"
+            element={
+              <ProtectedRoute>
+                <Plans />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/workout/:studentId"
             element={
               <ProtectedRoute>

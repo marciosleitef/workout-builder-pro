@@ -9,13 +9,29 @@ interface BioRecord {
   id: string;
   measured_at: string;
   weight: number | null;
+  height: number | null;
+  bmi: number | null;
+  age: number | null;
+  fat_mass: number | null;
   body_fat_pct: number | null;
+  total_body_water: number | null;
+  water_lean_mass_pct: number | null;
+  hydration_index: number | null;
+  water_lean_mass_abs_pct: number | null;
+  intracellular_water: number | null;
+  intracellular_water_pct: number | null;
+  extracellular_water: number | null;
   lean_mass: number | null;
+  lean_mass_pct: number | null;
+  muscle_fat_ratio: number | null;
   muscle_mass: number | null;
-  visceral_fat: number | null;
+  muscle_mass_pct: number | null;
   basal_metabolism: number | null;
+  phase_angle: number | null;
+  cellular_age: number | null;
   body_water_pct: number | null;
   bone_mass: number | null;
+  visceral_fat: number | null;
   file_url: string | null;
   notes: string | null;
 }
@@ -29,14 +45,31 @@ interface Props {
 
 const FIELD_LABELS: { key: keyof BioRecord; label: string; unit: string }[] = [
   { key: "weight", label: "Peso", unit: "kg" },
+  { key: "height", label: "Altura", unit: "cm" },
+  { key: "bmi", label: "IMC", unit: "" },
+  { key: "age", label: "Idade", unit: "anos" },
+  { key: "fat_mass", label: "Massa Gorda", unit: "kg" },
   { key: "body_fat_pct", label: "% Gordura", unit: "%" },
+  { key: "total_body_water", label: "Água Corporal Total", unit: "L" },
+  { key: "water_lean_mass_pct", label: "Água Corpo/Massa Magra", unit: "%" },
+  { key: "hydration_index", label: "Índice Hidratação", unit: "" },
+  { key: "water_lean_mass_abs_pct", label: "Água Massa Magra", unit: "%" },
+  { key: "intracellular_water", label: "Água Intracelular", unit: "L" },
+  { key: "intracellular_water_pct", label: "% Água Intracelular", unit: "%" },
+  { key: "extracellular_water", label: "Água Extracelular", unit: "L" },
   { key: "lean_mass", label: "Massa Magra", unit: "kg" },
+  { key: "lean_mass_pct", label: "% Massa Magra", unit: "%" },
+  { key: "muscle_fat_ratio", label: "Razão Músculo/Gordura", unit: "" },
   { key: "muscle_mass", label: "Massa Muscular", unit: "kg" },
+  { key: "muscle_mass_pct", label: "% Massa Muscular", unit: "%" },
+  { key: "basal_metabolism", label: "Taxa Metabol. Basal", unit: "kcal" },
+  { key: "phase_angle", label: "Ângulo de Fase", unit: "°" },
+  { key: "cellular_age", label: "Idade Celular", unit: "anos" },
   { key: "visceral_fat", label: "Gordura Visceral", unit: "" },
-  { key: "basal_metabolism", label: "Metabolismo Basal", unit: "kcal" },
-  { key: "body_water_pct", label: "% Água Corporal", unit: "%" },
   { key: "bone_mass", label: "Massa Óssea", unit: "kg" },
 ];
+
+const NUMERIC_KEYS = FIELD_LABELS.map(f => f.key);
 
 const BioimpedanceDialog = ({ open, onOpenChange, studentId, studentName }: Props) => {
   const { user } = useAuth();
@@ -44,10 +77,10 @@ const BioimpedanceDialog = ({ open, onOpenChange, studentId, studentName }: Prop
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [form, setForm] = useState<Record<string, string>>({
-    measured_at: new Date().toISOString().split("T")[0],
-    weight: "", body_fat_pct: "", lean_mass: "", muscle_mass: "",
-    visceral_fat: "", basal_metabolism: "", body_water_pct: "", bone_mass: "", notes: "",
+  const [form, setForm] = useState<Record<string, string>>(() => {
+    const init: Record<string, string> = { measured_at: new Date().toISOString().split("T")[0], notes: "" };
+    NUMERIC_KEYS.forEach(k => init[k] = "");
+    return init;
   });
   const [fileUrl, setFileUrl] = useState("");
 
@@ -85,22 +118,23 @@ const BioimpedanceDialog = ({ open, onOpenChange, studentId, studentName }: Prop
       student_id: studentId,
       professor_id: user!.id,
       measured_at: form.measured_at,
-      weight: form.weight ? parseFloat(form.weight) : null,
-      body_fat_pct: form.body_fat_pct ? parseFloat(form.body_fat_pct) : null,
-      lean_mass: form.lean_mass ? parseFloat(form.lean_mass) : null,
-      muscle_mass: form.muscle_mass ? parseFloat(form.muscle_mass) : null,
-      visceral_fat: form.visceral_fat ? parseFloat(form.visceral_fat) : null,
-      basal_metabolism: form.basal_metabolism ? parseFloat(form.basal_metabolism) : null,
-      body_water_pct: form.body_water_pct ? parseFloat(form.body_water_pct) : null,
-      bone_mass: form.bone_mass ? parseFloat(form.bone_mass) : null,
       file_url: fileUrl || null,
       notes: form.notes || null,
     };
+    NUMERIC_KEYS.forEach(k => {
+      payload[k] = form[k] ? parseFloat(form[k]) : null;
+    });
+    // age and cellular_age are integers
+    if (form.age) payload.age = parseInt(form.age);
+    if (form.cellular_age) payload.cellular_age = parseInt(form.cellular_age);
+
     const { error } = await supabase.from("student_bioimpedance").insert(payload);
     if (error) { toast.error("Erro ao salvar"); return; }
     toast.success("Bioimpedância registrada!");
     setShowForm(false);
-    setForm({ measured_at: new Date().toISOString().split("T")[0], weight: "", body_fat_pct: "", lean_mass: "", muscle_mass: "", visceral_fat: "", basal_metabolism: "", body_water_pct: "", bone_mass: "", notes: "" });
+    const init: Record<string, string> = { measured_at: new Date().toISOString().split("T")[0], notes: "" };
+    NUMERIC_KEYS.forEach(k => init[k] = "");
+    setForm(init);
     setFileUrl("");
     fetchRecords();
   };
@@ -122,11 +156,9 @@ const BioimpedanceDialog = ({ open, onOpenChange, studentId, studentName }: Prop
 
         {showForm ? (
           <div className="space-y-4 mt-2">
-            {showForm && (
-              <button onClick={() => setShowForm(false)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-                <ArrowLeft className="w-4 h-4" /> Voltar
-              </button>
-            )}
+            <button onClick={() => setShowForm(false)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+              <ArrowLeft className="w-4 h-4" /> Voltar
+            </button>
             <div>
               <label className="text-sm font-medium text-foreground">Data da Medição</label>
               <input type="date" value={form.measured_at} onChange={(e) => setForm({ ...form, measured_at: e.target.value })} className="w-full mt-1 px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
@@ -136,7 +168,13 @@ const BioimpedanceDialog = ({ open, onOpenChange, studentId, studentName }: Prop
               {FIELD_LABELS.map(({ key, label, unit }) => (
                 <div key={key}>
                   <label className="text-xs font-medium text-foreground">{label} {unit && `(${unit})`}</label>
-                  <input type="number" step="0.01" value={form[key] || ""} onChange={(e) => setForm({ ...form, [key]: e.target.value })} className="w-full mt-1 px-3 py-2 rounded-lg bg-secondary border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                  <input
+                    type="number"
+                    step={key === "age" || key === "cellular_age" ? "1" : "0.01"}
+                    value={form[key] || ""}
+                    onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                    className="w-full mt-1 px-3 py-2 rounded-lg bg-secondary border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
                 </div>
               ))}
             </div>
@@ -176,7 +214,7 @@ const BioimpedanceDialog = ({ open, onOpenChange, studentId, studentName }: Prop
               <p className="text-center text-muted-foreground text-sm py-6">Nenhuma avaliação registrada</p>
             ) : (
               records.map((r, idx) => {
-                const prev = records[idx + 1]; // next older record
+                const prev = records[idx + 1];
                 return (
                   <div key={r.id} className="rounded-xl border border-border bg-card p-4">
                     <p className="font-display font-bold text-sm text-foreground mb-2">

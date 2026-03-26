@@ -77,8 +77,7 @@ const Index = () => {
         newGroup.items.push(item);
         setGroups([newGroup]);
         setActiveGroupId(newGroup.id);
-        // On mobile, switch to builder after adding
-        setMobileTab("builder");
+        toast.success(`${exercise.name} adicionado!`);
         return;
       }
 
@@ -90,8 +89,7 @@ const Index = () => {
       setGroups((prev) =>
         prev.map((g) => (g.id === targetId ? { ...g, items: [...g.items, item] } : g))
       );
-      // On mobile, switch to builder after adding
-      setMobileTab("builder");
+      toast.success(`${exercise.name} adicionado!`);
     },
     [groups, activeGroupId]
   );

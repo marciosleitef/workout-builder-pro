@@ -363,6 +363,34 @@ export default function DailyTrackingDialog({ open, onOpenChange, student }: Pro
           </div>
         )}
 
+        {/* Post-workout radar */}
+        {postRadarData.length > 0 && (
+          <div className="bg-secondary/20 rounded-xl p-3 mb-3">
+            <p className="text-xs font-medium text-muted-foreground mb-2">Perfil Pós-Treino (média)</p>
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              {[
+                { label: "Recuperação", value: avg(allPost, "post_recovery_scale"), max: 10, icon: "💪" },
+                { label: "Esforço (PSE)", value: avg(allPost, "perceived_exertion_scale"), max: 10, icon: "🔥" },
+                { label: "Dor (EVA)", value: avg(allPost, "pain_scale_eva"), max: 10, icon: "⚡" },
+              ].map((m) => (
+                <div key={m.label} className="bg-secondary/30 rounded-lg p-2 text-center">
+                  <p className="text-lg mb-0.5">{m.icon}</p>
+                  <p className="text-xs font-bold text-foreground">{m.value ?? "—"}/{m.max}</p>
+                  <p className="text-[9px] text-muted-foreground">{m.label}</p>
+                </div>
+              ))}
+            </div>
+            <ResponsiveContainer width="100%" height={180}>
+              <RadarChart data={postRadarData} outerRadius={60}>
+                <PolarGrid stroke="hsl(var(--border))" />
+                <PolarAngleAxis dataKey="metric" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                <PolarRadiusAxis domain={[0, 10]} tick={false} axisLine={false} />
+                <Radar name="Média" dataKey="value" stroke="hsl(var(--destructive))" fill="hsl(var(--destructive))" fillOpacity={0.3} />
+              </RadarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
       </div>
 
       {/* Weight evolution chart */}

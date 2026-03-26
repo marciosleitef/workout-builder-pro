@@ -40,13 +40,14 @@ const Profile = () => {
       setProfile(prof);
       setFullName(prof.full_name || "");
       setAvatarUrl(prof.avatar_url);
+      setPhone((prof as any).phone || "");
     }
 
     if (role === "student") {
       const { data: st } = await supabase.from("students").select("*").eq("user_id", user!.id).maybeSingle();
       if (st) {
         setStudent(st);
-        setPhone(st.phone || st.whatsapp || "");
+        if (!phone) setPhone(st.phone || st.whatsapp || "");
       }
     }
   };
@@ -78,7 +79,7 @@ const Profile = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const { error: profErr } = await supabase.from("profiles").update({ full_name: fullName }).eq("user_id", user!.id);
+      const { error: profErr } = await supabase.from("profiles").update({ full_name: fullName, phone } as any).eq("user_id", user!.id);
       if (profErr) throw profErr;
 
       if (role === "student" && student) {
@@ -161,12 +162,10 @@ const Profile = () => {
               <Label className="text-xs flex items-center gap-1"><Mail className="h-3 w-3" /> E-mail</Label>
               <Input value={user?.email || ""} disabled className="mt-1 opacity-60" />
             </div>
-            {role === "student" && (
-              <div>
-                <Label className="text-xs flex items-center gap-1"><Phone className="h-3 w-3" /> Telefone/WhatsApp</Label>
-                <Input value={phone} onChange={e => setPhone(e.target.value)} className="mt-1" placeholder="(00) 00000-0000" />
-              </div>
-            )}
+            <div>
+              <Label className="text-xs flex items-center gap-1"><Phone className="h-3 w-3" /> Telefone/WhatsApp</Label>
+              <Input value={phone} onChange={e => setPhone(e.target.value)} className="mt-1" placeholder="(00) 00000-0000" />
+            </div>
             <Button onClick={handleSave} disabled={saving} className="w-full">
               <Save className="h-3.5 w-3.5 mr-1" /> {saving ? "Salvando..." : "Salvar Alterações"}
             </Button>

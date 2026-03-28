@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { ArrowLeft, DollarSign, AlertTriangle, CalendarClock, Plus, Check, X, Search, TrendingUp, TrendingDown } from "lucide-react";
+import { ArrowLeft, DollarSign, AlertTriangle, CalendarClock, Plus, Check, X, Search, TrendingUp, TrendingDown, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { format, differenceInDays, startOfMonth, endOfMonth, addMonths, isBefore, isAfter, parseISO } from "date-fns";
@@ -275,15 +275,20 @@ const Financial = () => {
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[p.realStatus]}`}>{statusLabels[p.realStatus]}</span>
                       </td>
                       <td className="px-4 py-3 text-center">
-                        {p.realStatus !== "paid" ? (
-                          <button onClick={() => markPaid(p.id)} className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-green-500/10 text-green-700 dark:text-green-400 text-xs font-medium hover:bg-green-500/20">
-                            <Check className="w-3 h-3" /> Confirmar
+                        <div className="inline-flex items-center gap-1">
+                          {p.realStatus !== "paid" ? (
+                            <button onClick={() => markPaid(p.id)} className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-green-500/10 text-green-700 dark:text-green-400 text-xs font-medium hover:bg-green-500/20">
+                              <Check className="w-3 h-3" /> Confirmar
+                            </button>
+                          ) : (
+                            <button onClick={() => markUnpaid(p.id)} className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-muted text-muted-foreground text-xs font-medium hover:bg-muted/80">
+                              <X className="w-3 h-3" /> Reverter
+                            </button>
+                          )}
+                          <button onClick={() => deletePayment(p.id)} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-destructive/10 text-destructive text-xs font-medium hover:bg-destructive/20">
+                            <Trash2 className="w-3 h-3" />
                           </button>
-                        ) : (
-                          <button onClick={() => markUnpaid(p.id)} className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-muted text-muted-foreground text-xs font-medium hover:bg-muted/80">
-                            <X className="w-3 h-3" /> Reverter
-                          </button>
-                        )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -314,15 +319,20 @@ const Financial = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <p className="text-base font-bold text-foreground">R$ {p.amount.toFixed(2)}</p>
-                  {p.realStatus !== "paid" ? (
-                    <button onClick={() => markPaid(p.id)} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-500/10 text-green-700 dark:text-green-400 text-xs font-medium hover:bg-green-500/20">
-                      <Check className="w-3 h-3" /> Confirmar
+                  <div className="flex items-center gap-1">
+                    {p.realStatus !== "paid" ? (
+                      <button onClick={() => markPaid(p.id)} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-500/10 text-green-700 dark:text-green-400 text-xs font-medium hover:bg-green-500/20">
+                        <Check className="w-3 h-3" /> Confirmar
+                      </button>
+                    ) : (
+                      <button onClick={() => markUnpaid(p.id)} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-muted text-muted-foreground text-xs font-medium hover:bg-muted/80">
+                        <X className="w-3 h-3" /> Reverter
+                      </button>
+                    )}
+                    <button onClick={() => deletePayment(p.id)} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-destructive/10 text-destructive text-xs font-medium hover:bg-destructive/20">
+                      <Trash2 className="w-3 h-3" />
                     </button>
-                  ) : (
-                    <button onClick={() => markUnpaid(p.id)} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-muted text-muted-foreground text-xs font-medium hover:bg-muted/80">
-                      <X className="w-3 h-3" /> Reverter
-                    </button>
-                  )}
+                  </div>
                 </div>
               </div>
             );

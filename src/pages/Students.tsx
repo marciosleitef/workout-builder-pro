@@ -70,6 +70,7 @@ const Students = () => {
   const [showNewStudentMenu, setShowNewStudentMenu] = useState(false);
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [linkGroupId, setLinkGroupId] = useState("");
+  const [linkPlanId, setLinkPlanId] = useState("");
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [showJourneyWizard, setShowJourneyWizard] = useState(false);
   const [showWorkoutInfo, setShowWorkoutInfo] = useState(false);
@@ -539,7 +540,7 @@ const Students = () => {
               <div className="w-10 h-10 rounded-lg bg-foreground/5 flex items-center justify-center"><Plus className="w-5 h-5 text-foreground/70" /></div>
               <div className="text-left"><p className="font-display font-bold text-sm text-foreground">Cadastro Manual</p><p className="text-xs text-muted-foreground">Preencher os dados do aluno agora</p></div>
             </button>
-            <button onClick={() => { setShowNewStudentMenu(false); setLinkGroupId(""); setTimeout(() => setShowLinkDialog(true), 150); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-foreground/20 transition-colors">
+            <button onClick={() => { setShowNewStudentMenu(false); setLinkGroupId(""); setLinkPlanId(""); setTimeout(() => setShowLinkDialog(true), 150); }} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-foreground/20 transition-colors">
               <div className="w-10 h-10 rounded-lg bg-foreground/5 flex items-center justify-center"><Link2 className="w-5 h-5 text-foreground/70" /></div>
               <div className="text-left"><p className="font-display font-bold text-sm text-foreground">Enviar Link de Cadastro</p><p className="text-xs text-muted-foreground">O aluno preenche seus próprios dados</p></div>
             </button>
@@ -562,10 +563,23 @@ const Students = () => {
                 <p className="text-xs text-muted-foreground mt-1">Se selecionado, o grupo virá travado no formulário de cadastro.</p>
               </div>
             )}
+            {plans.length > 0 && (
+              <div>
+                <label className="text-sm font-medium text-foreground">Plano do aluno (opcional)</label>
+                <select value={linkPlanId} onChange={(e) => setLinkPlanId(e.target.value)} className="w-full mt-1 px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
+                  <option value="">Sem plano definido</option>
+                  {plans.map((p) => (<option key={p.id} value={p.id}>{p.name} — R$ {Number(p.price).toFixed(2)}</option>))}
+                </select>
+                <p className="text-xs text-muted-foreground mt-1">Se selecionado, o plano virá travado no formulário de cadastro.</p>
+              </div>
+            )}
             <button
               onClick={() => {
                 let link = `${window.location.origin}/register/${user?.id}`;
-                if (linkGroupId) link += `?group=${linkGroupId}`;
+                const params = new URLSearchParams();
+                if (linkGroupId) params.set("group", linkGroupId);
+                if (linkPlanId) params.set("plan", linkPlanId);
+                if (params.toString()) link += `?${params.toString()}`;
                 navigator.clipboard.writeText(link);
                 toast.success("Link de cadastro copiado!");
                 setShowLinkDialog(false);

@@ -134,6 +134,14 @@ const Financial = () => {
     fetchAll();
   };
 
+  const deletePayment = async (paymentId: string) => {
+    if (!confirm("Tem certeza que deseja excluir esta cobrança?")) return;
+    const { error } = await supabase.from("payments").delete().eq("id", paymentId);
+    if (error) { toast.error("Erro ao excluir cobrança"); return; }
+    toast.success("Cobrança excluída!");
+    fetchAll();
+  };
+
   const handleNewPayment = async () => {
     if (!formStudentId || !formAmount || !formDueDate) { toast.error("Preencha aluno, valor e vencimento"); return; }
     const { error } = await supabase.from("payments").insert({
